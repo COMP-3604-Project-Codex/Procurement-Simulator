@@ -1,51 +1,69 @@
 <!doctype html>
 <html>
   <head>
-  
-     <!--Import Google Icon Font-->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <!-- Compiled and minified CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
-    <!--Let browser know website is optimized for mobile-->
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              display: ["Space Grotesk", "sans-serif"],
+              body: ["Plus Jakarta Sans", "sans-serif"]
+            },
+            boxShadow: {
+              soft: "0 14px 36px -20px rgba(15, 23, 42, 0.55)"
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <title>App Users</title>
 
   </head>
-  <body>
-    <nav class="purple">
-      <div class="nav-wrapper">
-        <a href="#!" class="brand-logo center">App Users</a>
-        <div class="nav-wrapper">
-            <ul id="nav-mobile" class="left">
-                <li><a href="/">Home</a></li>
-                <li><a href="/users">Users Jinja</a></li>
-                <li><a href="/static/users">Users JS</a></li>
-            </ul>
-        </div>
-      </div>
-    </nav>
-    
-    <div class="container" id="content">
-        <div class="row">
-            <p>
-                This is table is rendered on the Client. JavaScript code requests the data from <a href="/api/users">/api/users</a> and writes it to this page.
-            </p>
-        </div>
-        <div class="row">
-            <table>
-                <thead>
-                  <tr>
-                    <th>Id</th><th>Username</th>
-                  </tr>
-                </thead>
-                <tbody id="result">
-                
-                <tbody>
-            </table>
-        </div>
+  <body class="min-h-screen bg-slate-950 font-body text-slate-100">
+    <div class="fixed inset-0 -z-10 overflow-hidden">
+      <div class="absolute -top-36 left-1/2 h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-cyan-500/20 blur-3xl"></div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <header class="border-b border-slate-800/80 bg-slate-900/80 backdrop-blur">
+      <div class="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between lg:px-6">
+        <a href="/" class="font-display text-xl tracking-tight text-cyan-300">App Users</a>
+        <nav>
+          <ul class="flex flex-wrap items-center gap-2 text-sm font-medium text-slate-300">
+            <li><a href="/" class="rounded-md px-3 py-1.5 transition hover:bg-slate-800 hover:text-cyan-200">Home</a></li>
+            <li><a href="/users" class="rounded-md px-3 py-1.5 transition hover:bg-slate-800 hover:text-cyan-200">Users Jinja</a></li>
+            <li><a href="/static/users" class="rounded-md px-3 py-1.5 transition hover:bg-slate-800 hover:text-cyan-200">Users JS</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main class="mx-auto w-full max-w-6xl space-y-6 px-4 py-8 lg:px-6" id="content">
+      <section class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 shadow-soft backdrop-blur">
+        <p class="text-slate-300">
+          This table is rendered on the client. JavaScript requests data from
+          <a href="/api/users" class="font-semibold text-cyan-300 underline decoration-cyan-400/50 underline-offset-2">/api/users</a>
+          and writes it to this page.
+        </p>
+      </section>
+      <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70 shadow-soft backdrop-blur">
+        <table class="min-w-full divide-y divide-slate-800 text-left text-sm">
+          <thead class="bg-slate-900/90 text-xs uppercase tracking-wide text-slate-400">
+            <tr>
+              <th class="px-4 py-3">Id</th>
+              <th class="px-4 py-3">Username</th>
+            </tr>
+          </thead>
+          <tbody id="result" class="divide-y divide-slate-800/80 text-slate-200"></tbody>
+        </table>
+      </div>
+    </main>
+
     <script src="main.js"></script>
   </body>
 </html>

@@ -1,23 +1,15 @@
 {% extends "layout.html" %}
 {% block title %}Not Authorized{% endblock %}
-{% block page %}Not Auhtorized{% endblock %}
-
-{{ super() }}
+{% block page %}Not Authorized{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row" style="margin-top: 10%;">
-        <div class="col s12 m10 offset-m1">
-            <div class="card-content">
-                <h1>401 - Not Authorized</h1>
-                <p>You do not have permission to access this resource. Please check your credentials and try again.</p>
-                <p>{{error}}</p>
-            </div>
-            <div class="card-action">
-                <a href="/" class="waves-effect waves-light btn">Go Home</a>
-                <a href="javascript:history.back()" class="waves-effect waves-light btn">Go Back</a>
-            </div>
-        </div>
-    </div>
-</div>
+<section class="mx-auto mt-8 max-w-3xl rounded-2xl border border-rose-500/30 bg-slate-900/80 p-6 shadow-soft backdrop-blur">
+  <h1 class="font-display text-3xl text-rose-300">401 - Not Authorized</h1>
+  <p class="mt-3 text-slate-300">You do not have permission to access this resource. Please check your credentials and try again.</p>
+  <p class="mt-2 text-sm text-rose-200">{{error}}</p>
+  <div class="mt-6 flex flex-wrap gap-3">
+    <a href="/" class="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400">Go Home</a>
+    <a href="javascript:history.back()" class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-800">Go Back</a>
+  </div>
+</section>
 {% endblock %}

@@ -8,8 +8,8 @@ function loadTable(users){
     const table = document.querySelector('#result');
     for(let user of users){
         table.innerHTML += `<tr>
-            <td>${user.id}</td>
-            <td>${user.username}</td>
+            <td class="px-4 py-3">${user.id}</td>
+            <td class="px-4 py-3">${user.username}</td>
         </tr>`;
     }
 }

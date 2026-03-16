@@ -1,0 +1,16 @@
+{% extends "student/layout.html" %}
+{% block title %}Group Details | Procurement Simulator{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-5xl space-y-6">
+  <p class="text-3xl font-semibold text-slate-800">Status: <span class="text-slate-700">{{ status }}</span></p>
+
+  <section class="overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-panel">
+    <ul class="divide-y divide-slate-300">
+      {% for member in members %}
+        <li class="px-4 py-5 text-2xl font-medium text-slate-800 sm:px-6">{{ member.name }}({{ member.student_id }})</li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+{% endblock %}
