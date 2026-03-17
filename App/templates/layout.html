@@ -10,9 +10,8 @@
         theme: {
           extend: {
             fontFamily: {
-              display: ["Space Grotesk", "sans-serif"],
-              body: ["Plus Jakarta Sans", "sans-serif"],
-              heading: ["Sora", "sans-serif"]
+              heading: ["Sora", "sans-serif"],
+              body: ["Manrope", "sans-serif"]
             },
             colors: {
               brand: {
@@ -23,7 +22,6 @@
               }
             },
             boxShadow: {
-              soft: "0 14px 36px -20px rgba(15, 23, 42, 0.55)",
               panel: "0 14px 40px -26px rgba(15, 23, 42, 0.35)"
             }
           }
@@ -32,46 +30,43 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <title>{% block title %}{% endblock %}</title>
 
   </head>
-  <body class="min-h-screen bg-slate-950 font-body text-slate-100">
-    <div class="fixed inset-0 -z-10 overflow-hidden">
-      <div class="absolute -top-40 left-1/2 h-[32rem] w-[32rem] -translate-x-1/2 rounded-full bg-cyan-500/20 blur-3xl"></div>
-      <div class="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl"></div>
-    </div>
+  <body class="bg-slate-100 font-body text-slate-900 antialiased">
 
-    <header class="border-b border-slate-800/80 bg-slate-900/80 backdrop-blur">
+
+    <header class="border-b border-slate-300 bg-white/80 backdrop-blur">
       <div class="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between lg:px-6">
         <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-7">
-          <a href="/" class="font-display text-xl tracking-tight text-cyan-300">Procurement Simulator</a>
+          <a href="/" class="font-heading text-xl tracking-tight text-slate-900">Procurement Simulator</a>
           <nav>
-            <ul class="flex flex-wrap items-center gap-2 text-sm font-medium text-slate-300">
-              <li><a href="/" class="rounded-md px-3 py-1.5 transition hover:bg-slate-800 hover:text-cyan-200">Home</a></li>
-              <li><a href="/users" class="rounded-md px-3 py-1.5 transition hover:bg-slate-800 hover:text-cyan-200">Users Jinja</a></li>
+            <ul class="flex flex-wrap items-center gap-2 text-sm font-medium text-slate-800">
+              <li><a href="/" class="rounded-md px-3 py-1.5 transition hover:bg-slate-100 hover:text-brand-600">Home</a></li>
+              <li><a href="/users" class="rounded-md px-3 py-1.5 transition hover:bg-slate-100 hover:text-brand-600">Users Jinja</a></li>
               {% if is_authenticated %}
-                <li><a href="/identify" class="rounded-md px-3 py-1.5 transition hover:bg-slate-800 hover:text-cyan-200">Identify</a></li>
+                <li><a href="/identify" class="rounded-md px-3 py-1.5 transition hover:bg-slate-100 hover:text-brand-600">Identify</a></li>
               {% endif %}
-              <li><a href="/static/users" class="rounded-md px-3 py-1.5 transition hover:bg-slate-800 hover:text-cyan-200">Users JS</a></li>
+              <li><a href="/static/users" class="rounded-md px-3 py-1.5 transition hover:bg-slate-100 hover:text-brand-600">Users JS</a></li>
             </ul>
           </nav>
         </div>
 
         {% if is_authenticated %}
-          <a href="/logout" class="inline-flex items-center justify-center rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 shadow-soft transition hover:bg-cyan-400">Logout</a>
+          <a href="/logout" class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-panel transition hover:bg-brand-600">Logout</a>
         {% else %}
           <form class="grid gap-2 sm:grid-cols-[1fr_1fr_auto] sm:items-end" method="POST" action="/login">
-            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400" for="login-username">
+            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500" for="login-username">
               Username
-              <input id="login-username" placeholder="username" value="bob" name="username" type="text" required class="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none">
+              <input id="login-username" placeholder="username" value="bob" name="username" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:outline-none">
             </label>
-            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-400" for="login-password">
+            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500" for="login-password">
               Password
-              <input id="login-password" placeholder="password" value="bobpass" name="password" type="password" required class="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none">
+              <input id="login-password" placeholder="password" value="bobpass" name="password" type="password" required class="mt-1 w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:outline-none">
             </label>
-            <button type="submit" class="h-10 rounded-lg bg-cyan-500 px-4 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400">Login</button>
+            <button type="submit" class="h-10 rounded-xl bg-brand-500 px-4 text-sm font-semibold text-white transition hover:bg-brand-600">Login</button>
           </form>
         {% endif %}
       </div>
@@ -81,7 +76,7 @@
       {% if messages %}
         <div class="mx-auto mt-4 flex w-full max-w-6xl flex-col gap-3 px-4 lg:px-6" id="flash-stack">
           {% for message in messages %}
-            <div class="flash-item flex items-start justify-between gap-3 rounded-lg border border-cyan-400/40 bg-cyan-500/15 px-4 py-3 text-sm text-cyan-100 shadow-soft">
+            <div class="flash-item flex items-start justify-between gap-3 rounded-lg border border-brand-500/40 bg-brand-50 px-4 py-3 text-sm text-brand-700 shadow-panel">
               <p>{{message}}</p>
               <button class="dismiss-flash rounded px-2 py-1 text-cyan-200 transition hover:bg-cyan-400/20" aria-label="Dismiss">x</button>
             </div>

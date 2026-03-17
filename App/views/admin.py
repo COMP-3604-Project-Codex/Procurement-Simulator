@@ -118,4 +118,4 @@ def admin_approve_and_assign_group(group_id):
 
 @admin_views.route('/admin/manage-groups')
 def admin_manage_groups():
-    return render_template('admin/manage_groups.html', tab='requests', group_requests=GROUP_REQUESTS, groups=GROUPS, lots=LOTS)
+    return render_template('admin/manage_groups.html', tab='requests', title='Manage Groups', group_requests=GROUP_REQUESTS, groups=GROUPS, lots=LOTS)

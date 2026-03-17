@@ -4,41 +4,41 @@
 
 {% block content %}
   <section class="space-y-6">
-    <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 shadow-soft backdrop-blur">
-      <p class="text-slate-300">
+    <div class="rounded-2xl border border-slate-300 bg-white p-5 shadow-panel backdrop-blur">
+      <p class="text-slate-700">
         This table is rendered on the server. Flask gets the data from the database and uses Jinja templates
         to dynamically render this page when a request is sent to
-        <a href="/users" class="font-semibold text-cyan-300 underline decoration-cyan-400/50 underline-offset-2">/users</a>.
+        <a href="/users" class="font-semibold text-brand-600 underline decoration-brand-500/50 underline-offset-2">/users</a>.
       </p>
     </div>
 
-    <form method="POST" action="/users" class="rounded-2xl border border-slate-800 bg-slate-900/70 p-5 shadow-soft backdrop-blur">
+    <form method="POST" action="/users" class="rounded-2xl border border-slate-300 bg-white p-5 shadow-panel backdrop-blur">
       <div class="grid gap-4 md:grid-cols-2">
-        <label class="block text-sm font-semibold text-slate-300" for="username">
+        <label class="block text-sm font-semibold text-slate-700" for="username">
           Username
-          <input id="username" placeholder="Username" name="username" type="text" class="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none">
+          <input id="username" placeholder="Username" name="username" type="text" class="mt-1 w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-base text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:outline-none">
         </label>
-        <label class="block text-sm font-semibold text-slate-300" for="password">
+        <label class="block text-sm font-semibold text-slate-700" for="password">
           Password
-          <input id="password" placeholder="password" name="password" type="password" class="mt-1 w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none">
+          <input id="password" placeholder="password" name="password" type="password" class="mt-1 w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-base text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:outline-none">
         </label>
       </div>
       <div class="mt-4 flex justify-end">
-        <button class="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400" type="submit" name="action">Submit</button>
+        <button class="rounded-xl bg-brand-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-600" type="submit" name="action">Submit</button>
       </div>
     </form>
 
-    <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70 shadow-soft backdrop-blur">
-      <table class="min-w-full divide-y divide-slate-800 text-left text-sm">
-        <thead class="bg-slate-900/90 text-xs uppercase tracking-wide text-slate-400">
+    <div class="overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-panel backdrop-blur">
+      <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+        <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
           <tr>
             <th class="px-4 py-3">Id</th>
             <th class="px-4 py-3">Username</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-800/80 text-slate-200">
+        <tbody class="divide-y divide-slate-200 text-slate-800">
           {% for user in users %}
-            <tr class="transition hover:bg-slate-800/60">
+            <tr class="transition hover:bg-slate-50">
               <td class="px-4 py-3">{{user.id}}</td>
               <td class="px-4 py-3">{{user.username}}</td>
             </tr>
