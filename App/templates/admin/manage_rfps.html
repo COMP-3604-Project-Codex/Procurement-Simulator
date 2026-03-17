@@ -1,0 +1,84 @@
+{% extends 'admin/layout.html' %}
+{% block title %}Manage RFPs{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-5xl">
+  <div class="flex border-b border-slate-300 mb-6">
+    <button id="tab-requests" class="px-6 py-2 text-lg font-semibold border-b-2 focus:outline-none transition-colors border-brand-500 text-brand-600" onclick="showRfpTab('requests')">RFP Requests</button>
+    <button id="tab-gallery" class="px-6 py-2 text-lg font-semibold border-b-2 focus:outline-none transition-colors border-transparent text-slate-700 hover:bg-slate-50" onclick="showRfpTab('gallery')">RFP Gallery</button>
+  </div>
+  <div id="section-requests" class="grid grid-cols-2 gap-4 mt-6">
+    {% for rfp in rfp_requests %}
+    <div class="border p-4 rounded-lg bg-white shadow">
+      <h3 class="text-lg font-semibold">{{ rfp.name }}</h3>
+      <p class="text-sm text-gray-500">TimeStamp: {{ rfp.timestamp }}</p>
+      <div class="mt-4 flex justify-between">
+        <button class="px-4 py-2 bg-blue-500 text-white rounded" onclick="showRfpPreviewModal({{ rfp.id }})">Preview RFP</button>
+        <form method="post" action="#">
+          <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded">Approve</button>
+          <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded">Reject</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <div id="section-gallery" class="grid grid-cols-3 gap-4 mt-6 hidden">
+    {% for rfp in rfp_gallery %}
+    <div class="border p-4 rounded-lg bg-white shadow">
+      <h3 class="text-lg font-semibold">{{ rfp.name }}</h3>
+      <p class="text-sm text-gray-500">TimeStamp: {{ rfp.timestamp }}</p>
+      <div class="mt-4 flex justify-between">
+        <button class="px-4 py-2 bg-blue-500 text-white rounded" onclick="showRfpPreviewModal({{ rfp.id }})">Preview</button>
+        <form method="post" action="#">
+          <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded">Remove</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+<!-- RFP Preview Modal -->
+<div id="rfpPreviewModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-1/2">
+    <div class="flex justify-between items-center border-b pb-4">
+      <h2 class="text-xl font-bold">RFP Details</h2>
+      <button class="text-gray-500 hover:text-gray-700" onclick="hideRfpPreviewModal()">&times;</button>
+    </div>
+    <div class="mt-4 space-y-4">
+      <p><strong>Type:</strong> {{ rfp_details.type }}</p>
+      <p><strong>Screen Size & Resolution:</strong> {{ rfp_details.screen_size }}</p>
+      <p><strong>Operating System(s):</strong> {{ rfp_details.os }}</p>
+      <p><strong>CPU:</strong> {{ rfp_details.cpu }}</p>
+      <p><strong>Memory (RAM):</strong> {{ rfp_details.memory }}</p>
+      <p><strong>Hard Drive:</strong> {{ rfp_details.hard_drive }}</p>
+      <p><strong>Graphics:</strong> {{ rfp_details.graphics }}</p>
+    </div>
+    <div class="mt-6 text-right">
+      <button class="px-4 py-2 bg-gray-300 text-gray-700 rounded" onclick="hideRfpPreviewModal()">Close</button>
+    </div>
+  </div>
+</div>
+<script>
+function showRfpTab(tab) {
+  document.getElementById('section-requests').classList.toggle('hidden', tab !== 'requests');
+  document.getElementById('section-gallery').classList.toggle('hidden', tab !== 'gallery');
+  document.getElementById('tab-requests').classList.toggle('border-brand-500', tab === 'requests');
+  document.getElementById('tab-requests').classList.toggle('text-brand-600', tab === 'requests');
+  document.getElementById('tab-requests').classList.toggle('border-transparent', tab !== 'requests');
+  document.getElementById('tab-requests').classList.toggle('text-slate-700', tab !== 'requests');
+  document.getElementById('tab-gallery').classList.toggle('border-brand-500', tab === 'gallery');
+  document.getElementById('tab-gallery').classList.toggle('text-brand-600', tab === 'gallery');
+  document.getElementById('tab-gallery').classList.toggle('border-transparent', tab !== 'gallery');
+  document.getElementById('tab-gallery').classList.toggle('text-slate-700', tab !== 'gallery');
+}
+function showRfpPreviewModal(rfpId) {
+  // In a real app, fetch RFP details by rfpId via AJAX and update modal content
+  document.getElementById('rfpPreviewModal').classList.remove('hidden');
+}
+function hideRfpPreviewModal() {
+  document.getElementById('rfpPreviewModal').classList.add('hidden');
+}
+// Default to requests tab
+showRfpTab('requests');
+</script>
+{% endblock %}
