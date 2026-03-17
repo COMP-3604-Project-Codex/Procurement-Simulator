@@ -52,14 +52,3 @@
   </div>
 </div>
 {% endblock %}
-
-{% block sidebar_nav %}
-<nav class="space-y-6 text-[1.7rem] leading-tight text-slate-800 sm:text-lg">
-  <a href="{{ url_for('admin_views.admin_manage_groups') }}" class="block rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">Groups</a>
-  <a href="{{ url_for('admin_lots_views.admin_manage_lots') }}" class="block rounded-xl px-3 py-2 font-semibold bg-brand-100 text-brand-600">Lots</a>
-  <a href="#" class="block rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">RFPs</a>
-  <a href="#" class="block rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">Bids</a>
-  <a href="#" class="block rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">Evaluations</a>
-  <a href="{{ url_for('index_views.index_page') }}" class="block rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">Logout</a>
-</nav>
-{% endblock %}
