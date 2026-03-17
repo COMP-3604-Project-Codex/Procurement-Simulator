@@ -1,0 +1,65 @@
+{% extends "admin/layout.html" %}
+{% block title %}Manage Lots{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl">
+  <div class="space-y-8 pb-10">
+    {% for lot in lots %}
+    <div class="rounded-2xl border border-slate-300 bg-white p-6 shadow-panel flex flex-col gap-4">
+      <div class="font-semibold text-2xl text-slate-900">Lot {{ lot.id }}</div>
+      <div class="text-lg">
+        <div>Lab Type : {{ lot.lab_type }}</div>
+        <div>Lab Size : {{ lot.lab_size }}</div>
+        <div>Budget : ${{ "{:,.0f}".format(lot.budget|float) }}</div>
+      </div>
+      <div class="flex gap-6 mt-4">
+        <button class="edit-lot-btn rounded-xl border border-slate-600 bg-slate-50 px-8 py-2 text-base font-semibold text-slate-700 transition hover:bg-slate-100" data-lot-id="{{ lot.id }}">Edit</button>
+        <form method="POST" action="{{ url_for('admin_lots_views.admin_remove_lot', lot_id=lot.id) }}" style="display:inline;">
+          <button type="submit" class="rounded-xl border border-red-600 bg-red-50 px-8 py-2 text-base font-semibold text-red-700 transition hover:bg-red-100">Remove</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <div class="mt-8">
+    <button id="add-lot-btn" class="w-full rounded-xl border border-slate-900 bg-white px-8 py-4 text-2xl font-semibold text-slate-900 transition hover:bg-slate-100">Add Lot +</button>
+  </div>
+</div>
+
+<!-- Add Lot Modal -->
+<div id="add-lot-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 hidden">
+  <div class="bg-white rounded-2xl p-10 shadow-panel w-full max-w-lg relative">
+    <button class="absolute top-4 right-4 text-4xl font-bold text-slate-700 close-modal">&times;</button>
+    <form method="POST" action="{{ url_for('admin_lots_views.admin_add_lot') }}" class="space-y-6">
+      <input name="lab_type" placeholder="Lab Type" class="w-full rounded bg-slate-200 px-4 py-3 text-lg" required>
+      <input name="lab_size" placeholder="Lab Size" class="w-full rounded bg-slate-200 px-4 py-3 text-lg" required>
+      <input name="budget" placeholder="Budget" class="w-full rounded bg-slate-200 px-4 py-3 text-lg" required>
+      <button type="submit" class="w-full rounded-xl border border-slate-900 bg-white px-8 py-3 text-xl font-semibold text-slate-900 transition hover:bg-slate-100">Add</button>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Lot Modal -->
+<div id="edit-lot-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 hidden">
+  <div class="bg-white rounded-2xl p-10 shadow-panel w-full max-w-lg relative">
+    <button class="absolute top-4 right-4 text-4xl font-bold text-slate-700 close-modal">&times;</button>
+    <form id="edit-lot-form" method="POST" class="space-y-6">
+      <input name="lab_type" id="edit-lab-type" placeholder="Lab Type" class="w-full rounded bg-slate-200 px-4 py-3 text-lg" required>
+      <input name="lab_size" id="edit-lab-size" placeholder="Lab Size" class="w-full rounded bg-slate-200 px-4 py-3 text-lg" required>
+      <input name="budget" id="edit-budget" placeholder="Budget" class="w-full rounded bg-slate-200 px-4 py-3 text-lg" required>
+      <button type="submit" class="w-full rounded-xl border border-slate-900 bg-white px-8 py-3 text-xl font-semibold text-slate-900 transition hover:bg-slate-100">Save</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block sidebar_nav %}
+<nav class="space-y-6 text-[1.7rem] leading-tight text-slate-800 sm:text-lg">
+  <a href="{{ url_for('admin_views.admin_manage_groups') }}" class="block rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">Groups</a>
+  <a href="{{ url_for('admin_lots_views.admin_manage_lots') }}" class="block rounded-xl px-3 py-2 font-semibold bg-brand-100 text-brand-600">Lots</a>
+  <a href="#" class="block rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">RFPs</a>
+  <a href="#" class="block rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">Bids</a>
+  <a href="#" class="block rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">Evaluations</a>
+  <a href="{{ url_for('index_views.index_page') }}" class="block rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">Logout</a>
+</nav>
+{% endblock %}
