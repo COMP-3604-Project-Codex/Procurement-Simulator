@@ -11,10 +11,20 @@
           extend: {
             fontFamily: {
               display: ["Space Grotesk", "sans-serif"],
-              body: ["Plus Jakarta Sans", "sans-serif"]
+              body: ["Plus Jakarta Sans", "sans-serif"],
+              heading: ["Sora", "sans-serif"]
+            },
+            colors: {
+              brand: {
+                50: "#f5f8ff",
+                100: "#e9efff",
+                500: "#2f5dff",
+                600: "#2348d2"
+              }
             },
             boxShadow: {
-              soft: "0 14px 36px -20px rgba(15, 23, 42, 0.55)"
+              soft: "0 14px 36px -20px rgba(15, 23, 42, 0.55)",
+              panel: "0 14px 40px -26px rgba(15, 23, 42, 0.35)"
             }
           }
         }
@@ -22,7 +32,7 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <title>{% block title %}{% endblock %}</title>
 

@@ -1,0 +1,132 @@
+{% extends 'layout.html' %}
+{% block title %}Manage Groups{% endblock %}
+{% block page %}Manage Groups{% endblock %}
+{% block content %}
+<div class="min-h-screen lg:grid lg:grid-cols-[280px_1fr] bg-slate-100">
+  <aside class="border-b border-slate-300 bg-white p-5 lg:border-b-0 lg:border-r lg:p-6">
+    <div class="mb-8">
+      <p class="font-heading text-3xl font-semibold tracking-tight text-slate-900">ADMIN</p>
+      <p class="font-heading text-3xl font-semibold tracking-tight text-slate-900">PANEL</p>
+    </div>
+    <nav class="space-y-6 text-[1.7rem] leading-tight text-slate-800 sm:text-lg">
+      <a href="{{ url_for('admin_views.admin_manage_groups') }}" class="block rounded-xl px-3 py-2 font-semibold bg-brand-100 text-brand-600">Manage Groups</a>
+      <a href="#" class="block rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">Lots</a>
+      <a href="#" class="block rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">RFPs</a>
+      <a href="#" class="block rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">Bids</a>
+      <a href="#" class="block rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">Evaluations</a>
+    </nav>
+  </aside>
+  <main class="bg-slate-100 p-0">
+    <div class="mx-auto max-w-5xl">
+      <div class="pt-10 pb-6 px-6">
+        <h1 class="text-3xl font-heading font-semibold text-slate-900 mb-2">Manage Groups</h1>
+        <div class="flex border-b border-slate-300 mb-6">
+          <button id="tab-requests" class="px-6 py-2 text-lg font-semibold border-b-2 focus:outline-none transition-colors border-transparent text-slate-700 hover:bg-slate-50" onclick="showTab('requests')">Group Requests</button>
+          <button id="tab-groups" class="px-6 py-2 text-lg font-semibold border-b-2 focus:outline-none transition-colors border-transparent text-slate-700 hover:bg-slate-50" onclick="showTab('groups')">Groups</button>
+        </div>
+      </div>
+      <div id="section-requests" class="space-y-8 px-6 pb-10">
+        {% for request in group_requests %}
+        <div class="request-card rounded-2xl border border-slate-300 bg-white p-6 shadow-panel flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div>
+            <div class="font-semibold text-xl text-slate-900 mb-2">Group Name: {{ request.name }}</div>
+            <div>
+              <p class="text-sm font-semibold text-slate-700 mb-1">Members:</p>
+              <ul class="space-y-1">
+                {% for member in request.members %}
+                <li class="text-slate-800">{{ member.name }} ({{ member.id }})</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+          <div class="flex flex-col gap-3 min-w-[140px]">
+            <button type="button" data-action="approve" data-group-id="{{ request.id }}" class="approve-btn rounded-xl border border-green-600 bg-green-50 px-6 py-2 text-sm font-semibold text-green-700 transition hover:bg-green-100 w-full">Approve</button>
+            <button type="button" data-action="decline" data-group-id="{{ request.id }}" class="decline-btn rounded-xl border border-red-600 bg-red-50 px-6 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 w-full">Decline</button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div id="section-groups" class="grid grid-cols-1 md:grid-cols-2 gap-8 px-6 pb-10 hidden">
+        {% for group in groups %}
+        <div class="rounded-2xl border border-slate-300 bg-white p-6 shadow-panel flex flex-col gap-4">
+          <div class="font-semibold text-xl text-slate-900">Group Name: {{ group.name }}</div>
+          <div>
+            <p class="text-sm font-semibold text-slate-700 mb-1">Members:</p>
+            <ul class="space-y-1">
+              {% for member in group.members %}
+              <li class="text-slate-800">{{ member.name }} ({{ member.id }})</li>
+              {% endfor %}
+            </ul>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-slate-700 mb-1">Assigned Lots:</p>
+            <div class="flex flex-wrap gap-2">
+              {% for lot in group.lots %}
+              <span class="rounded-lg bg-brand-100 px-3 py-1 text-sm font-medium text-brand-600">Lot {{ lot }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          <button type="button" data-group-id="{{ group.id }}" class="assign-lots-btn w-full rounded-xl border border-slate-900 bg-white px-4 py-3 text-base font-semibold text-slate-900 transition hover:bg-slate-100">Assign Lots</button>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </main>
+  <!-- Assign Lots Modal -->
+  <div id="assignLotsModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+    <div class="bg-white text-black rounded-2xl p-8 w-full max-w-md relative">
+      <button onclick="hideAssignLotsModal()" class="absolute top-4 right-4 text-3xl font-bold leading-none">&times;</button>
+      <h2 class="text-2xl font-semibold mb-6 text-center text-slate-900">Assign Lots:</h2>
+      <form id="assignLotsForm" method="post">
+        <label for="lot1" class="block mb-2 text-slate-800 font-semibold">1st Lot:</label>
+        <select name="lot1" id="lot1" class="block w-full mb-4 rounded-lg border border-slate-300 px-3 py-2">
+          {% for lot in lots %}
+          <option value="{{ lot }}">Lot {{ lot }}</option>
+          {% endfor %}
+        </select>
+        <label for="lot2" class="block mb-2 text-slate-800 font-semibold">2nd Lot:</label>
+        <select name="lot2" id="lot2" class="block w-full mb-6 rounded-lg border border-slate-300 px-3 py-2">
+          {% for lot in lots %}
+          <option value="{{ lot }}">Lot {{ lot }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="w-full rounded-xl border border-slate-900 bg-white px-4 py-3 text-lg font-semibold text-slate-900 transition hover:bg-slate-100">Confirm</button>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+function showTab(tab) {
+  document.getElementById('section-requests').classList.toggle('hidden', tab !== 'requests');
+  document.getElementById('section-groups').classList.toggle('hidden', tab !== 'groups');
+  document.getElementById('tab-requests').classList.toggle('border-brand-600', tab === 'requests');
+  document.getElementById('tab-requests').classList.toggle('text-brand-600', tab === 'requests');
+  document.getElementById('tab-requests').classList.toggle('bg-white', tab === 'requests');
+  document.getElementById('tab-groups').classList.toggle('border-brand-600', tab === 'groups');
+  document.getElementById('tab-groups').classList.toggle('text-brand-600', tab === 'groups');
+  document.getElementById('tab-groups').classList.toggle('bg-white', tab === 'groups');
+}
+// Default to requests tab
+showTab('requests');
+
+// Assign Lots Modal logic
+let assignLotsAction = '';
+function showAssignLotsModal(groupId) {
+  assignLotsAction = `/admin/groups/${groupId}/assign-lots`;
+  document.getElementById('assignLotsForm').action = assignLotsAction;
+  document.getElementById('assignLotsModal').classList.remove('hidden');
+}
+function hideAssignLotsModal() {
+  document.getElementById('assignLotsModal').classList.add('hidden');
+}
+// Attach event listeners to Assign Lots buttons after DOM loads
+window.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.assign-lots-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      showAssignLotsModal(btn.dataset.groupId);
+    });
+  });
+});
+</script>
+{% endblock %}
