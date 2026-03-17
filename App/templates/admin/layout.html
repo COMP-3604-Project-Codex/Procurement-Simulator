@@ -31,6 +31,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+    <script src="{{ url_for('static', filename='lots.js') }}"></script>
   </head>
   <body class="bg-slate-100 font-body text-slate-900 antialiased">
     <div class="min-h-screen lg:grid lg:grid-cols-[280px_1fr]">
@@ -43,7 +44,7 @@
         {% block sidebar_nav %}
 <nav class="space-y-6 text-[1.7rem] leading-tight text-slate-800 sm:text-lg">
   <a href="{{ url_for('admin_views.admin_manage_groups') }}" class="block rounded-xl px-3 py-2 font-semibold bg-brand-100 text-brand-600">Groups</a>
-  <a href="#" class="block rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">Lots</a>
+  <a href="{{ url_for('admin_lots_views.admin_manage_lots') }}" class="block rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">Lots</a>
   <a href="#" class="block rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">RFPs</a>
   <a href="#" class="block rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">Bids</a>
   <a href="#" class="block rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">Evaluations</a>
