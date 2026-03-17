@@ -90,7 +90,7 @@
           <option value="{{ lot }}">Lot {{ lot }}</option>
           {% endfor %}
         </select>
-        <button type="submit" class="w-full rounded-xl border border-slate-900 bg-white px-4 py-3 text-lg font-semibold text-slate-900 transition hover:bg-slate-100">Confirm</button>
+        <button type="button" id="confirmAssignBtn" class="w-full rounded-xl border border-slate-900 bg-white px-4 py-3 text-lg font-semibold text-slate-900 transition hover:bg-slate-100">Confirm</button>
       </form>
     </div>
   </div>
@@ -111,9 +111,16 @@ showTab('requests');
 
 // Assign Lots Modal logic
 let assignLotsAction = '';
+let isApproval = false;
 function showAssignLotsModal(groupId) {
   assignLotsAction = `/admin/groups/${groupId}/assign-lots`;
+  isApproval = false;
   document.getElementById('assignLotsForm').action = assignLotsAction;
+  document.getElementById('assignLotsModal').classList.remove('hidden');
+}
+function showAssignLotsModalForApproval(groupId) {
+  assignLotsAction = `/admin/group-requests/${groupId}/approve-and-assign`;
+  isApproval = true;
   document.getElementById('assignLotsModal').classList.remove('hidden');
 }
 function hideAssignLotsModal() {
@@ -125,6 +132,58 @@ window.addEventListener('DOMContentLoaded', function() {
     btn.addEventListener('click', function(e) {
       e.preventDefault();
       showAssignLotsModal(btn.dataset.groupId);
+    });
+  });
+
+  // Handle approve/decline buttons
+  document.querySelectorAll('.approve-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      const groupId = e.target.dataset.groupId;
+      showAssignLotsModalForApproval(groupId);
+    });
+  });
+
+  document.querySelectorAll('.decline-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      const groupId = e.target.dataset.groupId;
+      fetch(`/admin/group-requests/${groupId}/decline`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      .then(response => {
+        if (response.ok) {
+          e.target.closest('.request-card').remove();
+        } else {
+          alert('Error declining group request');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Error declining group request');
+      });
+    });
+  });
+
+  // Handle confirm assign button
+  document.getElementById('confirmAssignBtn').addEventListener('click', function(e) {
+    const formData = new FormData(document.getElementById('assignLotsForm'));
+    fetch(assignLotsAction, {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => {
+      if (response.ok) {
+        hideAssignLotsModal();
+        location.reload(); // Reload to update the page
+      } else {
+        alert('Error assigning lots');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error assigning lots');
     });
   });
 });

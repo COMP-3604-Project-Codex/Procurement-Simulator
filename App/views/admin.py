@@ -99,6 +99,23 @@ def admin_decline_group(group_id):
     # Here you would decline the group request in the database
     return redirect(url_for('admin_views.admin_group_requests'))
 
+@admin_views.route('/admin/group-requests/<int:group_id>/approve-and-assign', methods=['POST'])
+def admin_approve_and_assign_group(group_id):
+    request_item = next((r for r in GROUP_REQUESTS if r['id'] == group_id), None)
+    if request_item:
+        lot1 = request.form.get('lot1')
+        lot2 = request.form.get('lot2')
+        # Create new group
+        new_group = {
+            'id': len(GROUPS) + 1,
+            'name': request_item['name'],
+            'members': request_item['members'],
+            'lots': [int(lot1), int(lot2)]
+        }
+        GROUPS.append(new_group)
+        GROUP_REQUESTS.remove(request_item)
+    return redirect(url_for('admin_views.admin_manage_groups'))
+
 @admin_views.route('/admin/manage-groups')
 def admin_manage_groups():
-    return render_template('admin/manage_groups.html', tab='requests', group_requests=GROUP_REQUESTS, groups=GROUPS)
+    return render_template('admin/manage_groups.html', tab='requests', group_requests=GROUP_REQUESTS, groups=GROUPS, lots=LOTS)
