@@ -31,19 +31,100 @@ GROUPS = [
             {'name': 'Jamal Baptiste', 'id': '20236754'},
             {'name': 'Denzel Johnson', 'id': '20939438'}
         ],
-        'lots': [8, 4]
+        'lots': [8, 4],
+        'bids': []
     },
     {
         'id': 2,
+        'name': 'TechSphere',
+        'members': [
+            {'name': 'Daniel Roberts', 'id': '20240123'},
+            {'name': 'Priya Singh', 'id': '20249811'},
+            {'name': 'Marcus Charles', 'id': '20235562'}
+        ],
+        'lots': [3, 6],
+        'bids': [
+            {'id': 1, 'to_group_id': 1, 'to_group_name': 'NovaCore', 'timestamp': '11/5/2025, 6:56pm'}
+        ]
+    },
+    {
+        'id': 3,
         'name': 'CodeMatrix',
         'members': [
             {'name': 'Leah Thomas', 'id': '20238914'},
             {'name': 'Ryan Ali', 'id': '20227654'},
             {'name': 'Samantha Pierre', 'id': '20241209'}
         ],
-        'lots': [2, 5]
+        'lots': [2, 5],
+        'bids': [
+            {'id': 2, 'to_group_id': 2, 'to_group_name': 'TechSphere', 'timestamp': '11/5/2025, 6:46pm'},
+            {'id': 3, 'to_group_id': 1, 'to_group_name': 'NovaCore', 'timestamp': '11/5/2025, 6:50pm'}
+        ]
+    },
+    {
+        'id': 4,
+        'name': 'DataWave',
+        'members': [],
+        'lots': [],
+        'bids': [
+            {'id': 4, 'to_group_id': 5, 'to_group_name': 'CyberFusion', 'timestamp': '11/5/2025, 6:46pm'},
+            {'id': 5, 'to_group_id': 2, 'to_group_name': 'TechSphere', 'timestamp': '11/5/2025, 6:56pm'}
+        ]
+    },
+    {
+        'id': 5,
+        'name': 'CyberFusion',
+        'members': [],
+        'lots': [],
+        'bids': [
+            {'id': 6, 'to_group_id': 1, 'to_group_name': 'NovaCore', 'timestamp': '11/5/2025, 7:00pm'}
+        ]
+    },
+    {
+        'id': 6,
+        'name': 'LogicForge',
+        'members': [],
+        'lots': [],
+        'bids': [
+            {'id': 7, 'to_group_id': 2, 'to_group_name': 'TechSphere', 'timestamp': '11/5/2025, 7:10pm'},
+            {'id': 8, 'to_group_id': 3, 'to_group_name': 'CodeMatrix', 'timestamp': '11/5/2025, 7:15pm'}
+        ]
     }
 ]
+
+# Admin Manage Bids (Groups) page
+@admin_views.route('/admin/manage-bids')
+def admin_manage_bids():
+    return render_template(
+        'admin/manage_bids.html',
+        bid_groups=GROUPS,
+        title='Manage Bids',
+        active_page='bids'
+    )
+
+# Admin Group Bids page (bids placed by a group)
+@admin_views.route('/admin/manage-bids/group/<int:group_id>')
+def admin_view_group_bids(group_id):
+    group = next((g for g in GROUPS if g['id'] == group_id), None)
+    if not group:
+        return redirect(url_for('admin_views.admin_manage_bids'))
+    return render_template(
+        'admin/group_bids.html',
+        group=group,
+        title=f"Bids Placed By G{group['id']} {group['name']}",
+        active_page='bids'
+    )
+
+# Dummy endpoints for bid document and remove (not implemented)
+@admin_views.route('/admin/manage-bids/group/<int:group_id>/bid/<int:bid_id>')
+def admin_view_bid_document(group_id, bid_id):
+    # Placeholder for bid document view
+    return f"Bid document for group {group_id}, bid {bid_id}"
+
+@admin_views.route('/admin/manage-bids/group/<int:group_id>/bid/<int:bid_id>/remove', methods=['POST'])
+def admin_remove_bid(group_id, bid_id):
+    # Placeholder for removing a bid
+    return redirect(url_for('admin_views.admin_view_group_bids', group_id=group_id))
 
 GROUP_REQUESTS = [
     {
