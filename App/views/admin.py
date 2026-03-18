@@ -237,3 +237,21 @@ def admin_manage_rfps():
         rfp_details=rfp_details,
         title='Manage RFPs',
         active_page='rfps')
+
+# --- Admin Manage Evaluations Page ---
+@admin_views.route('/admin/manage-evaluations')
+def admin_manage_evaluations():
+    # Dummy data for demonstration, matching the UI
+    evaluation_groups = [
+        {"id": 1, "name": "NovaCore", "timestamp": "11/5/2025, 6:46pm"},
+        {"id": 2, "name": "TechSphere", "timestamp": "11/5/2025, 6:46pm"},
+        {"id": 3, "name": "CodeMatrix", "timestamp": "11/6/2025, 12:06am"},
+        {"id": 4, "name": "Datawave", "timestamp": "11/5/2025, 10:12pm"},
+        {"id": 5, "name": "CyberFusion", "timestamp": "11/5/2025, 10:44pm"},
+        {"id": 6, "name": "LogicForge", "timestamp": "11/5/2025, 10:44pm"},
+    ]
+    return render_template('admin/manage_evaluations.html',
+        evaluation_groups=evaluation_groups,
+        title='Manage Evaluations',
+        active_page='evaluations'
+    )
