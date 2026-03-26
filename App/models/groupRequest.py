@@ -1,10 +1,11 @@
 from App.database import db
-from sqlalchemy.dialects.postgresql import ARRAY
 
 class GroupRequest(db.Model):
+    __tablename__ = 'group_request'
+
     id = db.Column(db.Integer, primary_key=True)
     groupName = db.Column(db.String(30), nullable=False, unique=True)
-    members = db.Column(ARRAY(db.Integer), nullable=False, default=[])
+    members = db.Column(db.JSON, nullable=False, default=list)
 
     def __init__(self, groupName, members: list[int]):
         self.groupName = groupName
