@@ -1,0 +1,15 @@
+from App.database import db
+
+class LotGroup(db.Model):
+    lotID = db.Column(db.Integer, db.ForeignKey('lot.id'), primary_key=True)
+    groupID = db.Column(db.Integer, db.ForeignKey('group.id'), primary_key=True)
+
+    def __init__(self, lotID, groupID):
+        self.lotID = lotID
+        self.groupID = groupID
+
+    def get_json(self):
+        return {
+            'lotID': self.lotID,
+            'groupID': self.groupID
+        }
