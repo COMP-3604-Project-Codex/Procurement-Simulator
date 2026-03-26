@@ -1,8 +1,6 @@
 from App.database import db
 
 class GroupRequest(db.Model):
-    __tablename__ = 'group_request'
-
     id = db.Column(db.Integer, primary_key=True)
     groupName = db.Column(db.String(30), nullable=False)
     members = db.Column(db.JSON, nullable=False, default=list)
