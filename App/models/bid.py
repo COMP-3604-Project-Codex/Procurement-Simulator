@@ -7,7 +7,7 @@ class Bid(db.Model):
     sourceGroupID = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=False)
     receipientGroupID = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    bidDocumentlink = db.Column(db.String(100), nullable=False)
+    bidDocumentlink = db.Column(db.String(1000), nullable=False)
 
     def __init__(self, lotID, sourceGroupID, receipientGroupID, bidDocumentlink):
         self.lotID = lotID
