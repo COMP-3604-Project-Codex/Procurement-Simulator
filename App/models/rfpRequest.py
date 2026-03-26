@@ -1,9 +1,8 @@
 from App.database import db
 
 class RFPRequest(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    groupID = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=False)
-    lotID = db.Column(db.Integer, db.ForeignKey('lot.id'), nullable=False)
+    groupID = db.Column(db.Integer, db.ForeignKey('group.id'), primary_key=True)
+    lotID = db.Column(db.Integer, db.ForeignKey('lot.id'), primary_key=True)
     specs = db.Column(db.JSON)
 
     def __init__(self, groupID, lotID, specs):
@@ -13,7 +12,6 @@ class RFPRequest(db.Model):
 
     def get_json(self):
         return {
-            'id': self.id,
             'groupID': self.groupID,
             'lotID': self.lotID,
             'specs': self.specs

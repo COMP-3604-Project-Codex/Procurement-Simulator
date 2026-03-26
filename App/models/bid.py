@@ -6,14 +6,15 @@ class Bid(db.Model):
     lotID = db.Column(db.Integer, db.ForeignKey('lot.id'), nullable=False)
     sourceGroupID = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=False)
     receipientGroupID = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=False)
-    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    bidDocumentlink = db.Column(db.String(1000), nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
+    bidDocumentLink = db.Column(db.String(1000), nullable=False)
 
-    def __init__(self, lotID, sourceGroupID, receipientGroupID, bidDocumentlink):
+    def __init__(self, lotID, sourceGroupID, receipientGroupID, bidDocumentLink):
         self.lotID = lotID
         self.sourceGroupID = sourceGroupID
         self.receipientGroupID = receipientGroupID
-        self.bidDocumentlink = bidDocumentlink
+        self.bidDocumentLink = bidDocumentLink
+        self.timestamp = datetime.utcnow()
 
     def get_json(self):
         return {
@@ -22,5 +23,5 @@ class Bid(db.Model):
             'sourceGroupID': self.sourceGroupID,
             'receipientGroupID': self.receipientGroupID,
             'timestamp': self.timestamp.isoformat(),
-            'bidDocumentlink': self.bidDocumentlink
+            'bidDocumentLink': self.bidDocumentLink
         }
