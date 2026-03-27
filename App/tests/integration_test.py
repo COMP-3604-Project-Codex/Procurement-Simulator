@@ -210,3 +210,90 @@ class Workflow4IntegrationTests(unittest.TestCase):
 
         removed = remove_group(group.id)
         assert removed
+
+class Workflow5IntegrationTests(unittest.TestCase):
+    @pytest.mark.run(order=12)
+    def test_save_rfp_details(self):
+        attempt = create_groupRequest("TechNova Solution", [1,2,3,4])
+        assert attempt["status"] == "good"
+
+        attempt = create_groupRequest("ANK Productions", [5,6,7,8])
+        assert attempt["status"] == "good"
+
+        for i in range(1, 3):
+            groupReq = get_groupRequest(i)
+
+            group = create_group(groupReq.groupName)
+
+            for member in groupReq.members:
+                add_studentGroup(member, group.id)
+
+            if i == 1:
+                add_lotGroup(1, group.id)
+                add_lotGroup(2, group.id)
+            else:
+                add_lotGroup(3, group.id)
+                add_lotGroup(4, group.id)
+
+            removed = remove_groupRequest(i)
+        
+        self.assertDictEqual({
+            "deviceType": "",
+            "resolution": "",
+            "os": "",
+            "cpu": "",
+            "ram": "",
+            "drive": "",
+            "gpu": "",
+            "peripherals": "",
+            "features": "",
+            "io": "" 
+        }, get_lotRFP_details_json(1))
+    
+        details = {
+            "deviceType": "Workstation/Laptop/Tablet",
+            "resolution": "",
+            "os": "Mac/Windows/Android/IOS/Linux/Chromium",
+            "cpu": "Core and frequency range eg (quad-core @ 2.2 - 3.0 GHz)",
+            "ram": "",
+            "drive": "",
+            "gpu": "",
+            "peripherals": "",
+            "features": "",
+            "io": "" 
+        }
+
+        lot = edit_lotRFP_details(1, details)
+
+        self.assertDictEqual({
+            "deviceType": "Workstation/Laptop/Tablet",
+            "resolution": "",
+            "os": "Mac/Windows/Android/IOS/Linux/Chromium",
+            "cpu": "Core and frequency range eg (quad-core @ 2.2 - 3.0 GHz)",
+            "ram": "",
+            "drive": "",
+            "gpu": "",
+            "peripherals": "",
+            "features": "",
+            "io": "" 
+        }, get_lotRFP_details_json(lot.id))
+
+    @pytest.mark.run(order=13)
+    def test_submit_rfp_details(self):
+        lot = get_lot(1)
+        attempt = create_rfpRequest(1, lot.id, lot.specs)
+        self.assertDictEqual({
+            "id": (1, 1),
+            "status": "good",
+            "message": "RFP Request was sent successfully"
+        }, attempt)
+    
+    @pytest.mark.run(order=14)
+    def test_submit_duplicate_rfp_details(self):
+        lot = get_lot(1)
+        attempt = create_rfpRequest(1, lot.id, lot.specs)
+        self.assertDictEqual({
+            "id": (0, 0),
+            "status": "bad",
+            "message": "You already submitted a group request for Lot1"
+        }, attempt)

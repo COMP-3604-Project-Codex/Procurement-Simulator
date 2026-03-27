@@ -27,15 +27,14 @@ def create_groupRequest(groupName, members):
             "duplicates": duplicates
         }
 
-
 def get_groupRequest(id):
     return db.session.get(GroupRequest, id)
 
-def get_all_groupRequest():
+def get_all_groupRequests():
     return db.session.scalars(db.select(GroupRequest)).all()
 
-def get_all_groupRequest_json():
-    reqs = get_all_groupRequest()
+def get_all_groupRequests_json():
+    reqs = get_all_groupRequests()
     if not reqs:
         return []
     reqs = [req.get_json() for req in reqs]

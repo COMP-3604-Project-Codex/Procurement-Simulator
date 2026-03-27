@@ -1,5 +1,6 @@
 from App.models import Lot
 from App.database import db
+from sqlalchemy.orm.attributes import flag_modified
 
 def create_lot(labType, labSize, budget):
     newlot = Lot(labType, labSize, budget)
@@ -34,6 +35,22 @@ def edit_lot(id, labType=None, labSize=None, budget=None):
             lot.budget = budget
         
         db.session.commit()
+
+def edit_lotRFP_details(id, rfpDetails):
+    lot = get_lot(id)
+    if lot:
+        for spec, details in lot.specs.items():
+            lot.specs[spec] = rfpDetails[spec]
+        flag_modified(lot, "specs")
+        db.session.commit()
+        return lot
+    return None
+
+def get_lotRFP_details_json(id):
+    lot = get_lot(id)
+    if lot:
+        return lot.specs
+    return None
 
 def remove_lot(id):
     lot = get_lot(id)
