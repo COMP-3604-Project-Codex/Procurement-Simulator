@@ -250,7 +250,7 @@ class Workflow5IntegrationTests(unittest.TestCase):
             "io": "" 
         }, get_lotRFP_details_json(1))
     
-        details = {
+        details1 = {
             "deviceType": "Workstation/Laptop/Tablet",
             "resolution": "",
             "os": "Mac/Windows/Android/IOS/Linux/Chromium",
@@ -263,7 +263,7 @@ class Workflow5IntegrationTests(unittest.TestCase):
             "io": "" 
         }
 
-        lot = edit_lotRFP_details(1, details)
+        lot = edit_lotRFP_details(1, details1)
 
         self.assertDictEqual({
             "deviceType": "Workstation/Laptop/Tablet",
@@ -278,12 +278,48 @@ class Workflow5IntegrationTests(unittest.TestCase):
             "io": "" 
         }, get_lotRFP_details_json(lot.id))
 
+        details2 = {
+            "deviceType": "",
+            "resolution": "",
+            "os": "",
+            "cpu": "",
+            "ram": "",
+            "drive": "HDD/SSD, speed and capacity range, (list if secondary storage)",
+            "gpu": "",
+            "peripherals": "Mouse keyboard, touchpad, gamepad, headset, speakers, webcam, adapters, hubs, eGPU, drawing tablet",
+            "features": "Touch screen, WIFI version, bluetooth, Capture Card, Integrated Speakers, Integrated Webcam, Fingerprint reader, LTE",
+            "io": "Optical Drive, USB Type-C, USB 3, USB 4, HDMI input, HDMI out, ethernet, Display port, thunderbolt, SD card reader, audio ports" 
+        }
+
+        lot = edit_lotRFP_details(2, details2)
+
+        self.assertDictEqual({
+            "deviceType": "",
+            "resolution": "",
+            "os": "",
+            "cpu": "",
+            "ram": "",
+            "drive": "HDD/SSD, speed and capacity range, (list if secondary storage)",
+            "gpu": "",
+            "peripherals": "Mouse keyboard, touchpad, gamepad, headset, speakers, webcam, adapters, hubs, eGPU, drawing tablet",
+            "features": "Touch screen, WIFI version, bluetooth, Capture Card, Integrated Speakers, Integrated Webcam, Fingerprint reader, LTE",
+            "io": "Optical Drive, USB Type-C, USB 3, USB 4, HDMI input, HDMI out, ethernet, Display port, thunderbolt, SD card reader, audio ports" 
+        }, get_lotRFP_details_json(lot.id))
+
     @pytest.mark.run(order=13)
     def test_submit_rfp_details(self):
         lot = get_lot(1)
         attempt = create_rfpRequest(1, lot.id, lot.specs)
         self.assertDictEqual({
             "id": (1, 1),
+            "status": "good",
+            "message": "RFP Request was sent successfully"
+        }, attempt)
+
+        lot = get_lot(2)
+        attempt = create_rfpRequest(1, lot.id, lot.specs)
+        self.assertDictEqual({
+            "id": (1, 2),
             "status": "good",
             "message": "RFP Request was sent successfully"
         }, attempt)
@@ -295,5 +331,45 @@ class Workflow5IntegrationTests(unittest.TestCase):
         self.assertDictEqual({
             "id": (0, 0),
             "status": "bad",
-            "message": "You already submitted a group request for Lot1"
+            "message": "You already submitted an rfp request for Lot1"
         }, attempt)
+
+class Workflow6IntegrationTests(unittest.TestCase):
+    @pytest.mark.run(order=15)
+    def test_approve_rfp_Request(self):
+        rfpRequest = get_rfpRequest(1, 1)
+
+        create_rfp(rfpRequest.groupID, rfpRequest.lotID, rfpRequest.specs)
+
+        rfp = get_rfp(1, 1)
+
+        self.assertDictEqual({
+            'groupID': 1,
+            'lotID': 1,
+            'specs': {
+                "deviceType": "Workstation/Laptop/Tablet",
+                "resolution": "",
+                "os": "Mac/Windows/Android/IOS/Linux/Chromium",
+                "cpu": "Core and frequency range eg (quad-core @ 2.2 - 3.0 GHz)",
+                "ram": "",
+                "drive": "",
+                "gpu": "",
+                "peripherals": "",
+                "features": "",
+                "io": "" 
+            }
+        }, rfp.get_json())
+
+        removed = remove_rfpRequest(1, 1)
+        assert removed
+
+    @pytest.mark.run(order=16)
+    def test_reject_rfp_Request(self):
+        removed = remove_rfpRequest(1, 2)
+        assert removed
+
+        reqs = get_all_rfpRequests()
+        assert not reqs
+
+        rfps = get_all_rfps()
+        assert len(rfps) == 1

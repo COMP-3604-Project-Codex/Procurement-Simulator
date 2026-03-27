@@ -9,3 +9,4 @@ from .group import *
 from .studentGroup import *
 from .lotGroup import *
 from .rfpRequest import *
+from .rfp import *
