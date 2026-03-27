@@ -69,7 +69,11 @@
           <div>
             <p class="px-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Vendor</p>
             <div class="mt-2 border-l-2 border-slate-300 pl-5">
-              <p class="py-1">RFP Gallery</p>
+              <a href="{{ url_for('student_views.rfp_gallery_page') }}" 
+                class="block py-1 hover:text-brand-500 transition-colors {% if active_page == 'rfp-gallery' %}text-brand-600 font-bold{% endif %}">
+                RFP Gallery
+              </a>
+
               <p class="py-1">Your Bids</p>
             </div>
           </div>

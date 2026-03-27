@@ -249,3 +249,37 @@ def student_client_evaluation_page():
         lots=lots_list,
         selected_lot=selected_lot_id
     )
+
+
+#Student view as vendor
+
+@student_views.route('/student/rfp-gallery', methods=['GET'])
+def rfp_gallery_page():
+
+    # rfps available
+    
+    available_rfps = [
+        {
+            'id': 'RFP-001',
+            'title': 'GIS Lab Workstations',
+            'client': 'Group 3 Tech Titans',
+            'deadline': '2026-04-15',
+            'status': 'Open',
+            'description': 'One large GIS Lab with 60 workstations'
+        },
+        {
+            'id': 'RFP-002',
+            'title': 'Cyber Cafe',
+            'client': 'Group 2 Cyber Shield',
+            'deadline': '2026-04-20',
+            'status': 'Open',
+            'description': 'One small Cyber Cafe with 20 workstations.'
+        }
+    ]
+
+    return render_template(
+        'student/vendor_rfp_gallery.html',
+        # title='View RFPs',
+        active_page='rfp-gallery',
+        rfps=available_rfps
+    )
