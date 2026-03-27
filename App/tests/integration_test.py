@@ -15,11 +15,13 @@ def empty_db():
     yield app.test_client()
     db.drop_all()
 
+@pytest.mark.run(order=1)
 def test_authenticate():
     user = create_user("bob", "bobpass")
     assert login("bob", "bobpass") != None
 
 class UsersIntegrationTests(unittest.TestCase):
+    @pytest.mark.run(order=2)
     def test_user_children_are_users(self):
         admin = Admin("jack", "jackpass")
         db.session.add(admin)
@@ -29,16 +31,50 @@ class UsersIntegrationTests(unittest.TestCase):
         users_json = get_all_users_json()
         self.assertListEqual([{"id":1, "username":"bob"}, {"id":2, "username":"jack", "role":"admin"}, {"id":3, "username":"cooper", "role":"student"}], users_json)
 
-    def test_create_user(self):
-        user = create_user("rick", "bobpass")
-        assert user.username == "rick"
-
-    def test_get_all_users_json(self):
-        users_json = get_all_users_json()
-        self.assertListEqual([{"id":1, "username":"bob"}, {"id":2, "username":"rick"}], users_json)
-
     # Tests data changes in the database
+    @pytest.mark.run(order=3)
     def test_update_user(self):
         update_user(1, "ronnie")
         user = get_user(1)
         assert user.username == "ronnie"
+
+class Workflow1IntegrationTests(unittest.TestCase):
+    @pytest.mark.run(order=4)
+    def test_creating_lots(self):
+        db.drop_all()
+        create_db()
+        create_lot("GIS Lab", 20, 160000.00)
+        create_lot("Government Office Lab", 12, 110000.00)
+        lots_json = get_all_lots_json()
+        self.assertListEqual([
+        {
+            'id': 1,
+            'labType': "GIS Lab",
+            'labSize': 20,
+            'budget': 160000.00
+        },
+        {
+            'id': 2,
+            'labType': "Government Office Lab",
+            'labSize': 12,
+            'budget': 110000.00
+        }
+        ], lots_json)
+
+    @pytest.mark.run(order=5)
+    def test_edit_lots(self):
+        lot = get_lot(1)
+        assert lot.budget == 160000.00
+        edit_lot(1, budget=170000.00)
+        lot = get_lot(1)
+        assert lot.budget == 170000.00
+
+    @pytest.mark.run(order=6)
+    def test_remove_lot(self):
+        lot = get_lot(1)
+        assert not lot == None
+        remove_lot(1)
+        lot = get_lot(1)
+        assert lot == None
+
+
