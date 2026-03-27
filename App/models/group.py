@@ -3,6 +3,7 @@ from App.database import db
 class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     groupName = db.Column(db.String(30), nullable=False, unique=True)
+    status = db.Column(db.String(30), nullable=False, default="requested")
 
     def __init__(self, groupName):
         self.groupName = groupName
@@ -13,5 +14,6 @@ class Group(db.Model):
     def get_json(self):
         return {
             'id': self.id,
-            'groupName': self.groupName
+            'groupName': self.groupName,
+            'status': self.status
         }

@@ -3,10 +3,8 @@ from .admin import *
 from .student import *
 from .lot import *
 from .group import *
-from .groupRequest import *
 from .lotGroup import *
 from .studentGroup import *
-from .rfpRequest import *
-from .rfp import *
+from .RFP import *
 from .bid import *
 from .evaluation import *

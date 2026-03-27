@@ -36,12 +36,30 @@ def edit_lot(id, labType=None, labSize=None, budget=None):
         
         db.session.commit()
 
-def edit_lotRFP_details(id, rfpDetails):
+def edit_lotRFP_details(id, deviceType=None, resolution=None, os=None, cpu=None, ram=None, drive=None, gpu=None, peripherals=None, features=None, io=None):
     lot = get_lot(id)
     if lot:
-        for spec, details in lot.specs.items():
-            lot.specs[spec] = rfpDetails[spec]
-        flag_modified(lot, "specs")
+        if deviceType:
+            lot.deviceType = deviceType
+        if resolution:
+            lot.resolution = resolution
+        if os:
+            lot.os = os
+        if cpu:
+            lot.cpu = cpu
+        if ram:
+            lot.ram = ram
+        if drive:
+            lot.drive = drive
+        if gpu:
+            lot.gpu = gpu
+        if peripherals:
+            lot.peripherals = peripherals
+        if features:
+            lot.features = features
+        if io:
+            lot.io = io
+
         db.session.commit()
         return lot
     return None

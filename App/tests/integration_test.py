@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash
 
 from App.main import create_app
 from App.database import db, create_db
-from App.models import User, Admin, Student, Group, GroupRequest, StudentGroup, Lot, LotGroup, RFPRequest, Bid, Evaluation
+from App.models import User, Admin, Student, Group, StudentGroup, Lot, LotGroup, Bid, Evaluation, RFP
 from App.controllers import *
 
 @pytest.fixture(autouse=True, scope="module")
@@ -99,55 +99,20 @@ class Workflow2IntegrationTests(unittest.TestCase):
         create_student("clint", "clintpass")
         create_student("bruce", "brucepass")
 
-        attempt = create_groupRequest("TechNova Solution", [1,2,3,4])
-        assert attempt["status"] == "good"
+        groupName = "TechNova Solution"
+        members = [1,2,3,4]
 
-        groupReq = get_groupRequest(attempt["id"])
+        group = create_group(groupName)
+        group = get_group(1)
         self.assertDictEqual({
             'id': 1,
-            'groupName': "TechNova Solution",
-            'members': [1,2,3,4]
-        }, groupReq.get_json())
+            'groupName': "G1 TechNova Solution",
+            'status': "requested"
+        }, group.get_json())
 
-    @pytest.mark.run(order=8)
-    def test_trying_to_create_group_request_with_a_duplicate_member(self):
-        attempt = create_groupRequest("ANK Productions", [1,2,3,4])
-        assert attempt["status"] == "bad"
-        assert attempt["duplicates"] == [1,2,3,4]
-
-        attempt = create_groupRequest("ANK Productions", [1,5,6,7])
-        assert attempt["status"] == "bad"
-        assert attempt["duplicates"] == [1]
-
-        attempt = create_groupRequest("ANK Productions", [1,5,2,7])
-        assert attempt["status"] == "bad"
-        assert attempt["duplicates"] == [1,2]
-
-        attempt = create_groupRequest("ANK Productions", [1,3,2,7])
-        assert attempt["status"] == "bad"
-        assert attempt["duplicates"] == [1,3,2]
-
-class Workflow3IntegrationTests(unittest.TestCase):
-    @pytest.mark.run(order=9)
-    def test_approving_groupReuests(self):
-        attempt = create_groupRequest("ANK Productions", [5,6,7,8])
-        assert attempt["status"] == "good"
-
-        groupReq = get_groupRequest(attempt["id"])
-        self.assertDictEqual({
-            'id': 2,
-            'groupName': "ANK Productions",
-            'members': [5,6,7,8]
-        }, groupReq.get_json())
-
-        groupReq = get_groupRequest(1)
-
-        group = create_group(groupReq.groupName)
-        assert group.groupName == "G1 TechNova Solution"
-
-        for member in groupReq.members:
+        for member in members:
             add_studentGroup(member, group.id)
-        
+
         self.assertListEqual([
             {
                 'studentID': 1,
@@ -164,11 +129,41 @@ class Workflow3IntegrationTests(unittest.TestCase):
             {
                 'studentID': 4,
                 'groupID': 1
-            }
+            },
         ], get_all_studentGroups_json())
 
-        add_lotGroup(1, group.id)
-        add_lotGroup(2, group.id)
+    @pytest.mark.run(order=8)
+    def test_trying_to_create_group_request_with_a_duplicate_member(self):
+        groupName = "ANK Productions"
+        members = [1,2,3,4]
+
+        duplicates = []
+
+        for member in members:
+            existing = db.session.scalars(db.select(StudentGroup).filter_by(studentID = member)).first()
+            if existing:
+                duplicates.append(member)
+        
+        assert duplicates == [1,2,3,4]
+
+        members = [5,6,7,8]
+        group = create_group(groupName)
+
+        for member in members:
+            add_studentGroup(member, group.id)
+
+class Workflow3IntegrationTests(unittest.TestCase):
+    @pytest.mark.run(order=9)
+    def test_approving_groupReuests(self):
+        groupID = 1
+        Lot1ID = 1
+        Lot2ID = 2
+        group = get_group(groupID)
+        add_lotGroup(Lot1ID, group.id)
+        add_lotGroup(Lot2ID, group.id)
+
+        group.status = "approved"
+        db.session.commit()
 
         self.assertListEqual([
             {
@@ -181,195 +176,205 @@ class Workflow3IntegrationTests(unittest.TestCase):
             }
         ], get_all_lotGroups_json())
 
-        removed = remove_groupRequest(1)
-        assert removed == True
-
-        groupReq = get_groupRequest(1)
-        assert not groupReq
+        group = get_group(1)
+        assert group.status == "approved"
 
     @pytest.mark.run(order=10)
     def test_rejecting_a_group_request(self):
-        rejected = remove_groupRequest(2)
-        assert rejected
+        groupID = 2
+
+        entries = db.session.scalars(db.select(StudentGroup).filter_by(groupID = groupID)).all()
+
+        for entry in entries:
+            removed = remove_studentGroup(entry.studentID, groupID)
+            assert removed
+
+        entries = db.session.scalars(db.select(LotGroup).filter_by(groupID = groupID)).all()
+
+        for entry in entries:
+            removed = remove_lotGroup(entry.lotID, groupID)
+            assert removed
+
+        removed = remove_group(groupID)
+        assert removed
 
 class Workflow4IntegrationTests(unittest.TestCase):
     @pytest.mark.run(order=11)
     def test_remove_group(self):
-        group = get_group(1)
-        entries = db.session.scalars(db.select(StudentGroup).filter_by(groupID = group.id)).all()
+        groupID = 1
+
+        entries = db.session.scalars(db.select(StudentGroup).filter_by(groupID = groupID)).all()
 
         for entry in entries:
-            removed = remove_studentGroup(entry.studentID, entry.groupID)
+            removed = remove_studentGroup(entry.studentID, groupID)
             assert removed
-        
-        entries = db.session.scalars(db.select(LotGroup).filter_by(groupID = group.id)).all()
+
+        entries = db.session.scalars(db.select(LotGroup).filter_by(groupID = groupID)).all()
 
         for entry in entries:
-            removed = remove_lotGroup(entry.lotID, entry.groupID)
+            removed = remove_lotGroup(entry.lotID, groupID)
             assert removed
 
-        removed = remove_group(group.id)
+        removed = remove_group(groupID)
         assert removed
+
 
 class Workflow5IntegrationTests(unittest.TestCase):
     @pytest.mark.run(order=12)
     def test_save_rfp_details(self):
-        attempt = create_groupRequest("TechNova Solution", [1,2,3,4])
-        assert attempt["status"] == "good"
+        lotID = 1
+        deviceType = "Workstation/Laptop/Tablet"
+        resolution = ""
+        os = "Mac/Windows/Android/IOS/Linux/Chromium"
+        cpu = "Core and frequency range eg (quad-core @ 2.2 - 3.0 GHz)"
+        ram = ""
+        drive = ""
+        gpu = ""
+        peripherals = ""
+        features = ""
+        io = ""
 
-        attempt = create_groupRequest("ANK Productions", [5,6,7,8])
-        assert attempt["status"] == "good"
+        lot = edit_lotRFP_details(lotID, deviceType=deviceType, os=os, cpu=cpu)
+        assert lot.deviceType == "Workstation/Laptop/Tablet"
+        assert lot.resolution == ""
+        assert lot.os == "Mac/Windows/Android/IOS/Linux/Chromium"
+        assert lot.cpu == "Core and frequency range eg (quad-core @ 2.2 - 3.0 GHz)"
+        assert lot.ram == ""
+        assert lot.drive == ""
+        assert lot.gpu == ""
+        assert lot.peripherals == ""
+        assert lot.features == ""
+        assert lot.io == ""
 
-        for i in range(1, 3):
-            groupReq = get_groupRequest(i)
+        lotID = 2
+        deviceType = ""
+        resolution = ""
+        os = ""
+        cpu = ""
+        ram = ""
+        drive = "HDD/SSD, speed and capacity range, (list if secondary storage)"
+        gpu = "Integrated/Dedicated with memory range"
+        peripherals = ""
+        features = "Touch screen, WIFI version, bluetooth, Capture Card, Integrated Speakers, Integrated Webcam, Fingerprint reader, LTE"
+        io = ""
 
-            group = create_group(groupReq.groupName)
+        lot = edit_lotRFP_details(lotID, drive=drive, gpu=gpu, features=features)
+        assert lot.deviceType == ""
+        assert lot.resolution == ""
+        assert lot.os == ""
+        assert lot.cpu == ""
+        assert lot.ram == ""
+        assert lot.drive == "HDD/SSD, speed and capacity range, (list if secondary storage)"
+        assert lot.gpu == "Integrated/Dedicated with memory range"
+        assert lot.peripherals == ""
+        assert lot.features == "Touch screen, WIFI version, bluetooth, Capture Card, Integrated Speakers, Integrated Webcam, Fingerprint reader, LTE"
+        assert lot.io == ""
 
-            for member in groupReq.members:
-                add_studentGroup(member, group.id)
-
-            if i == 1:
-                add_lotGroup(1, group.id)
-                add_lotGroup(2, group.id)
-            else:
-                add_lotGroup(3, group.id)
-                add_lotGroup(4, group.id)
-
-            removed = remove_groupRequest(i)
-        
-        self.assertDictEqual({
-            "deviceType": "",
-            "resolution": "",
-            "os": "",
-            "cpu": "",
-            "ram": "",
-            "drive": "",
-            "gpu": "",
-            "peripherals": "",
-            "features": "",
-            "io": "" 
-        }, get_lotRFP_details_json(1))
-    
-        details1 = {
-            "deviceType": "Workstation/Laptop/Tablet",
-            "resolution": "",
-            "os": "Mac/Windows/Android/IOS/Linux/Chromium",
-            "cpu": "Core and frequency range eg (quad-core @ 2.2 - 3.0 GHz)",
-            "ram": "",
-            "drive": "",
-            "gpu": "",
-            "peripherals": "",
-            "features": "",
-            "io": "" 
-        }
-
-        lot = edit_lotRFP_details(1, details1)
-
-        self.assertDictEqual({
-            "deviceType": "Workstation/Laptop/Tablet",
-            "resolution": "",
-            "os": "Mac/Windows/Android/IOS/Linux/Chromium",
-            "cpu": "Core and frequency range eg (quad-core @ 2.2 - 3.0 GHz)",
-            "ram": "",
-            "drive": "",
-            "gpu": "",
-            "peripherals": "",
-            "features": "",
-            "io": "" 
-        }, get_lotRFP_details_json(lot.id))
-
-        details2 = {
-            "deviceType": "",
-            "resolution": "",
-            "os": "",
-            "cpu": "",
-            "ram": "",
-            "drive": "HDD/SSD, speed and capacity range, (list if secondary storage)",
-            "gpu": "",
-            "peripherals": "Mouse keyboard, touchpad, gamepad, headset, speakers, webcam, adapters, hubs, eGPU, drawing tablet",
-            "features": "Touch screen, WIFI version, bluetooth, Capture Card, Integrated Speakers, Integrated Webcam, Fingerprint reader, LTE",
-            "io": "Optical Drive, USB Type-C, USB 3, USB 4, HDMI input, HDMI out, ethernet, Display port, thunderbolt, SD card reader, audio ports" 
-        }
-
-        lot = edit_lotRFP_details(2, details2)
-
-        self.assertDictEqual({
-            "deviceType": "",
-            "resolution": "",
-            "os": "",
-            "cpu": "",
-            "ram": "",
-            "drive": "HDD/SSD, speed and capacity range, (list if secondary storage)",
-            "gpu": "",
-            "peripherals": "Mouse keyboard, touchpad, gamepad, headset, speakers, webcam, adapters, hubs, eGPU, drawing tablet",
-            "features": "Touch screen, WIFI version, bluetooth, Capture Card, Integrated Speakers, Integrated Webcam, Fingerprint reader, LTE",
-            "io": "Optical Drive, USB Type-C, USB 3, USB 4, HDMI input, HDMI out, ethernet, Display port, thunderbolt, SD card reader, audio ports" 
-        }, get_lotRFP_details_json(lot.id))
 
     @pytest.mark.run(order=13)
     def test_submit_rfp_details(self):
-        lot = get_lot(1)
-        attempt = create_rfpRequest(1, lot.id, lot.specs)
-        self.assertDictEqual({
-            "id": (1, 1),
-            "status": "good",
-            "message": "RFP Request was sent successfully"
-        }, attempt)
+        lotID = 1
+        groupID = 1
 
-        lot = get_lot(2)
-        attempt = create_rfpRequest(1, lot.id, lot.specs)
-        self.assertDictEqual({
-            "id": (1, 2),
-            "status": "good",
-            "message": "RFP Request was sent successfully"
-        }, attempt)
+        rfp = create_rfp(lotID, groupID)
+
+        lot = get_lot(lotID)
+
+        rfp.deviceType = lot.deviceType
+        rfp.resolution = lot.resolution
+        rfp.os = lot.os
+        rfp.cpu = lot.cpu
+        rfp.ram = lot.ram
+        rfp.drive = lot.drive
+        rfp.gpu = lot.gpu
+        rfp.peripherals = lot.peripherals
+        rfp.features = lot.features
+        rfp.io = lot.io
+
+        db.session.commit()
+
+        rfp = get_rfp(groupID, lotID)
+        assert rfp.deviceType == "Workstation/Laptop/Tablet"
+        assert rfp.resolution == ""
+        assert rfp.os == "Mac/Windows/Android/IOS/Linux/Chromium"
+        assert rfp.cpu == "Core and frequency range eg (quad-core @ 2.2 - 3.0 GHz)"
+        assert rfp.ram == ""
+        assert rfp.drive == ""
+        assert rfp.gpu == ""
+        assert rfp.peripherals == ""
+        assert rfp.features == ""
+        assert rfp.io == ""
+        assert rfp.status == "requested"
+        
     
     @pytest.mark.run(order=14)
     def test_submit_duplicate_rfp_details(self):
-        lot = get_lot(1)
-        attempt = create_rfpRequest(1, lot.id, lot.specs)
-        self.assertDictEqual({
-            "id": (0, 0),
-            "status": "bad",
-            "message": "You already submitted an rfp request for Lot1"
-        }, attempt)
+        lotID = 1
+        groupID = 1
+
+        rfp = db.session.scalars(db.select(RFP).filter_by(groupID=groupID, lotID=lotID)).first()
+        assert rfp
+        assert rfp.status == "requested"
+
+        lotID = 2
+
+        rfp = create_rfp(groupID, lotID)
+        assert rfp
+
+        lot = get_lot(lotID)
+
+        rfp.deviceType = lot.deviceType
+        rfp.resolution = lot.resolution
+        rfp.os = lot.os
+        rfp.cpu = lot.cpu
+        rfp.ram = lot.ram
+        rfp.drive = lot.drive
+        rfp.gpu = lot.gpu
+        rfp.peripherals = lot.peripherals
+        rfp.features = lot.features
+        rfp.io = lot.io
+
+        db.session.commit()
+
+        rfp = get_rfp(groupID, lotID)
+        assert rfp.deviceType == ""
+        assert rfp.resolution == ""
+        assert rfp.os == ""
+        assert rfp.cpu == ""
+        assert rfp.ram == ""
+        assert rfp.drive == "HDD/SSD, speed and capacity range, (list if secondary storage)"
+        assert rfp.gpu == "Integrated/Dedicated with memory range"
+        assert rfp.peripherals == ""
+        assert rfp.features == "Touch screen, WIFI version, bluetooth, Capture Card, Integrated Speakers, Integrated Webcam, Fingerprint reader, LTE"
+        assert rfp.io == ""
+        assert rfp.status == "requested"
 
 class Workflow6IntegrationTests(unittest.TestCase):
     @pytest.mark.run(order=15)
     def test_approve_rfp_Request(self):
-        rfpRequest = get_rfpRequest(1, 1)
+        lotID = 1
+        groupID = 1
 
-        create_rfp(rfpRequest.groupID, rfpRequest.lotID, rfpRequest.specs)
+        rfp = get_rfp(groupID, lotID)
+        rfp.status = "approved"
+        db.session.commit()
 
-        rfp = get_rfp(1, 1)
-
-        self.assertDictEqual({
-            'groupID': 1,
-            'lotID': 1,
-            'specs': {
-                "deviceType": "Workstation/Laptop/Tablet",
-                "resolution": "",
-                "os": "Mac/Windows/Android/IOS/Linux/Chromium",
-                "cpu": "Core and frequency range eg (quad-core @ 2.2 - 3.0 GHz)",
-                "ram": "",
-                "drive": "",
-                "gpu": "",
-                "peripherals": "",
-                "features": "",
-                "io": "" 
-            }
-        }, rfp.get_json())
-
-        removed = remove_rfpRequest(1, 1)
-        assert removed
+        rfp = get_rfp(groupID, lotID)
+        assert rfp.status == "approved"
 
     @pytest.mark.run(order=16)
     def test_reject_rfp_Request(self):
-        removed = remove_rfpRequest(1, 2)
+        groupID = 1
+        lotID = 2
+
+        removed = remove_rfp(groupID, lotID)
         assert removed
 
-        reqs = get_all_rfpRequests()
-        assert not reqs
+class Workflow7IntegrationTests(unittest.TestCase):
+    @pytest.mark.run(order=17)
+    def test_remove_rfp(self):
+        groupID = 1
+        lotID = 1
 
-        rfps = get_all_rfps()
-        assert len(rfps) == 1
+        removed = remove_rfp(groupID, lotID)
+        assert removed

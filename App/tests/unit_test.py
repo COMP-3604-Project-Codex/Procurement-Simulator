@@ -5,7 +5,7 @@
 
 # from App.main import create_app
 # from App.database import db, create_db
-# from App.models import User, Admin, Student, Group, GroupRequest, StudentGroup, Lot, LotGroup, RFPRequest, Bid, Evaluation
+# from App.models import User, Admin, Student, Group, StudentGroup, Lot, LotGroup, Bid, Evaluation, RFP
 
 
 # class AdminUnitTests(unittest.TestCase):

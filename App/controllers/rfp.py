@@ -1,10 +1,11 @@
 from App.models import RFP
 from App.database import db
 
-def create_rfp(groupID, lotID, specs):
-    rfp = RFP(groupID, lotID, specs)
+def create_rfp(groupID, lotID):
+    rfp = RFP(groupID, lotID)
     db.session.add(rfp)
     db.session.commit()
+    return rfp
 
 def get_rfp(groupID, lotID):
     return db.session.get(RFP, (groupID, lotID))

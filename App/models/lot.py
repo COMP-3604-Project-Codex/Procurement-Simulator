@@ -6,24 +6,21 @@ class Lot(db.Model):
     labType = db.Column(db.String(30), nullable=False)
     labSize = db.Column(db.Integer, nullable=False)
     budget = db.Column(db.Float, nullable=False)
-    specs = db.Column(db.JSON)
+    deviceType = db.Column(db.String(1000), default="")
+    resolution = db.Column(db.String(1000), default="")
+    os = db.Column(db.String(1000), default="")
+    cpu = db.Column(db.String(1000), default="")
+    ram = db.Column(db.String(1000), default="")
+    drive = db.Column(db.String(1000), default="")
+    gpu = db.Column(db.String(1000), default="")
+    peripherals = db.Column(db.String(1000), default="")
+    features = db.Column(db.String(1000), default="")
+    io = db.Column(db.String(1000), default="")
 
     def __init__(self, labType, labSize, budget):
         self.labType = labType
         self.labSize = labSize
         self.budget = budget
-        self.specs = {
-            "deviceType": "",
-            "resolution": "",
-            "os": "",
-            "cpu": "",
-            "ram": "",
-            "drive": "",
-            "gpu": "",
-            "peripherals": "",
-            "features": "",
-            "io": "" 
-        }
 
     def set_generated_name(self):
         self.name = f"Lot {self.id}"
