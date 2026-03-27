@@ -185,7 +185,7 @@ def student_view_bids_page():
 
 @student_views.route('/student/client-bid-details/<int:bid_id>', methods=['GET', 'POST'])
 def student_bid_details_page(bid_id):
-    
+
     # list of specs to loop through in template
     technical_specs = [
         ('screen', 'Screen Size & Resolution'),
@@ -217,4 +217,35 @@ def student_bid_details_page(bid_id):
         bid=bid,
         lot=lot,
         technical_specs=technical_specs
+    )
+
+
+@student_views.route('/student/client-evaluation', methods=['GET'])
+def student_client_evaluation_page():
+
+    selected_lot_id = request.args.get('selected_lot', '1')
+
+    ALL_EVALUATIONS = [
+        {'bid_id': 101, 'lot_id': '1', 'group_name': 'Tech Titans', 'cost': 14500.0, 'specs_met': '9/9', 'rating': 4.8, 'is_selected': True},
+        {'bid_id': 102, 'lot_id': '1', 'group_name': 'Global Systems', 'cost': 12200.0, 'specs_met': '7/9', 'rating': 3.5, 'is_selected': False},
+        {'bid_id': 201, 'lot_id': '2', 'group_name': 'NetConnect Ltd', 'cost': 8500.0, 'specs_met': '5/5', 'rating': 4.2, 'is_selected': False},
+        {'bid_id': 202, 'lot_id': '2', 'group_name': 'Cyber Shield', 'cost': 9200.0, 'specs_met': '4/5', 'rating': 3.9, 'is_selected': False}
+    ]
+
+    # filtering evals
+    filtered_evals = [e for e in ALL_EVALUATIONS if e['lot_id'] == selected_lot_id]
+
+     
+    lots_list = [
+        {'id': 1, 'lab_type': 'Workstations'},
+        {'id': 2, 'lab_type': 'Networking Gear'}
+    ]
+
+    return render_template(
+        'student/client_eval.html',
+        active_page='client-evaluation',
+        title='Bid Evaluations',
+        evaluations=filtered_evals,  
+        lots=lots_list,
+        selected_lot=selected_lot_id
     )
