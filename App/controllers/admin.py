@@ -3,7 +3,7 @@ from App.database import db
 
 def create_admin(username, password):
     newadmin = Admin(username=username, password=password)
-    db.session.add(newuser)
+    db.session.add(newadmin)
     db.session.commit()
 
 def get_admin(id):

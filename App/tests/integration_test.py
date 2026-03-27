@@ -43,6 +43,7 @@ class Workflow1IntegrationTests(unittest.TestCase):
     def test_creating_lots(self):
         db.drop_all()
         create_db()
+        create_admin("bob", "bobpass")
         create_lot("GIS Lab", 20, 160000.00)
         create_lot("Government Office Lab", 12, 110000.00)
         lots_json = get_all_lots_json()
@@ -77,4 +78,22 @@ class Workflow1IntegrationTests(unittest.TestCase):
         lot = get_lot(1)
         assert lot == None
 
+class Workflow2IntegrationTests(unittest.TestCase):
+    @pytest.mark.run(order=7)
+    def test_create_groupRequest(self):
+        remove_lot(2)
+        create_lot("GIS Lab", 20, 160000.00)
+        create_lot("Government Office Lab", 12, 110000.00)
 
+        create_student("jack", "jackpass")
+        create_student("cooper", "cooperpass")
+        create_student("john", "johnpass")
+        create_student("tony", "tonypass")
+
+        create_groupRequest("TechNova Solution", [1,2,3,4])
+        groupReq = get_groupRequest(1)
+        self.assertDictEqual({
+            'id': 1,
+            'groupName': "TechNova Solution",
+            'members': [1,2,3,4]
+        }, groupReq.get_json())
