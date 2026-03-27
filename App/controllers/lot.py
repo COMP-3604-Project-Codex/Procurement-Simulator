@@ -4,6 +4,8 @@ from App.database import db
 def create_lot(labType, labSize, budget):
     newlot = Lot(labType, labSize, budget)
     db.session.add(newlot)
+    db.session.flush()
+    newlot.set_generated_name()
     db.session.commit()
 
 def get_lot(id):

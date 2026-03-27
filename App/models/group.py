@@ -8,7 +8,7 @@ class Group(db.Model):
         self.groupName = groupName
 
     def set_generated_name(self):
-        self.groupName = f"Group{self.id} {self.groupName}"
+        self.groupName = f"G{self.id} {self.groupName}"
 
     def get_json(self):
         return {

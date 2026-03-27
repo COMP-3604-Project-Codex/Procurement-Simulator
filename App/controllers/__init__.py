@@ -5,3 +5,6 @@ from .lot import *
 from .groupRequest import *
 from .admin import *
 from .student import *
+from .group import *
+from .studentGroup import *
+from .lotGroup import *
