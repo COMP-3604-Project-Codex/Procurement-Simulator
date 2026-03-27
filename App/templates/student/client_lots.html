@@ -1,0 +1,95 @@
+{% extends "student/layout.html" %}
+{% block content %}
+    <div class="mx-auto max-w-5xl space-y-6">
+
+        <div class="flex gap-4 border-b border-slate-300 pb-1">
+            {% for lot in lots %}
+            <button type="button" onclick="window.location.href='?selected_lot={{ lot.id }}'"
+                    class="px-6 py-3 font-heading font-bold transition-all border-b-4 {% if request.args.get('selected_lot', '1') == lot.id|string %} border-brand-500 text-brand-600 {% else %} border-transparent text-slate-500 hover:text-slate-800 {% endif %}">
+                LOT {{ lot.id }}
+            </button>
+            {% endfor %}
+        </div>
+
+        {% set current_lot_id = request.args.get('selected_lot', '1') | int %}
+        {% set current_lot = (lots | selectattr('id', 'equalto', current_lot_id) | list | first) %}
+        
+        <div class="rounded-2xl border border-slate-300 bg-white p-6 shadow-panel">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h2 class="text-sm font-bold uppercase tracking-widest text-brand-500">Currently Viewing</h2>
+                    <p class="font-heading text-3xl font-bold text-slate-900">{{ current_lot.lab_type }}</p>
+                    <p class="mt-2 text-slate-600">{{ current_lot.description }}</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm font-semibold text-slate-500">Allocated Budget</p>
+                    <p class="text-2xl font-bold text-slate-900">${{ "{:,.2f}".format(current_lot.budget) }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-300 bg-white shadow-panel overflow-hidden">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+                <h3 class="font-bold text-slate-800 tracking-tight">Technical Specifications (RFP Details)</h3>
+            </div>
+            
+            <form action="{{ url_for('student_views.student_lots_page') }}" method="POST" class="p-6 max-h-[500px] overflow-y-auto space-y-8">
+                <input type="hidden" name="lot_id" value="{{ current_lot.id }}">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-slate-700">CPU (Processor)</label>
+                        <input type="text" name="cpu" placeholder="e.g. Intel Core i7-13700K" class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none bg-slate-50">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-slate-700">Memory (RAM)</label>
+                        <input type="text" name="ram" placeholder="e.g. 32GB DDR5 5600MHz" class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none bg-slate-50">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-slate-700">Screen Size & Resolution</label>
+                        <input type="text" name="screen" placeholder="e.g. 27-inch 4K IPS" class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none bg-slate-50">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-slate-700">Operating System(s)</label>
+                        <input type="text" name="os" placeholder="e.g. Windows 11 Pro / Ubuntu 22.04" class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none bg-slate-50">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-slate-700">Hard Drive / Storage</label>
+                        <input type="text" name="storage" placeholder="e.g. 1TB NVMe Gen4 SSD" class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none bg-slate-50">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-slate-700">Graphics Card (GPU)</label>
+                        <input type="text" name="graphics" placeholder="e.g. NVIDIA RTX 4070 12GB" class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none bg-slate-50">
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-slate-700">I/O Ports</label>
+                        <textarea name="io" rows="2" placeholder="USB-C, Thunderbolt, HDMI 2.1..." class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none bg-slate-50"></textarea>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-slate-700">External Peripherals</label>
+                        <textarea name="peripherals" rows="2" placeholder="Mechanical Keyboard, Ergonomic Mouse..." class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none bg-slate-50"></textarea>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-sm font-bold text-slate-700">Special Features</label>
+                        <textarea name="features" rows="2" placeholder="Built-in Webcam, WiFi 6E, TPM 2.0..." class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none bg-slate-50"></textarea>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-200">
+                    <button type="submit" class="w-full rounded-xl bg-brand-500 py-4 font-bold text-white shadow-panel hover:bg-brand-600 transition">
+                        Submit RFP Specifications for Lot {{ current_lot.id }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
