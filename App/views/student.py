@@ -33,6 +33,24 @@ STUDENT_DATA = [
     {'name': 'Brandon Phillips', 'student_id': '20238901'},
 ]
 
+STUDENT_BIDS = [
+    {
+        'bid_id': 101,
+        'lot_id': '1',
+        'vendor_name': 'Dell Technologies',
+        'total_price': 145000.00,
+        'status': 'Pending',
+        'spec_summary': 'Precision Workstations with i9 Processors'
+    },
+    {
+        'bid_id': 102,
+        'lot_id': '1',
+        'vendor_name': 'HP Enterprise',
+        'total_price': 152000.00,
+        'status': 'Pending',
+        'spec_summary': 'Z-Book Fury with Xeon Processors'
+    }
+]
 @student_views.route('/student', methods=['GET'])
 def student_home_page():
     return redirect(url_for('student_views.student_create_group_page'))
@@ -147,3 +165,56 @@ def student_lots_page():
     )
          
     
+@student_views.route('/student/client-view-bids', methods=['GET'])
+def student_view_bids_page():
+
+    selected_lot_id = request.args.get('selected_lot', '1')
+    current_lot = next((l for l in ASSIGNED_LOTS if str(l['id']) == selected_lot_id), ASSIGNED_LOTS[0])
+    
+
+    bids_for_lot = [b for b in STUDENT_BIDS if b['lot_id'] == selected_lot_id]
+
+    return render_template(
+        'student/client_viewbid.html',
+        active_page='view-bids',
+        title='Received Bids',
+        lots=ASSIGNED_LOTS,
+        current_lot=current_lot,
+        bids=bids_for_lot
+    )
+
+@student_views.route('/student/client-bid-details/<int:bid_id>', methods=['GET', 'POST'])
+def student_bid_details_page(bid_id):
+    
+    # list of specs to loop through in template
+    technical_specs = [
+        ('screen', 'Screen Size & Resolution'),
+        ('os', 'Operating System(s)'),
+        ('cpu', 'CPU'),
+        ('ram', 'Memory (RAM)'),
+        ('hdd', 'Hard Drive'),
+        ('graphics', 'Graphics'),
+        ('peripherals', 'External Peripherals'),
+        ('features', 'Features'),
+        ('io', 'I/O')
+    ]
+
+    # Find bid
+    bid = next((b for b in STUDENT_BIDS if b['bid_id'] == bid_id), None)
+    
+    # Find associated lot
+    lot = next((l for l in ASSIGNED_LOTS if str(l['id']) == str(bid['lot_id'])), None)
+
+    if request.method == 'POST':
+        # Logic for saving comments to go here
+        flash("Comment saved for review.")
+        return redirect(url_for('student_views.student_bid_details_page', bid_id=bid_id))
+
+    return render_template(
+        'student/client_bid_details.html',
+        active_page='view-bids',
+        title=f"Bid Analysis: {bid['vendor_name']}",
+        bid=bid,
+        lot=lot,
+        technical_specs=technical_specs
+    )

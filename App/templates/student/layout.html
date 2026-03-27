@@ -52,7 +52,14 @@
                 class="block py-1 hover:text-brand-500 transition-colors {% if active_page == 'lots' %}text-brand-600 font-bold{% endif %}">
                 Lots
               </a>
-              <p class="py-1 text-slate-400">Bids</p> <p class="py-1 text-slate-400">Evaluation</p> </div>
+              <div>
+                <a href="{{ url_for('student_views.student_view_bids_page') }}" 
+                  class="block py-1 hover:text-brand-500 transition-colors {% if active_page == 'view-bids' %}text-brand-600 font-bold{% endif %}">
+                  Bids
+                </a>
+              </div>
+              
+               <p class="py-1 text-slate-400">Evaluation</p> </div>
           </div>
 
           <div>
