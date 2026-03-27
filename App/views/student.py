@@ -1,4 +1,6 @@
+
 from flask import Blueprint, flash, request, redirect, render_template, url_for
+from datetime import datetime
 
 
 student_views = Blueprint('student_views', __name__, template_folder='../templates')
@@ -282,4 +284,40 @@ def rfp_gallery_page():
         # title='View RFPs',
         active_page='rfp-gallery',
         rfps=available_rfps
+    )
+
+
+# Vendor-submitted bids
+@student_views.route('/student/vendor-bids', methods=['GET'])
+def submitted_bids_page():
+
+    # This data represents bids 
+    submitted_bids = [
+        {
+            'bid_id': 'BID-901',
+            'rfp_title': 'GIS Lab',
+            'target_group': 'Group 3 (Tech Titans)',
+            'submitted_at': datetime(2026, 3, 25, 14, 30),             
+            'status': 'Accepted', 
+        },
+        {
+            'bid_id': 'BID-902',
+            'rfp_title': 'Design Studio',
+            'target_group': 'Group 2 (Cyber Shield)',
+            'submitted_at': datetime(2026, 3, 26, 10, 15), 
+            'status': 'Pending', 
+        },
+        {
+            'bid_id': 'BID-903',
+            'rfp_title': 'Cyber Cafe ',
+            'target_group': 'Group 1 (Global Systems)',
+            'submitted_at': datetime(2026, 3, 20, 9, 0), 
+            'status': 'Rejected', 
+        }
+    ]
+
+    return render_template(
+        'student/vendor_bids.html',
+        active_page='my-bids',
+        bids=submitted_bids
     )

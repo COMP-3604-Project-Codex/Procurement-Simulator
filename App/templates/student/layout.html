@@ -74,7 +74,9 @@
                 RFP Gallery
               </a>
 
-              <p class="py-1">Your Bids</p>
+              <a href="{{ url_for('student_views.submitted_bids_page') }}" 
+                class="block py-1 hover:text-brand-500 transition-colors {% if active_page == 'vendor-bids' %}text-brand-600 font-bold{% endif %}">
+                Your Bids 
             </div>
           </div>
 
