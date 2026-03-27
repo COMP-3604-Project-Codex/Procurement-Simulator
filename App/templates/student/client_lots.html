@@ -7,6 +7,10 @@
             <button type="button" onclick="window.location.href='?selected_lot={{ lot.id }}'"
                     class="px-6 py-3 font-heading font-bold transition-all border-b-4 {% if request.args.get('selected_lot', '1') == lot.id|string %} border-brand-500 text-brand-600 {% else %} border-transparent text-slate-500 hover:text-slate-800 {% endif %}">
                 LOT {{ lot.id }}
+                {% set rfp = (STUDENT_RFPS | selectattr('lot_id', 'equalto', lot.id|string) | list | first) %}
+                {% if rfp and rfp.status == 'Submitted' %}
+                    <span class="ml-2 text-xs text-emerald-500">✓</span>
+                {% endif %}
             </button>
             {% endfor %}
         </div>
@@ -29,65 +33,99 @@
         </div>
 
         <div class="rounded-2xl border border-slate-300 bg-white shadow-panel overflow-hidden">
-            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
                 <h3 class="font-bold text-slate-800 tracking-tight">Technical Specifications (RFP Details)</h3>
+                {% if existing_rfp %}
+                    <span class="px-3 py-1 rounded-full text-xs font-bold uppercase {% if existing_rfp.status == 'Submitted' %} bg-emerald-100 text-emerald-700 {% else %} bg-amber-100 text-amber-700 {% endif %}">
+                        {{ existing_rfp.status }}
+                    </span>
+                {% endif %}
             </div>
             
             <form action="{{ url_for('student_views.student_lots_page') }}" method="POST" class="p-6 max-h-[500px] overflow-y-auto space-y-8">
                 <input type="hidden" name="lot_id" value="{{ current_lot.id }}">
+                {% set is_locked = existing_rfp and existing_rfp.status == 'Submitted' %}
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="space-y-2">
                         <label class="text-sm font-bold text-slate-700">CPU (Processor)</label>
-                        <input type="text" name="cpu" placeholder="e.g. Intel Core i7-13700K" class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none bg-slate-50">
+                        <input type="text" name="cpu" placeholder="e.g. Intel Core i7" value="{{ existing_rfp.cpu if existing_rfp else '' }}" 
+                            {% if is_locked %} readonly {% endif %}
+                            class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none {% if is_locked %} bg-slate-100 text-slate-500 {% else %} bg-slate-50 {% endif %}">
                     </div>
                     <div class="space-y-2">
                         <label class="text-sm font-bold text-slate-700">Memory (RAM)</label>
-                        <input type="text" name="ram" placeholder="e.g. 32GB DDR5 5600MHz" class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none bg-slate-50">
+                        <input type="text" name="ram" placeholder="e.g. 32GB DDR5" value="{{ existing_rfp.ram if existing_rfp else '' }}" 
+                            {% if is_locked %} readonly {% endif %}
+                            class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none {% if is_locked %} bg-slate-100 text-slate-500 {% else %} bg-slate-50 {% endif %}">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="space-y-2">
                         <label class="text-sm font-bold text-slate-700">Screen Size & Resolution</label>
-                        <input type="text" name="screen" placeholder="e.g. 27-inch 4K IPS" class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none bg-slate-50">
+                        <input type="text" name="screen" placeholder="e.g. 27-inch 4K" value="{{ existing_rfp.screen if existing_rfp else '' }}" 
+                            {% if is_locked %} readonly {% endif %}
+                            class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none {% if is_locked %} bg-slate-100 text-slate-500 {% else %} bg-slate-50 {% endif %}">
                     </div>
                     <div class="space-y-2">
                         <label class="text-sm font-bold text-slate-700">Operating System(s)</label>
-                        <input type="text" name="os" placeholder="e.g. Windows 11 Pro / Ubuntu 22.04" class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none bg-slate-50">
+                        <input type="text" name="os" placeholder="e.g. Windows 11 Pro" value="{{ existing_rfp.os if existing_rfp else '' }}" 
+                            {% if is_locked %} readonly {% endif %}
+                            class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none {% if is_locked %} bg-slate-100 text-slate-500 {% else %} bg-slate-50 {% endif %}">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="space-y-2">
                         <label class="text-sm font-bold text-slate-700">Hard Drive / Storage</label>
-                        <input type="text" name="storage" placeholder="e.g. 1TB NVMe Gen4 SSD" class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none bg-slate-50">
+                        <input type="text" name="storage" placeholder="e.g. 1TB NVMe SSD" value="{{ existing_rfp.storage if existing_rfp else '' }}" 
+                            {% if is_locked %} readonly {% endif %}
+                            class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none {% if is_locked %} bg-slate-100 text-slate-500 {% else %} bg-slate-50 {% endif %}">
                     </div>
                     <div class="space-y-2">
                         <label class="text-sm font-bold text-slate-700">Graphics Card (GPU)</label>
-                        <input type="text" name="graphics" placeholder="e.g. NVIDIA RTX 4070 12GB" class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none bg-slate-50">
+                        <input type="text" name="graphics" placeholder="e.g. NVIDIA RTX 4070" value="{{ existing_rfp.graphics if existing_rfp else '' }}" 
+                            {% if is_locked %} readonly {% endif %}
+                            class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none {% if is_locked %} bg-slate-100 text-slate-500 {% else %} bg-slate-50 {% endif %}">
                     </div>
                 </div>
 
                 <div class="space-y-6">
                     <div class="space-y-2">
                         <label class="text-sm font-bold text-slate-700">I/O Ports</label>
-                        <textarea name="io" rows="2" placeholder="USB-C, Thunderbolt, HDMI 2.1..." class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none bg-slate-50"></textarea>
+                        <textarea name="io" rows="2" placeholder="USB-C, HDMI..." {% if is_locked %} readonly {% endif %}
+                            class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none {% if is_locked %} bg-slate-100 text-slate-500 {% else %} bg-slate-50 {% endif %}">{{ existing_rfp.io if existing_rfp else '' }}</textarea>
                     </div>
                     <div class="space-y-2">
                         <label class="text-sm font-bold text-slate-700">External Peripherals</label>
-                        <textarea name="peripherals" rows="2" placeholder="Mechanical Keyboard, Ergonomic Mouse..." class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none bg-slate-50"></textarea>
+                        <textarea name="peripherals" rows="2" placeholder="Keyboard, Mouse..." {% if is_locked %} readonly {% endif %}
+                            class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none {% if is_locked %} bg-slate-100 text-slate-500 {% else %} bg-slate-50 {% endif %}">{{ existing_rfp.peripherals if existing_rfp else '' }}</textarea>
                     </div>
                     <div class="space-y-2">
                         <label class="text-sm font-bold text-slate-700">Special Features</label>
-                        <textarea name="features" rows="2" placeholder="Built-in Webcam, WiFi 6E, TPM 2.0..." class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none bg-slate-50"></textarea>
+                        <textarea name="features" rows="2" placeholder="Webcam, WiFi 6E..." {% if is_locked %} readonly {% endif %}
+                            class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none {% if is_locked %} bg-slate-100 text-slate-500 {% else %} bg-slate-50 {% endif %}">{{ existing_rfp.features if existing_rfp else '' }}</textarea>
                     </div>
                 </div>
 
                 <div class="pt-4 border-t border-slate-200">
-                    <button type="submit" class="w-full rounded-xl bg-brand-500 py-4 font-bold text-white shadow-panel hover:bg-brand-600 transition">
-                        Submit RFP Specifications for Lot {{ current_lot.id }}
-                    </button>
+                    {% if is_locked %}
+                        <div class="w-full rounded-xl bg-emerald-50 py-4 font-bold text-emerald-700 text-center border border-emerald-200">
+                            ✅ This RFP has been submitted and is now locked.
+                        </div>
+                    {% else %}
+                        <div class="flex gap-4">
+                            <button type="submit" name="action" value="save" 
+                                class="flex-1 rounded-xl border border-slate-300 py-4 font-bold text-slate-700 hover:bg-slate-50 transition">
+                                Save as Draft
+                            </button>
+                            <button type="submit" name="action" value="submit" 
+                                class="flex-1 rounded-xl bg-brand-500 py-4 font-bold text-white shadow-panel hover:bg-brand-600 transition">
+                                Submit Final RFP
+                            </button>
+                        </div>
+                    {% endif %}
                 </div>
             </form>
         </div>

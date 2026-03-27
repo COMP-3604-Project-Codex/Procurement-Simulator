@@ -3,6 +3,7 @@ from flask import Blueprint, flash, request, redirect, render_template, url_for
 
 student_views = Blueprint('student_views', __name__, template_folder='../templates')
 
+#Global variables for testing ui pre-models
 ASSIGNED_LOTS =[
     {
         'id': 1,
@@ -95,9 +96,12 @@ def student_group_details_page():
 @student_views.route('/student/lots', methods=['GET', 'POST'])
 def student_lots_page():
     if request.method == 'POST':
-        # 1. Capture the data and include the lot_id from the form
+        action = request.form.get('action') # 
+        lot_id = request.form.get('lot_id')
+        
+        # Capture data from form
         rfp_data = {
-            'lot_id': request.form.get('lot_id'), # Important to know which lot this is for!
+            'lot_id': lot_id,
             'screen': request.form.get('screen'),
             'os': request.form.get('os'),
             'cpu': request.form.get('cpu'),
@@ -106,26 +110,40 @@ def student_lots_page():
             'graphics': request.form.get('graphics'),
             'peripherals': request.form.get('peripherals'),
             'features': request.form.get('features'),
-            'io': request.form.get('io')
+            'io': request.form.get('io'),
+            'status': 'Submitted' if action == 'submit' else 'Draft'
         }
         
-        # 2. Save it once
-        STUDENT_RFPS.append(rfp_data)
+        #  Update if exists, else Append
+        existing_index = next((i for i, r in enumerate(STUDENT_RFPS) if r['lot_id'] == lot_id), None)
         
-        # 3. Flash the message and redirect
-        flash(f"RFP for Lot {rfp_data['lot_id']} Submitted Successfully!", "success")
-        return redirect(url_for('student_views.student_lots_page', selected_lot=rfp_data['lot_id']))
+        if existing_index is not None:
+            STUDENT_RFPS[existing_index] = rfp_data
+        else:
+            STUDENT_RFPS.append(rfp_data)
+        
+        #  Success Message
+        if action == 'submit':
+            flash(f"RFP for Lot {lot_id} has been submitted!", "success")
+        else:
+            flash(f"Draft for Lot {lot_id} saved successfully.", "info")
+            
+        return redirect(url_for('student_views.student_lots_page', selected_lot=lot_id))
 
-    # --- This part runs only for GET requests ---
+    # GET req info
     selected_lot_id = request.args.get('selected_lot', '1')
     current_lot = next((l for l in ASSIGNED_LOTS if str(l['id']) == selected_lot_id), ASSIGNED_LOTS[0])
+    
+    # Looks for existing rfp
+    existing_rfp = next((r for r in STUDENT_RFPS if r['lot_id'] == selected_lot_id), None)
 
     return render_template(
         'student/client_lots.html', 
         active_page='lots',
-        title='Assigned Lots',
+        title='Assigned Lots & RFPs',
         lots=ASSIGNED_LOTS,
-        current_lot=current_lot
+        current_lot=current_lot,
+        existing_rfp=existing_rfp
     )
          
     
