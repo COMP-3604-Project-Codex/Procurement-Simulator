@@ -8,10 +8,6 @@ from App.database import db, create_db
 from App.models import User, Admin, Student, Group, GroupRequest, StudentGroup, Lot, LotGroup, RFPRequest, Bid, Evaluation
 
 
-'''
-    Unit Tests
-'''
-
 class AdminUnitTests(unittest.TestCase):
 
     def test_new_admin(self):
@@ -226,37 +222,3 @@ class EvaluationUnitTests(unittest.TestCase):
         assert eval_json["sourceGroupID"] == 1
         assert eval_json["receipientGroupID"] == 2
         assert eval_json["evaluationDetails"] == details
-
-'''
-    Integration Tests
-'''
-
-# This fixture creates an empty database for the test and deletes it after the test
-# scope="class" would execute the fixture once and resued for all methods in the class
-# @pytest.fixture(autouse=True, scope="module")
-# def empty_db():
-#     app = create_app({'TESTING': True, 'SQLALCHEMY_DATABASE_URI': 'sqlite:///test.db'})
-#     create_db()
-#     yield app.test_client()
-#     db.drop_all()
-
-
-# def test_authenticate():
-#     user = create_user("bob", "bobpass")
-#     assert login("bob", "bobpass") != None
-
-# class UsersIntegrationTests(unittest.TestCase):
-
-#     def test_create_user(self):
-#         user = create_user("rick", "bobpass")
-#         assert user.username == "rick"
-
-#     def test_get_all_users_json(self):
-#         users_json = get_all_users_json()
-#         self.assertListEqual([{"id":1, "username":"bob"}, {"id":2, "username":"rick"}], users_json)
-
-#     # Tests data changes in the database
-#     def test_update_user(self):
-#         update_user(1, "ronnie")
-#         user = get_user(1)
-#         assert user.username == "ronnie"
