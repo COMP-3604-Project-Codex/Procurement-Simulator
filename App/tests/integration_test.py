@@ -191,3 +191,22 @@ class Workflow3IntegrationTests(unittest.TestCase):
     def test_rejecting_a_group_request(self):
         rejected = remove_groupRequest(2)
         assert rejected
+
+class Workflow4IntegrationTests(unittest.TestCase):
+    @pytest.mark.run(order=11)
+    def test_remove_group(self):
+        group = get_group(1)
+        entries = db.session.scalars(db.select(StudentGroup).filter_by(groupID = group.id)).all()
+
+        for entry in entries:
+            removed = remove_studentGroup(entry.studentID, entry.groupID)
+            assert removed
+        
+        entries = db.session.scalars(db.select(LotGroup).filter_by(groupID = group.id)).all()
+
+        for entry in entries:
+            removed = remove_lotGroup(entry.lotID, entry.groupID)
+            assert removed
+
+        removed = remove_group(group.id)
+        assert removed

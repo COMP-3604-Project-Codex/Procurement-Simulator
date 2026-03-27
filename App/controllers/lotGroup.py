@@ -7,7 +7,7 @@ def add_lotGroup(lotID, groupID):
     db.session.commit()
 
 def get_lotGroup(lotID, groupID):
-    return db.session.get(LotGroup, lotID, groupID)
+    return db.session.get(LotGroup, (lotID, groupID))
 
 def get_all_lotGroups():
     return db.session.scalars(db.select(LotGroup)).all()
@@ -24,3 +24,5 @@ def remove_lotGroup(lotID, groupID):
     if entry:
         db.session.delete(entry)
         db.session.commit()
+        return True
+    return False

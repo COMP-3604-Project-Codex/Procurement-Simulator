@@ -7,7 +7,7 @@ def add_studentGroup(studentID, groupID):
     db.session.commit()
 
 def get_studentGroup(studentID, groupID):
-    return db.session.get(StudentGroup, studentID, groupID)
+    return db.session.get(StudentGroup, (studentID, groupID))
 
 def get_all_studentGroups():
     return db.session.scalars(db.select(StudentGroup)).all()
@@ -24,3 +24,5 @@ def remove_studentGroup(studentID, groupID):
     if entry:
         db.session.delete(entry)
         db.session.commit()
+        return True
+    return False

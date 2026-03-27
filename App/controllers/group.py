@@ -27,3 +27,5 @@ def remove_group(id):
     if group:
         db.session.delete(group)
         db.session.commit()
+        return True
+    return False
