@@ -43,7 +43,6 @@ class Workflow1IntegrationTests(unittest.TestCase):
     def test_creating_lots(self):
         db.drop_all()
         create_db()
-        create_admin("bob", "bobpass")
         create_lot("GIS Lab", 20, 160000.00)
         create_lot("Government Office Lab", 12, 110000.00)
         lots_json = get_all_lots_json()
@@ -75,10 +74,10 @@ class Workflow1IntegrationTests(unittest.TestCase):
     @pytest.mark.run(order=6)
     def test_remove_lot(self):
         lot = get_lot(1)
-        assert not lot == None
+        assert lot
         remove_lot(1)
         lot = get_lot(1)
-        assert lot == None
+        assert not lot
 
 class Workflow2IntegrationTests(unittest.TestCase):
     @pytest.mark.run(order=7)
@@ -103,7 +102,7 @@ class Workflow2IntegrationTests(unittest.TestCase):
         members = [1,2,3,4]
 
         group = create_group(groupName)
-        group = get_group(1)
+        
         self.assertDictEqual({
             'id': 1,
             'groupName': "G1 TechNova Solution",
@@ -158,13 +157,11 @@ class Workflow3IntegrationTests(unittest.TestCase):
         groupID = 1
         Lot1ID = 1
         Lot2ID = 2
-        group = get_group(groupID)
-        add_lotGroup(Lot1ID, group.id)
-        add_lotGroup(Lot2ID, group.id)
+        add_lotGroup(Lot1ID, groupID)
+        add_lotGroup(Lot2ID, groupID)
 
-        group.status = "approved"
-        db.session.commit()
-
+        approve_group(groupID)
+    
         self.assertListEqual([
             {
                 'lotID': 1,
@@ -218,6 +215,35 @@ class Workflow4IntegrationTests(unittest.TestCase):
         removed = remove_group(groupID)
         assert removed
 
+        groupName = "TechNova Solution"
+        members = [1,2,3,4]
+        Lot1ID = 1
+        Lot2ID = 2
+
+        group = create_group(groupName)
+
+        for member in members:
+            add_studentGroup(member, group.id)
+
+        add_lotGroup(Lot1ID, group.id)
+        add_lotGroup(Lot2ID, group.id)
+
+        approve_group(group.id)
+
+        groupName = "ANK Productions"
+        members = [5,6,7,8]
+        Lot1ID = 3
+        Lot2ID = 4
+
+        group = create_group(groupName)
+        
+        for member in members:
+            add_studentGroup(member, group.id)
+
+        add_lotGroup(Lot1ID, group.id)
+        add_lotGroup(Lot2ID, group.id)
+
+        approve_group(group.id)
 
 class Workflow5IntegrationTests(unittest.TestCase):
     @pytest.mark.run(order=12)
@@ -276,22 +302,7 @@ class Workflow5IntegrationTests(unittest.TestCase):
         lotID = 1
         groupID = 1
 
-        rfp = create_rfp(lotID, groupID)
-
-        lot = get_lot(lotID)
-
-        rfp.deviceType = lot.deviceType
-        rfp.resolution = lot.resolution
-        rfp.os = lot.os
-        rfp.cpu = lot.cpu
-        rfp.ram = lot.ram
-        rfp.drive = lot.drive
-        rfp.gpu = lot.gpu
-        rfp.peripherals = lot.peripherals
-        rfp.features = lot.features
-        rfp.io = lot.io
-
-        db.session.commit()
+        rfp = create_rfp(groupID, lotID)
 
         rfp = get_rfp(groupID, lotID)
         assert rfp.deviceType == "Workstation/Laptop/Tablet"
@@ -321,21 +332,6 @@ class Workflow5IntegrationTests(unittest.TestCase):
         rfp = create_rfp(groupID, lotID)
         assert rfp
 
-        lot = get_lot(lotID)
-
-        rfp.deviceType = lot.deviceType
-        rfp.resolution = lot.resolution
-        rfp.os = lot.os
-        rfp.cpu = lot.cpu
-        rfp.ram = lot.ram
-        rfp.drive = lot.drive
-        rfp.gpu = lot.gpu
-        rfp.peripherals = lot.peripherals
-        rfp.features = lot.features
-        rfp.io = lot.io
-
-        db.session.commit()
-
         rfp = get_rfp(groupID, lotID)
         assert rfp.deviceType == ""
         assert rfp.resolution == ""
@@ -355,9 +351,7 @@ class Workflow6IntegrationTests(unittest.TestCase):
         lotID = 1
         groupID = 1
 
-        rfp = get_rfp(groupID, lotID)
-        rfp.status = "approved"
-        db.session.commit()
+        approve_rfp(groupID, lotID)
 
         rfp = get_rfp(groupID, lotID)
         assert rfp.status == "approved"
@@ -378,3 +372,27 @@ class Workflow7IntegrationTests(unittest.TestCase):
 
         removed = remove_rfp(groupID, lotID)
         assert removed
+
+        rfp = create_rfp(groupID, lotID)
+        approve_rfp(groupID, lotID)
+
+        groupID = 2
+        lotID = 3
+        rfp = create_rfp(groupID, lotID)
+        approve_rfp(groupID, lotID)
+
+class Workflow8IntegrationTests(unittest.TestCase):
+    @pytest.mark.run(order=18)
+    def test_place_bid(self):
+        sourceGroupID = 1
+        receipientGroupID = 2
+        lotID = 3
+        bidDocumentLink = "www.exampleBid.com"
+
+        bid = create_bid(lotID, sourceGroupID, receipientGroupID, bidDocumentLink)
+        
+        assert bid
+        assert bid.sourceGroupID == 1
+        assert bidDocumentLink == "www.exampleBid.com"
+        assert receipientGroupID == 2
+        assert lotID == 3

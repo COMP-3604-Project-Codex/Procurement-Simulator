@@ -9,6 +9,11 @@ def create_group(groupName):
     db.session.commit()
     return group
 
+def approve_group(id):
+    group = get_group(id)
+    group.status = "approved"
+    db.session.commit()
+
 def get_group(id):
     return db.session.get(Group, id)
 

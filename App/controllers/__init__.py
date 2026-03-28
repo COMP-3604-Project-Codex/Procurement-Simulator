@@ -8,3 +8,4 @@ from .group import *
 from .studentGroup import *
 from .lotGroup import *
 from .RFP import *
+from .bid import *

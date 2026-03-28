@@ -2,39 +2,26 @@ from App.models import Bid
 from App.database import db
 
 def create_bid(lotID, sourceGroupID, receipientGroupID, bidDocumentLink):
-    newlot = Lot(labType, labSize, budget)
-    db.session.add(newlot)
+    newbid = Bid(lotID, sourceGroupID, receipientGroupID, bidDocumentLink)
+    db.session.add(newbid)
     db.session.commit()
+    return newbid
 
-def get_lot(id):
-    return db.session.get(Lot, id)
+def get_bid(id):
+    return db.session.get(Bid, id)
 
-def get_all_lots():
-    return db.session.scalars(db.select(Lot)).all()
+def get_all_bids():
+    return db.session.scalars(db.select(Bid)).all()
 
-def get_all_lots_json():
-    lots = get_all_lots()
-    if not lots:
+def get_all_bids_json():
+    bids = get_all_bids()
+    if not bids:
         return []
-    lots = [lot.get_json() for lot in lots]
-    return lots
+    bids = [bid.get_json() for bid in bids]
+    return bids
 
-def edit_lot(id, labType=None, labSize=None, budget=None):
-    lot = get_lot(id)
-    if lot:
-        if labType:
-            lot.labType = labType
-
-        if labSize:
-            lot.labSize = labSize
-        
-        if budget:
-            lot.budget = budget
-        
-        db.session.commit()
-
-def remove_lot(id):
-    lot = get_lot(id)
-    if lot:
-        db.session.delete(lot)
+def remove_bid(id):
+    bid = get_bid(id)
+    if bid:
+        db.session.delete(bid)
         db.session.commit()
