@@ -436,3 +436,34 @@ class Workflow10IntegrationTests(unittest.TestCase):
         assert evaluation
         assert evaluation.status == "draft"
         assert evaluation.overallScore == 5.6
+
+class Workflow11IntegrationTests(unittest.TestCase):
+    @pytest.mark.run(order=21)
+    def test_edit_evaluation(self):
+        evaluationID = 1
+        specsMet = 9
+        presentation = 3
+        professionalism = 2
+        budget = 4
+        deviceType = "device type comment"
+        resolution = "resolution comment"
+        ram = "ram comment"
+
+        edited = edit_evaluation(evaluationID, specsMet, presentation, professionalism, budget, deviceType=deviceType, resolution=resolution, ram=ram)
+        assert edited
+        
+        evaluation = get_evaluation(evaluationID)
+        assert evaluation.overallScore == 7.2
+        assert evaluation.deviceType == "device type comment"
+        assert evaluation.resolution == "resolution comment"
+        assert evaluation.ram == "ram comment"
+    
+    @pytest.mark.run(order=22)
+    def test_select_evaluation(self):
+        evaluationID = 1
+
+        select_evaluation(evaluationID)
+
+        evaluation = get_evaluation(evaluationID)
+        assert evaluation
+        assert evaluation.status == "selected"

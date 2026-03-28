@@ -37,6 +37,11 @@ def edit_evaluation(id, specsMet, presentation, professionalism, budget, deviceT
         return True
     return False
 
+def select_evaluation(id):
+    evaluation = get_evaluation(id)
+    evaluation.status = "selected"
+    db.session.commit()
+
 def get_evaluation(id):
     return db.session.get(Evaluation, id)
 
