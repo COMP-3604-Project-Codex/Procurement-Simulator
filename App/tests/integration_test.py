@@ -396,3 +396,43 @@ class Workflow8IntegrationTests(unittest.TestCase):
         assert bidDocumentLink == "www.exampleBid.com"
         assert receipientGroupID == 2
         assert lotID == 3
+
+class Workflow9IntegrationTests(unittest.TestCase):
+    @pytest.mark.run(order=19)
+    def test_remove_bid(self):
+        bidID = 1
+
+        removed = remove_bid(bidID)
+        assert removed
+
+        sourceGroupID = 1
+        receipientGroupID = 2
+        lotID = 3
+        bidDocumentLink = "www.exampleBid.com"
+
+        bid = create_bid(lotID, sourceGroupID, receipientGroupID, bidDocumentLink)
+
+        sourceGroupID = 2
+        receipientGroupID = 1
+        lotID = 1
+        bidDocumentLink = "www.exampleBid.com"
+
+        bid = create_bid(lotID, sourceGroupID, receipientGroupID, bidDocumentLink)
+    
+# class Workflow10IntegrationTests(unittest.TestCase):
+#     @pytest.mark.run(order=20)
+#     def test_create_evaluation(self):
+#         sourceGroupID = 1
+#         receipientGroupID = 2
+#         bidID = 2
+#         lotID = 1
+#         specsMet = 5
+#         presentation = 3
+#         professionalism = 2
+#         budget = 4
+
+#         evaluation = create_evaluation(sourceGroupID, receipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget)
+
+#         assert evaluation
+#         assert evaluation.status == "draft"
+#         assert evaluation.overallScore == 5.6

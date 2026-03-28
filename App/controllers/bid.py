@@ -25,3 +25,5 @@ def remove_bid(id):
     if bid:
         db.session.delete(bid)
         db.session.commit()
+        return True
+    return False
