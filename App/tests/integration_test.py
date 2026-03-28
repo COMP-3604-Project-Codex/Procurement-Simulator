@@ -419,20 +419,20 @@ class Workflow9IntegrationTests(unittest.TestCase):
 
         bid = create_bid(lotID, sourceGroupID, receipientGroupID, bidDocumentLink)
     
-# class Workflow10IntegrationTests(unittest.TestCase):
-#     @pytest.mark.run(order=20)
-#     def test_create_evaluation(self):
-#         sourceGroupID = 1
-#         receipientGroupID = 2
-#         bidID = 2
-#         lotID = 1
-#         specsMet = 5
-#         presentation = 3
-#         professionalism = 2
-#         budget = 4
+class Workflow10IntegrationTests(unittest.TestCase):
+    @pytest.mark.run(order=20)
+    def test_create_evaluation(self):
+        sourceGroupID = 1
+        receipientGroupID = 2
+        bidID = 2
+        lotID = 1
+        specsMet = 5
+        presentation = 3
+        professionalism = 2
+        budget = 4
 
-#         evaluation = create_evaluation(sourceGroupID, receipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget)
+        evaluation = create_evaluation(sourceGroupID, receipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget)
 
-#         assert evaluation
-#         assert evaluation.status == "draft"
-#         assert evaluation.overallScore == 5.6
+        assert evaluation
+        assert evaluation.status == "draft"
+        assert evaluation.overallScore == 5.6
