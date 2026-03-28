@@ -56,7 +56,7 @@ def get_all_evaluations_json():
     return evals
 
 def remove_evaluation(id):
-    eva = get_bid(id)
+    eva = get_evaluation(id)
     if eva:
         db.session.delete(eva)
         db.session.commit()

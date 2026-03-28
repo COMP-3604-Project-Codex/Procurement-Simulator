@@ -467,3 +467,11 @@ class Workflow11IntegrationTests(unittest.TestCase):
         evaluation = get_evaluation(evaluationID)
         assert evaluation
         assert evaluation.status == "selected"
+
+class Workflow12IntegrationTests(unittest.TestCase):
+    @pytest.mark.run(order=23)
+    def test_remove_evaluation(self):
+        evaluationID = 1
+
+        removed = remove_evaluation(evaluationID)
+        assert removed
