@@ -15,13 +15,13 @@ def empty_db():
     yield app.test_client()
     db.drop_all()
 
-@pytest.mark.run(order=1)
+@pytest.mark.run(order=33)
 def test_authenticate():
     user = create_user("bob", "bobpass")
     assert login("bob", "bobpass") != None
 
 class UsersIntegrationTests(unittest.TestCase):
-    @pytest.mark.run(order=2)
+    @pytest.mark.run(order=34)
     def test_user_children_are_users(self):
         admin = Admin("jack", "jackpass")
         db.session.add(admin)
@@ -32,14 +32,14 @@ class UsersIntegrationTests(unittest.TestCase):
         self.assertListEqual([{"id":1, "username":"bob"}, {"id":2, "username":"jack", "role":"admin"}, {"id":3, "username":"cooper", "role":"student"}], users_json)
 
     # Tests data changes in the database
-    @pytest.mark.run(order=3)
+    @pytest.mark.run(order=35)
     def test_update_user(self):
         update_user(1, "ronnie")
         user = get_user(1)
         assert user.username == "ronnie"
 
 class Workflow1IntegrationTests(unittest.TestCase):
-    @pytest.mark.run(order=4)
+    @pytest.mark.run(order=36)
     def test_creating_lots(self):
         db.drop_all()
         create_db()
@@ -63,7 +63,7 @@ class Workflow1IntegrationTests(unittest.TestCase):
         }
         ], lots_json)
 
-    @pytest.mark.run(order=5)
+    @pytest.mark.run(order=37)
     def test_edit_lots(self):
         lot = get_lot(1)
         assert lot.budget == 160000.00
@@ -71,7 +71,7 @@ class Workflow1IntegrationTests(unittest.TestCase):
         lot = get_lot(1)
         assert lot.budget == 170000.00
 
-    @pytest.mark.run(order=6)
+    @pytest.mark.run(order=38)
     def test_remove_lot(self):
         lot = get_lot(1)
         assert lot
@@ -80,7 +80,7 @@ class Workflow1IntegrationTests(unittest.TestCase):
         assert not lot
 
 class Workflow2IntegrationTests(unittest.TestCase):
-    @pytest.mark.run(order=7)
+    @pytest.mark.run(order=39)
     def test_create_groupRequest(self):
         remove_lot(2)
         create_lot("GIS Lab", 20, 160000.00)
@@ -131,7 +131,7 @@ class Workflow2IntegrationTests(unittest.TestCase):
             },
         ], get_all_studentGroups_json())
 
-    @pytest.mark.run(order=8)
+    @pytest.mark.run(order=40)
     def test_trying_to_create_group_request_with_a_duplicate_member(self):
         groupName = "ANK Productions"
         members = [1,2,3,4]
@@ -152,7 +152,7 @@ class Workflow2IntegrationTests(unittest.TestCase):
             add_studentGroup(member, group.id)
 
 class Workflow3IntegrationTests(unittest.TestCase):
-    @pytest.mark.run(order=9)
+    @pytest.mark.run(order=41)
     def test_approving_groupReuests(self):
         groupID = 1
         Lot1ID = 1
@@ -176,7 +176,7 @@ class Workflow3IntegrationTests(unittest.TestCase):
         group = get_group(1)
         assert group.status == "approved"
 
-    @pytest.mark.run(order=10)
+    @pytest.mark.run(order=42)
     def test_rejecting_a_group_request(self):
         groupID = 2
 
@@ -196,7 +196,7 @@ class Workflow3IntegrationTests(unittest.TestCase):
         assert removed
 
 class Workflow4IntegrationTests(unittest.TestCase):
-    @pytest.mark.run(order=11)
+    @pytest.mark.run(order=43)
     def test_remove_group(self):
         groupID = 1
 
@@ -246,7 +246,7 @@ class Workflow4IntegrationTests(unittest.TestCase):
         approve_group(group.id)
 
 class Workflow5IntegrationTests(unittest.TestCase):
-    @pytest.mark.run(order=12)
+    @pytest.mark.run(order=44)
     def test_save_rfp_details(self):
         lotID = 1
         deviceType = "Workstation/Laptop/Tablet"
@@ -296,8 +296,7 @@ class Workflow5IntegrationTests(unittest.TestCase):
         assert lot.features == "Touch screen, WIFI version, bluetooth, Capture Card, Integrated Speakers, Integrated Webcam, Fingerprint reader, LTE"
         assert lot.io == ""
 
-
-    @pytest.mark.run(order=13)
+    @pytest.mark.run(order=45)
     def test_submit_rfp_details(self):
         lotID = 1
         groupID = 1
@@ -316,9 +315,8 @@ class Workflow5IntegrationTests(unittest.TestCase):
         assert rfp.features == ""
         assert rfp.io == ""
         assert rfp.status == "requested"
-        
-    
-    @pytest.mark.run(order=14)
+
+    @pytest.mark.run(order=46)
     def test_submit_duplicate_rfp_details(self):
         lotID = 1
         groupID = 1
@@ -346,7 +344,7 @@ class Workflow5IntegrationTests(unittest.TestCase):
         assert rfp.status == "requested"
 
 class Workflow6IntegrationTests(unittest.TestCase):
-    @pytest.mark.run(order=15)
+    @pytest.mark.run(order=47)
     def test_approve_rfp_Request(self):
         lotID = 1
         groupID = 1
@@ -356,7 +354,7 @@ class Workflow6IntegrationTests(unittest.TestCase):
         rfp = get_rfp(groupID, lotID)
         assert rfp.status == "approved"
 
-    @pytest.mark.run(order=16)
+    @pytest.mark.run(order=48)
     def test_reject_rfp_Request(self):
         groupID = 1
         lotID = 2
@@ -365,7 +363,7 @@ class Workflow6IntegrationTests(unittest.TestCase):
         assert removed
 
 class Workflow7IntegrationTests(unittest.TestCase):
-    @pytest.mark.run(order=17)
+    @pytest.mark.run(order=49)
     def test_remove_rfp(self):
         groupID = 1
         lotID = 1
@@ -382,7 +380,7 @@ class Workflow7IntegrationTests(unittest.TestCase):
         approve_rfp(groupID, lotID)
 
 class Workflow8IntegrationTests(unittest.TestCase):
-    @pytest.mark.run(order=18)
+    @pytest.mark.run(order=50)
     def test_place_bid(self):
         sourceGroupID = 1
         receipientGroupID = 2
@@ -398,7 +396,7 @@ class Workflow8IntegrationTests(unittest.TestCase):
         assert lotID == 3
 
 class Workflow9IntegrationTests(unittest.TestCase):
-    @pytest.mark.run(order=19)
+    @pytest.mark.run(order=51)
     def test_remove_bid(self):
         bidID = 1
 
@@ -418,9 +416,9 @@ class Workflow9IntegrationTests(unittest.TestCase):
         bidDocumentLink = "www.exampleBid.com"
 
         bid = create_bid(lotID, sourceGroupID, receipientGroupID, bidDocumentLink)
-    
+
 class Workflow10IntegrationTests(unittest.TestCase):
-    @pytest.mark.run(order=20)
+    @pytest.mark.run(order=52)
     def test_create_evaluation(self):
         sourceGroupID = 1
         receipientGroupID = 2
@@ -438,7 +436,7 @@ class Workflow10IntegrationTests(unittest.TestCase):
         assert evaluation.overallScore == 5.6
 
 class Workflow11IntegrationTests(unittest.TestCase):
-    @pytest.mark.run(order=21)
+    @pytest.mark.run(order=53)
     def test_edit_evaluation(self):
         evaluationID = 1
         specsMet = 9
@@ -457,8 +455,8 @@ class Workflow11IntegrationTests(unittest.TestCase):
         assert evaluation.deviceType == "device type comment"
         assert evaluation.resolution == "resolution comment"
         assert evaluation.ram == "ram comment"
-    
-    @pytest.mark.run(order=22)
+
+    @pytest.mark.run(order=54)
     def test_select_evaluation(self):
         evaluationID = 1
 
@@ -469,7 +467,7 @@ class Workflow11IntegrationTests(unittest.TestCase):
         assert evaluation.status == "selected"
 
 class Workflow12IntegrationTests(unittest.TestCase):
-    @pytest.mark.run(order=23)
+    @pytest.mark.run(order=55)
     def test_remove_evaluation(self):
         evaluationID = 1
 
