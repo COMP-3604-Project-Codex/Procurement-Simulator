@@ -1,0 +1,14 @@
+{% extends 'admin/layout.html' %}
+{% block title %}Manage Evaluations{% endblock %}
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+  {% for group in evaluation_groups %}
+  <div class="bg-white rounded-xl shadow-panel p-6 flex flex-col items-center">
+    <h2 class="font-heading text-2xl font-bold mb-2">G{{ group.id }} {{ group.name }}</h2>
+    <p class="text-sm text-slate-600 mb-4">TimeStamp :<br>{{ group.timestamp }}</p>
+    <button type="button" class="w-full border border-slate-400 rounded py-2 font-semibold hover:bg-brand-50">Evaluation Document</button>
+    <button type="button" class="w-full border border-slate-400 rounded py-2 font-semibold hover:bg-red-50">Remove</button>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
