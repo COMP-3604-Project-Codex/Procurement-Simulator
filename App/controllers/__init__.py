@@ -7,6 +7,6 @@ from .student import *
 from .group import *
 from .studentGroup import *
 from .lotGroup import *
-from .RFP import *
+from .rfp import *
 from .bid import *
 from .evaluation import *
