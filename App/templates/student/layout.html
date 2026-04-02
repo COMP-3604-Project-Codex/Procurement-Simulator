@@ -48,17 +48,35 @@
           <div>
             <p class="px-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Client</p>
             <div class="mt-2 border-l-2 border-slate-300 pl-5">
-              <p class="py-1">Lots</p>
-              <p class="py-1">Bids</p>
-              <p class="py-1">Evaluation</p>
-            </div>
+              <a href="{{ url_for('student_views.student_lots_page') }}" 
+                class="block py-1 hover:text-brand-500 transition-colors {% if active_page == 'lots' %}text-brand-600 font-bold{% endif %}">
+                Lots
+              </a>
+              <div>
+                <a href="{{ url_for('student_views.student_view_bids_page') }}" 
+                  class="block py-1 hover:text-brand-500 transition-colors {% if active_page == 'view-bids' %}text-brand-600 font-bold{% endif %}">
+                  Bids
+                </a>
+              </div>
+              
+               <a href="{{ url_for('student_views.student_client_evaluation_page') }}" 
+                  class="block py-1 hover:text-brand-500 transition-colors {% if active_page == 'client-evaluation' %}text-brand-600 font-bold{% endif %}">
+                  Evaluation
+                </a>
+              </div>
           </div>
 
           <div>
             <p class="px-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Vendor</p>
             <div class="mt-2 border-l-2 border-slate-300 pl-5">
-              <p class="py-1">RFP Gallery</p>
-              <p class="py-1">Your Bids</p>
+              <a href="{{ url_for('student_views.rfp_gallery_page') }}" 
+                class="block py-1 hover:text-brand-500 transition-colors {% if active_page == 'rfp-gallery' %}text-brand-600 font-bold{% endif %}">
+                RFP Gallery
+              </a>
+
+              <a href="{{ url_for('student_views.submitted_bids_page') }}" 
+                class="block py-1 hover:text-brand-500 transition-colors {% if active_page == 'vendor-bids' %}text-brand-600 font-bold{% endif %}">
+                Your Bids 
             </div>
           </div>
 
@@ -68,6 +86,18 @@
       </aside>
 
       <main>
+        <section class="px-5 py-8 lg:px-10">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <div class="mb-6 p-4 rounded-xl border bg-emerald-50 border-emerald-200 text-emerald-800 shadow-sm flex justify-between items-center">
+                  <span>{{ message }}</span>
+                  <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700">✕</button>
+                </div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
+
         <header class="border-b border-slate-300 bg-white/80 px-5 py-6 backdrop-blur lg:px-10">
           <h1 class="font-heading text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">{{ title }}</h1>
         </header>

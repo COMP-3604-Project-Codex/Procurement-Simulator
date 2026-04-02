@@ -1,0 +1,83 @@
+{% extends "student/layout.html" %}
+{% block content %}
+    <div class="mx-auto max-w-6xl space-y-6">
+        
+        <div class="px-2">
+            <h1 class="font-heading text-3xl font-bold text-slate-900">Submitted Bids</h1>
+            <p class="text-slate-600 italic text-sm">Track the status of your proposals sent to clients.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-5 bg-emerald-50 border border-emerald-100 rounded-2xl flex justify-between items-center">
+                <div>
+                    <p class="text-[10px] uppercase font-bold text-emerald-600 tracking-widest">Accepted Bids</p>
+                    <p class="text-3xl font-bold text-emerald-700">1</p>
+                </div>
+                <div class="text-emerald-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            </div>
+            <div class="p-5 bg-amber-50 border border-amber-100 rounded-2xl flex justify-between items-center">
+                <div>
+                    <p class="text-[10px] uppercase font-bold text-amber-600 tracking-widest">Pending Review</p>
+                    <p class="text-3xl font-bold text-amber-700">1</p>
+                </div>
+                <div class="text-amber-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-300 bg-white shadow-panel overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-slate-50 border-b border-slate-200 text-[10px] uppercase font-bold text-slate-500">
+                    <tr>
+                        <th class="px-6 py-4">Submission Date & Time</th> <th class="px-6 py-4">RFP Opportunity</th>
+                        <th class="px-6 py-4">Target Group</th>
+                        <th class="px-6 py-4 text-center">Status</th>
+                        <th class="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for bid in bids %}
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="px-6 py-4">
+                            <span class="block font-bold text-slate-900">
+                                {{ bid.submitted_at.strftime('%b %d, %Y') }}
+                            </span>
+                            <span class="text-[10px] text-brand-500 font-mono font-bold uppercase">
+                                {{ bid.submitted_at.strftime('%I:%M %p') }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <p class="text-sm font-semibold text-slate-700">{{ bid.rfp_title }}</p>
+                        </td>
+                        <td class="px-6 py-4">
+                            <p class="text-xs text-slate-500 uppercase font-bold tracking-tighter">{{ bid.target_group }}</p>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            {% if bid.status == 'Accepted' %}
+                                <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase">Accepted</span>
+                            {% elif bid.status == 'Rejected' %}
+                                <span class="px-3 py-1 rounded-full bg-red-100 text-red-700 text-[10px] font-bold uppercase">Rejected</span>
+                            {% else %}
+                                <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-[10px] font-bold uppercase">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <button onclick="alert('Viewing bid details...')" 
+                            class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-900 hover:text-white transition">
+                                View Details
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
