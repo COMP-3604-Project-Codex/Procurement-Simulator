@@ -1,2 +1,2 @@
-from .unit_test import *
-from .integration_test import *
+from .tests_1_unit_test import *
+from .tests_2_integration_test import *
