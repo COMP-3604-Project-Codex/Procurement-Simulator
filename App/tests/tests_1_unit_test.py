@@ -41,40 +41,38 @@ class AdminUnitTests(unittest.TestCase):
         admin = Admin("alice", "alicepass")
         assert not admin.is_student()
 
-
 class StudentUnitTests(unittest.TestCase):
     @pytest.mark.run(order=7)
     def test_new_student(self):
-        student = Student("bob", "bobpass")
-        assert student.username == "bob"
+        student = Student("bob", "20231245", "bobpass")
+        assert student.username == "20231245"
 
     @pytest.mark.run(order=8)
     def test_student_get_json(self):
-        student = Student("bob", "bobpass")
+        student = Student("bob", "20240123", "bobpass")
         student_json = student.get_json()
-        assert student_json["username"] == "bob"
+        assert student_json["username"] == "20240123"
         assert student_json["role"] == "student"
 
     @pytest.mark.run(order=9)
     def test_student_hashed_password(self):
-        student = Student("bob", "bobpass")
+        student = Student("bob", "20240123", "bobpass")
         assert student.password != "bobpass"
 
     @pytest.mark.run(order=10)
     def test_student_check_password(self):
-        student = Student("bob", "bobpass")
+        student = Student("bob", "20240123", "bobpass")
         assert student.check_password("bobpass")
 
     @pytest.mark.run(order=11)
     def test_student_is_student(self):
-        student = Student("bob", "bobpass")
+        student = Student("bob", "20240123", "bobpass")
         assert student.is_student()
 
     @pytest.mark.run(order=12)
     def test_student_is_not_admin(self):
-        student = Student("bob", "bobpass")
+        student = Student("bob", "20240123", "bobpass")
         assert not student.is_admin()
-
 
 class GroupUnitTests(unittest.TestCase):
     @pytest.mark.run(order=13)

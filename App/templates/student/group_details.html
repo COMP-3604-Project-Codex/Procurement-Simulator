@@ -6,11 +6,11 @@
       <div class="mb-8 flex items-center justify-between border-b border-slate-100 pb-6">
         <div>
           <p class="text-sm font-bold uppercase tracking-widest text-brand-500">Active Group</p>
-          <h2 class="font-heading text-4xl font-bold text-slate-900">{{ group.name }}</h2>
+          <h2 class="font-heading text-4xl font-bold text-slate-900">{{ group.groupName }}</h2>
         </div>
         <span class="inline-flex items-center rounded-full bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 border border-amber-200">
           <span class="mr-2 h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
-          {{ group.status }}
+          {{ status }}
         </span>
       </div>
 
@@ -24,7 +24,7 @@
             </div>
             <div>
               <p class="font-bold text-slate-900">{{ member.name }}</p>
-              <p class="text-xs text-slate-500">ID: {{ member.student_id }}</p>
+              <p class="text-xs text-slate-500">ID: {{ member.username }}</p>
             </div>
           </div>
           {% endfor %}

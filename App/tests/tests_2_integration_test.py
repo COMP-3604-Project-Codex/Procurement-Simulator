@@ -2,6 +2,7 @@ import pytest
 import unittest
 from datetime import datetime
 from werkzeug.security import generate_password_hash
+from sqlalchemy import or_
 
 from App.main import create_app
 from App.database import db, create_db
@@ -25,18 +26,18 @@ class UsersIntegrationTests(unittest.TestCase):
     def test_user_children_are_users(self):
         admin = Admin("jack", "jackpass")
         db.session.add(admin)
-        student = Student("cooper", "cooperpass")
+        student = Student("cooper", "20229876", "cooperpass")
         db.session.add(student)
         db.session.commit()
         users_json = get_all_users_json()
-        self.assertListEqual([{"id":1, "username":"bob"}, {"id":2, "username":"jack", "role":"admin"}, {"id":3, "username":"cooper", "role":"student"}], users_json)
+        self.assertListEqual([{"id":1, "username":"bob"}, {"id":2, "username":"jack", "role":"admin"}, {"id":3, "username":"20229876", "role":"student"}], users_json)
 
     # Tests data changes in the database
     @pytest.mark.run(order=35)
     def test_update_user(self):
-        update_user(1, "ronnie")
+        update_user(1, "pot")
         user = get_user(1)
-        assert user.username == "ronnie"
+        assert user.username == "pot"
 
 class Workflow1IntegrationTests(unittest.TestCase):
     @pytest.mark.run(order=36)
@@ -88,15 +89,15 @@ class Workflow2IntegrationTests(unittest.TestCase):
         create_lot("University Computer Lab", "Medium, capable of having 20 machines", 250000.00)
         create_lot("Data Center", "Medium, capable of having 20 machines", 25000000.00)
 
-        create_student("jack", "jackpass")
-        create_student("cooper", "cooperpass")
-        create_student("john", "johnpass")
-        create_student("tony", "tonypass")
+        create_student("jack", "20240123", "jackpass")
+        create_student("cooper", "20231245", "cooperpass")
+        create_student("john", "20229876", "johnpass")
+        create_student("tony", "20235678", "tonypass")
 
-        create_student("peper", "peperpass")
-        create_student("steve", "stevepass")
-        create_student("clint", "clintpass")
-        create_student("bruce", "brucepass")
+        create_student("peper", "20246789", "peperpass")
+        create_student("steve", "20242345", "stevepass")
+        create_student("clint", "20238901", "clintpass")
+        create_student("bruce", "20238902", "brucepass")
 
         groupName = "TechNova Solution"
         members = [1,2,3,4]
@@ -199,18 +200,6 @@ class Workflow4IntegrationTests(unittest.TestCase):
     @pytest.mark.run(order=43)
     def test_remove_group(self):
         groupID = 1
-
-        entries = db.session.scalars(db.select(StudentGroup).filter_by(groupID = groupID)).all()
-
-        for entry in entries:
-            removed = remove_studentGroup(entry.studentID, groupID)
-            assert removed
-
-        entries = db.session.scalars(db.select(LotGroup).filter_by(groupID = groupID)).all()
-
-        for entry in entries:
-            removed = remove_lotGroup(entry.lotID, groupID)
-            assert removed
 
         removed = remove_group(groupID)
         assert removed

@@ -1,10 +1,11 @@
 from flask_admin.contrib.sqla import ModelView
+from functools import wraps
 from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, set_access_cookies
-from flask_admin import Admin
+from flask_admin import Admin as FlaskAdmin
 from flask import flash, redirect, url_for, request, Blueprint, render_template
 from App.database import db
-from App.models import User, Lot
-from App.controllers import create_lot, get_lot, edit_lot, remove_lot
+from App.models import User, Admin, Student, Group, StudentGroup, Lot, LotGroup, Bid, Evaluation, RFP
+from App.controllers import *
 
 class AdminView(ModelView):
     @jwt_required()
@@ -16,10 +17,20 @@ class AdminView(ModelView):
         return redirect(url_for('index_page', next=request.url))
 
 def setup_admin(app):
-    admin = Admin(app, name='FlaskMVC', template_mode='bootstrap3')
+    admin = FlaskAdmin(app, name='FlaskMVC', template_mode='bootstrap3')
     admin.add_view(AdminView(User, db.session))
 
 admin_views = Blueprint('admin_views', __name__, template_folder='../templates/admin')
+
+def admin_required(f):
+    @wraps(f)
+    @jwt_required()
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_admin():
+            flash("You are logged in as a student and therefore cannot access admin page")
+            return redirect(url_for('index_views.index_page'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 # ─── Dummy Data ───────────────────────────────────────────────────────────────
 
@@ -146,11 +157,13 @@ def get_lot_by_id(lot_id):
 # ─── Lot Routes ───────────────────────────────────────────────────────────────
 
 @admin_views.route('/admin/lots', methods=['GET'])
+@admin_required
 def admin_manage_lots():
     lots = db.session.scalars(db.select(Lot)).all()
     return render_template('admin/manage_lots.html', title='Manage Lots', lots=lots)
 
 @admin_views.route('/admin/lots/add', methods=['POST'])
+@admin_required
 def admin_add_lot():
     lab_type = request.form.get('lab_type')
     lab_size = request.form.get('lab_size')
@@ -161,6 +174,7 @@ def admin_add_lot():
     return redirect(url_for('admin_views.admin_manage_lots'))
 
 @admin_views.route('/admin/lots/<int:lot_id>/edit', methods=['POST'])
+@admin_required
 def admin_edit_lot(lot_id):
     labType = request.form.get('lab_type')
     labSize = request.form.get('lab_size')
@@ -171,6 +185,7 @@ def admin_edit_lot(lot_id):
     return redirect(url_for('admin_views.admin_manage_lots'))
 
 @admin_views.route('/admin/lots/<int:lot_id>/remove', methods=['POST'])
+@admin_required
 def admin_remove_lot(lot_id):
     
     remove_lot(lot_id)
@@ -180,6 +195,7 @@ def admin_remove_lot(lot_id):
 # ─── Bid Routes ───────────────────────────────────────────────────────────────
 
 @admin_views.route('/admin/manage-bids')
+@admin_required
 def admin_manage_bids():
     return render_template(
         'admin/manage_bids.html',
@@ -189,6 +205,7 @@ def admin_manage_bids():
     )
 
 @admin_views.route('/admin/manage-bids/group/<int:group_id>')
+@admin_required
 def admin_view_group_bids(group_id):
     group = next((g for g in GROUPS if g['id'] == group_id), None)
     if not group:
@@ -201,16 +218,19 @@ def admin_view_group_bids(group_id):
     )
 
 @admin_views.route('/admin/manage-bids/group/<int:group_id>/bid/<int:bid_id>')
+@admin_required
 def admin_view_bid_document(group_id, bid_id):
     return f"Bid document for group {group_id}, bid {bid_id}"
 
 @admin_views.route('/admin/manage-bids/group/<int:group_id>/bid/<int:bid_id>/remove', methods=['POST'])
+@admin_required
 def admin_remove_bid(group_id, bid_id):
     return redirect(url_for('admin_views.admin_view_group_bids', group_id=group_id))
 
 # ─── Group Routes ─────────────────────────────────────────────────────────────
 
 @admin_views.route('/admin/groups/<int:group_id>/assign-lots', methods=['GET', 'POST'])
+@admin_required
 def admin_assign_lots(group_id):
     group = next((g for g in GROUPS if g['id'] == group_id), None)
     if request.method == 'POST':
@@ -221,14 +241,17 @@ def admin_assign_lots(group_id):
     return render_template('admin/assign_lots_modal.html', group=group, lots=LOTS)
 
 @admin_views.route('/admin/group-requests/<int:group_id>/approve', methods=['POST'])
+@admin_required
 def admin_approve_group(group_id):
     return redirect(url_for('admin_views.admin_manage_groups'))
 
 @admin_views.route('/admin/group-requests/<int:group_id>/decline', methods=['POST'])
+@admin_required
 def admin_decline_group(group_id):
     return redirect(url_for('admin_views.admin_manage_groups'))
 
 @admin_views.route('/admin/group-requests/<int:group_id>/approve-and-assign', methods=['POST'])
+@admin_required
 def admin_approve_and_assign_group(group_id):
     request_item = next((r for r in GROUP_REQUESTS if r['id'] == group_id), None)
     if request_item:
@@ -245,6 +268,7 @@ def admin_approve_and_assign_group(group_id):
     return redirect(url_for('admin_views.admin_manage_groups'))
 
 @admin_views.route('/admin/manage-groups')
+@admin_required
 def admin_manage_groups():
     return render_template('admin/manage_groups.html',
                          tab='requests',
@@ -257,6 +281,7 @@ def admin_manage_groups():
 # ─── RFP Routes ───────────────────────────────────────────────────────────────
 
 @admin_views.route('/admin/manage-rfps')
+@admin_required
 def admin_manage_rfps():
     rfp_requests = [
         {'id': 1, 'name': 'G5 JRS Technologies', 'timestamp': '11/5/2025, 11:32pm'},
@@ -288,6 +313,7 @@ def admin_manage_rfps():
 # ─── Evaluation Routes ────────────────────────────────────────────────────────
 
 @admin_views.route('/admin/manage-evaluations')
+@admin_required
 def admin_manage_evaluations():
     evaluation_groups = [
         {"id": 1, "name": "NovaCore", "timestamp": "11/5/2025, 6:46pm"},

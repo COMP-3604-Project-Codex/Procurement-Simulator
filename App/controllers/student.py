@@ -1,8 +1,8 @@
 from App.models import Student
 from App.database import db
 
-def create_student(username, password):
-    newstudent = Student(username=username, password=password)
+def create_student(name, username, password):
+    newstudent = Student(name=name, username=username, password=password)
     db.session.add(newstudent)
     db.session.commit()
 

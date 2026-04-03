@@ -1,5 +1,11 @@
-from App.models import Group
+from App.models import *
+from .bid import remove_bid
+from .evaluation import remove_evaluation
+from .rfp import remove_rfp
+from .studentGroup import remove_studentGroup
+from .lotGroup import remove_lotGroup
 from App.database import db
+from sqlalchemy import or_
 
 def create_group(groupName):
     group = Group(groupName)
@@ -30,6 +36,31 @@ def get_all_groups_json():
 def remove_group(id):
     group = get_group(id)
     if group:
+        entries = db.session.scalars(db.select(Bid).filter(or_(Bid.sourceGroupID == id, Bid.receipientGroupID == id))).all()
+
+        for entry in entries:
+            removed = remove_bid(entry.id)
+
+        entries = db.session.scalars(db.select(Evaluation).filter(or_(Evaluation.sourceGroupID == id, Evaluation.receipientGroupID == id))).all()
+
+        for entry in entries:
+            removed = remove_evaluation(entry.id)
+
+        entries = db.session.scalars(db.select(RFP).filter_by(groupID = id)).all()
+
+        for entry in entries:
+            removed = remove_rfp(id, entry.lotID)
+
+        entries = db.session.scalars(db.select(StudentGroup).filter_by(groupID = id)).all()
+
+        for entry in entries:
+            removed = remove_studentGroup(entry.studentID, id)
+
+        entries = db.session.scalars(db.select(LotGroup).filter_by(groupID = id)).all()
+
+        for entry in entries:
+            removed = remove_lotGroup(entry.lotID, id)
+        
         db.session.delete(group)
         db.session.commit()
         return True

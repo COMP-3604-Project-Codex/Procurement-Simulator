@@ -1,7 +1,39 @@
 
 from flask import Blueprint, flash, request, redirect, render_template, url_for
+from functools import wraps
+from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, set_access_cookies
 from datetime import datetime
+from App.models import *
+from App.controllers import *
+from App.views import *
 
+def student_required(f):
+    @wraps(f)
+    @jwt_required()
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_student():
+            flash("You are logged in as an admin and therefore cannot access student page")
+            return redirect(url_for('index_views.index_page'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def group_status_check(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        exists = check_studentGroup(current_user.id)
+    
+        if not exists:
+            flash("You either have not created a group yet or your group has been reject or removed, create a new one")
+            return redirect(url_for('student_views.student_create_group_page'))
+        
+        group = get_group(exists.groupID)
+
+        if group.status == "requested":
+            flash("Your group has not been approved yet")
+            return redirect(request.referrer)
+        
+        return f(*args, **kwargs)
+    return decorated_function
 
 student_views = Blueprint('student_views', __name__, template_folder='../templates')
 
@@ -54,35 +86,109 @@ STUDENT_BIDS = [
     }
 ]
 @student_views.route('/student', methods=['GET'])
+@student_required
 def student_home_page():
-    return redirect(url_for('student_views.student_create_group_page'))
+    return redirect(url_for('student_views.student_group_details_page'))
 
 
 @student_views.route('/student/create-group', methods=['GET', 'POST']) 
+@student_required
 def student_create_group_page():
+    exists = check_studentGroup(current_user.id)
+    
+    if exists:
+        flash ("You are already in a group")
+        return redirect(request.referrer)
+
     if request.method == 'POST':
         name = request.form.get('group_name')
         members = request.form.getlist('members')
         
-        new_group = {
-            "name": name,
-            "members": members,
-            "status": "Pending Admin Approval"
-        }
-        STUDENT_GRP.append(new_group)
+        members.append(current_user.id)
+
+        duplicates = []
+
+        for member in members:
+            existing = db.session.scalars(db.select(StudentGroup).filter_by(studentID = member)).first()
+            if existing:
+                duplicates.append(member)
+            
+        if duplicates:
+            students = []
+            you = False
+
+            for ID in duplicates:
+                if ID == current_user.id:
+                    you = True
+                    continue
+
+                student = db.session.scalars(db.select(Student).filter_by(id=ID)).first()
+                if student:
+                    students.append(student)
+            
+            if you:
+                strings = []
+                for student in students:
+                    string = f"{student.name}, "
+                    strings.append(string)
+
+                if not strings:
+                    flash("You are already in a group")
+                    return redirect(url_for('student_views.student_group_details_page'))
+
+                if len(strings) >= 2:
+                    strings[-2] = f"{students[-2].name} and "
+                    strings[-1] = f"{students[-1].name}"
+
+                    flash(f"You are already in a group and {''.join(strings)} are already in groups")
+                    return redirect(url_for('student_views.student_group_details_page'))
+                else:
+                    strings[0] = f"{students[0].name}"
+
+                    flash(f"You are already in a group and {''.join(strings)} is already in a group")
+                    return redirect(url_for('student_views.student_group_details_page'))
+            else:
+                strings = []
+                for student in students:
+                    string = f"{student.name}, "
+                    strings.append(string)
+
+                if len(strings) >= 2:
+                    strings[-2] = f"{students[-2].name} and "
+                    strings[-1] = f"{students[-1].name}"
+
+                    flash(f"{''.join(strings)} are already in groups")
+                    return redirect(url_for('student_views.student_group_details_page'))
+                else:
+                    strings[0] = f"{students[0].name}"
+
+                    flash(f"{''.join(strings)} is already in a group")
+                    return redirect(url_for('student_views.student_group_details_page'))
+
+        group = create_group(name)
+
+        for member in members:
+            add_studentGroup(member, group.id)
         
         flash(f"Group '{name}' created successfully!")
         return redirect(url_for('student_views.student_group_details_page'))
     
-    candidates = [
-        {'name': 'Daniel Roberts', 'student_id': '20240123', 'selected': False},
-        {'name': 'Michael Johnson', 'student_id': '20231245', 'selected': True},
-        {'name': 'Samantha Lewis', 'student_id': '20229876', 'selected': True},
-        {'name': 'Christopher Brown', 'student_id': '20235678', 'selected': False},
-        {'name': 'Ashley Williams', 'student_id': '20246789', 'selected': False},
-        {'name': 'Emily Thompson', 'student_id': '20242345', 'selected': True},
-        {'name': 'Brandon Phillips', 'student_id': '20238901', 'selected': False},
-    ]
+    students = db.session.scalars(db.select(Student)).all()
+
+    candidates = []
+
+    for student in students:
+        if student.id == current_user.id:
+            continue
+
+        candidate = {}
+        candidate["id"] = student.id
+        candidate["name"] = student.name
+        candidate["student_id"] = student.username
+        candidate["selected"] = False
+
+        candidates.append(candidate)
+
     return render_template(
         'student/create_group.html',
         active_page='create-group',
@@ -92,28 +198,44 @@ def student_create_group_page():
 
 
 @student_views.route('/student/group-details', methods=['GET'])
+@student_required
 def student_group_details_page():
+    exists = check_studentGroup(current_user.id)
+    
+    if not exists:
+        flash("You either have not created a group yet or your group has been reject or removed, create a new one")
+        return redirect(url_for('student_views.student_create_group_page'))
 
-    current_group = STUDENT_GRP[-1] if STUDENT_GRP else None
-    display_members = []
+    exists.groupID
 
-    if current_group:
-        for student_id in current_group['members']:
-            match = next((s for s in STUDENT_DATA if s['student_id'] == student_id), None)
-            if match:
-                display_members.append(match)
+    current_group = get_group(exists.groupID)
+
+    if current_group.status == "requested":
+        status = "Pending Confirmation"
+    else:
+        status = "Confirmed"
+
+    entries = db.session.scalars(db.select(StudentGroup).filter_by(groupID=current_group.id)).all()
+    
+    members = []
+
+    for entry in entries:
+        member = db.session.scalars(db.select(Student).filter_by(id=entry.studentID)).first()
+        members.append(member)
 
     return render_template(
         'student/group_details.html',
         active_page='group-details',
         title='Group Details',
-        status='Pending Confirmation',
+        status=status,
         group=current_group,
-        members=display_members
+        members=members
     )
 
 
 @student_views.route('/student/lots', methods=['GET', 'POST'])
+@student_required
+@group_status_check
 def student_lots_page():
     if request.method == 'POST':
         action = request.form.get('action') # 
@@ -168,6 +290,8 @@ def student_lots_page():
          
     
 @student_views.route('/student/client-view-bids', methods=['GET'])
+@student_required
+@group_status_check
 def student_view_bids_page():
 
     selected_lot_id = request.args.get('selected_lot', '1')
@@ -186,6 +310,8 @@ def student_view_bids_page():
     )
 
 @student_views.route('/student/client-bid-details/<int:bid_id>', methods=['GET', 'POST'])
+@student_required
+@group_status_check
 def student_bid_details_page(bid_id):
 
     # list of specs to loop through in template
@@ -223,6 +349,8 @@ def student_bid_details_page(bid_id):
 
 
 @student_views.route('/student/client-evaluation', methods=['GET'])
+@student_required
+@group_status_check
 def student_client_evaluation_page():
 
     selected_lot_id = request.args.get('selected_lot', '1')
@@ -256,6 +384,8 @@ def student_client_evaluation_page():
 #Student view as vendor
 
 @student_views.route('/student/rfp-gallery', methods=['GET'])
+@student_required
+@group_status_check
 def rfp_gallery_page():
 
     # rfps available
@@ -289,6 +419,8 @@ def rfp_gallery_page():
 
 # Vendor-submitted bids
 @student_views.route('/student/vendor-bids', methods=['GET'])
+@student_required
+@group_status_check
 def submitted_bids_page():
 
     # This data represents bids 
