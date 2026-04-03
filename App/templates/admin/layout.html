@@ -1,66 +1,111 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Procurement Simulator{% endblock %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              heading: ["Sora", "sans-serif"],
-              body: ["Manrope", "sans-serif"]
-            },
-            colors: {
-              brand: {
-                50: "#f5f8ff",
-                100: "#e9efff",
-                500: "#2f5dff",
-                600: "#2348d2"
-              }
-            },
-            boxShadow: {
-              panel: "0 14px 40px -26px rgba(15, 23, 42, 0.35)"
-            }
-          }
-        }
-      }
-    </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
-    <script src="{{ url_for('static', filename='lots.js') }}"></script>
-  </head>
-  <body class="bg-slate-100 font-body text-slate-900 antialiased">
-    <div class="min-h-screen lg:grid lg:grid-cols-[280px_1fr]">
-      <aside class="border-b border-slate-300 bg-white p-5 lg:border-b-0 lg:border-r lg:p-6">
-        <div class="mb-8">
-          <p class="font-heading text-3xl font-semibold tracking-tight text-slate-900">PROCUREMENT</p>
-          <p class="font-heading text-3xl font-semibold tracking-tight text-slate-900">SIMULATOR</p>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{% block title %}Procurement Simulator{% endblock %}</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            heading: ["Sora", "sans-serif"],
+                            body: ["Manrope", "sans-serif"],
+                        },
+                        colors: {
+                            brand: {
+                                50: "#f5f8ff",
+                                100: "#e9efff",
+                                500: "#2f5dff",
+                                600: "#2348d2",
+                            },
+                        },
+                        boxShadow: {
+                            panel: "0 14px 40px -26px rgba(15, 23, 42, 0.35)",
+                        },
+                    },
+                },
+            };
+        </script>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap"
+            rel="stylesheet"
+        />
+        <script src="{{ url_for('static', filename='lots.js') }}"></script>
+    </head>
+    <body class="bg-slate-100 font-body text-slate-900 antialiased">
+        <div class="min-h-screen lg:grid lg:grid-cols-[280px_1fr]">
+            <aside
+                class="border-b border-slate-300 bg-white p-5 lg:border-b-0 lg:border-r lg:p-6"
+            >
+                <div class="mb-8">
+                    <p
+                        class="font-heading text-3xl font-semibold tracking-tight text-slate-900"
+                    >
+                        PROCUREMENT
+                    </p>
+                    <p
+                        class="font-heading text-3xl font-semibold tracking-tight text-slate-900"
+                    >
+                        SIMULATOR
+                    </p>
+                </div>
+
+                {% block sidebar_nav %}
+                <nav
+                    class="space-y-6 text-[1.7rem] leading-tight text-slate-800 sm:text-lg"
+                >
+                    <a
+                        href="{{ url_for('admin_views.admin_manage_groups') }}"
+                        class="block rounded-xl px-3 py-2 font-semibold {% if active_page == 'groups' %}bg-brand-100 text-brand-600{% else %}hover:bg-slate-100{% endif %}"
+                        >Groups</a
+                    >
+                    <a
+                        href="{{ url_for('admin_views.admin_manage_lots') }}"
+                        class="block rounded-xl px-3 py-2 font-semibold {% if active_page == 'lots' %}bg-brand-100 text-brand-600{% else %}hover:bg-slate-100{% endif %}"
+                        >Lots</a
+                    >
+                    <a
+                        href="{{ url_for('admin_views.admin_manage_rfps') }}"
+                        class="block rounded-xl px-3 py-2 font-semibold {% if active_page == 'rfps' %}bg-brand-100 text-brand-600{% else %}hover:bg-slate-100{% endif %}"
+                        >RFPs</a
+                    >
+                    <a
+                        href="{{ url_for('admin_views.admin_manage_bids') }}"
+                        class="block rounded-xl px-3 py-2 font-semibold {% if active_page == 'bids' %}bg-brand-100 text-brand-600{% else %}hover:bg-slate-100{% endif %}"
+                        >Bids</a
+                    >
+                    <a
+                        href="{{ url_for('admin_views.admin_manage_evaluations') }}"
+                        class="block rounded-xl px-3 py-2 font-semibold {% if active_page == 'evaluations' %}bg-brand-100 text-brand-600{% else %}hover:bg-slate-100{% endif %}"
+                        >Evaluations</a
+                    >
+                    <a
+                        href="{{ url_for('index_views.index_page') }}"
+                        class="block rounded-xl px-3 py-2 font-semibold {% if active_page == 'logout' %}bg-brand-100 text-brand-600{% else %}hover:bg-slate-100{% endif %}"
+                        >Logout</a
+                    >
+                </nav>
+                {% endblock %}
+            </aside>
+
+            <main>
+                <header
+                    class="border-b border-slate-300 bg-white/80 px-5 py-6 backdrop-blur lg:px-10"
+                >
+                    <h1
+                        class="font-heading text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl"
+                    >
+                        {{ title }}
+                    </h1>
+                </header>
+                <section class="px-5 py-8 lg:px-10">
+                    {% block content %}{% endblock %}
+                </section>
+            </main>
         </div>
-
-        {% block sidebar_nav %}
-<nav class="space-y-6 text-[1.7rem] leading-tight text-slate-800 sm:text-lg">
-  <a href="{{ url_for('admin_views.admin_manage_groups') }}" class="block rounded-xl px-3 py-2 font-semibold {% if active_page == 'groups' %}bg-brand-100 text-brand-600{% else %}hover:bg-slate-100{% endif %}">Groups</a>
-  <a href="{{ url_for('admin_lots_views.admin_manage_lots') }}" class="block rounded-xl px-3 py-2 font-semibold {% if active_page == 'lots' %}bg-brand-100 text-brand-600{% else %}hover:bg-slate-100{% endif %}">Lots</a>
-  <a href="{{ url_for('admin_views.admin_manage_rfps') }}" class="block rounded-xl px-3 py-2 font-semibold {% if active_page == 'rfps' %}bg-brand-100 text-brand-600{% else %}hover:bg-slate-100{% endif %}">RFPs</a>
-  <a href="{{ url_for('admin_views.admin_manage_bids') }}" class="block rounded-xl px-3 py-2 font-semibold {% if active_page == 'bids' %}bg-brand-100 text-brand-600{% else %}hover:bg-slate-100{% endif %}">Bids</a>
-  <a href="{{ url_for('admin_views.admin_manage_evaluations') }}" class="block rounded-xl px-3 py-2 font-semibold {% if active_page == 'evaluations' %}bg-brand-100 text-brand-600{% else %}hover:bg-slate-100{% endif %}">Evaluations</a>
-  <a href="{{ url_for('index_views.index_page') }}" class="block rounded-xl px-3 py-2 font-semibold {% if active_page == 'logout' %}bg-brand-100 text-brand-600{% else %}hover:bg-slate-100{% endif %}">Logout</a>
-</nav>
-{% endblock %}
-      </aside>
-
-      <main>
-        <header class="border-b border-slate-300 bg-white/80 px-5 py-6 backdrop-blur lg:px-10">
-          <h1 class="font-heading text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">{{ title }}</h1>
-        </header>
-        <section class="px-5 py-8 lg:px-10">
-          {% block content %}{% endblock %}
-        </section>
-      </main>
-    </div>
-  </body>
+    </body>
 </html>

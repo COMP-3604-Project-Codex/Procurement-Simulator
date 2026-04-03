@@ -4,7 +4,7 @@ class Lot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(10))
     labType = db.Column(db.String(30), nullable=False)
-    labSize = db.Column(db.Integer, nullable=False)
+    labSize = db.Column(db.String(1000), nullable=False)
     budget = db.Column(db.Float, nullable=False)
     deviceType = db.Column(db.String(1000), default="")
     resolution = db.Column(db.String(1000), default="")

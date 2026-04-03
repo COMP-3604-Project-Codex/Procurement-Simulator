@@ -3,7 +3,8 @@ from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, se
 from flask_admin import Admin
 from flask import flash, redirect, url_for, request, Blueprint, render_template
 from App.database import db
-from App.models import User
+from App.models import User, Lot
+from App.controllers import create_lot, get_lot, edit_lot, remove_lot
 
 class AdminView(ModelView):
     @jwt_required()
@@ -11,7 +12,6 @@ class AdminView(ModelView):
         return current_user is not None
 
     def inaccessible_callback(self, name, **kwargs):
-        # redirect to login page if user doesn't have access
         flash("Login to access admin")
         return redirect(url_for('index_page', next=request.url))
 
@@ -21,7 +21,23 @@ def setup_admin(app):
 
 admin_views = Blueprint('admin_views', __name__, template_folder='../templates/admin')
 
-# Dummy data for demonstration
+# ─── Dummy Data ───────────────────────────────────────────────────────────────
+
+LOTS = [
+    {
+        'id': 1,
+        'lab_type': 'GIS Lab',
+        'lab_size': 'Medium, capable of having 20 machines',
+        'budget': 160000
+    },
+    {
+        'id': 2,
+        'lab_type': 'Government Office Lab',
+        'lab_size': 'Small, capable of having 12 machines',
+        'budget': 110000
+    }
+]
+
 GROUPS = [
     {
         'id': 1,
@@ -92,40 +108,6 @@ GROUPS = [
     }
 ]
 
-# Admin Manage Bids (Groups) page
-@admin_views.route('/admin/manage-bids')
-def admin_manage_bids():
-    return render_template(
-        'admin/manage_bids.html',
-        bid_groups=GROUPS,
-        title='Manage Bids',
-        active_page='bids'
-    )
-
-# Admin Group Bids page (bids placed by a group)
-@admin_views.route('/admin/manage-bids/group/<int:group_id>')
-def admin_view_group_bids(group_id):
-    group = next((g for g in GROUPS if g['id'] == group_id), None)
-    if not group:
-        return redirect(url_for('admin_views.admin_manage_bids'))
-    return render_template(
-        'admin/group_bids.html',
-        group=group,
-        title=f"Bids Placed By G{group['id']} {group['name']}",
-        active_page='bids'
-    )
-
-# Dummy endpoints for bid document and remove (not implemented)
-@admin_views.route('/admin/manage-bids/group/<int:group_id>/bid/<int:bid_id>')
-def admin_view_bid_document(group_id, bid_id):
-    # Placeholder for bid document view
-    return f"Bid document for group {group_id}, bid {bid_id}"
-
-@admin_views.route('/admin/manage-bids/group/<int:group_id>/bid/<int:bid_id>/remove', methods=['POST'])
-def admin_remove_bid(group_id, bid_id):
-    # Placeholder for removing a bid
-    return redirect(url_for('admin_views.admin_view_group_bids', group_id=group_id))
-
 GROUP_REQUESTS = [
     {
         'id': 1,
@@ -156,13 +138,82 @@ GROUP_REQUESTS = [
     }
 ]
 
-LOTS = [2, 4, 5, 8]
+# ─── Helper Functions ─────────────────────────────────────────────────────────
+
+def get_lot_by_id(lot_id):
+    return next((lot for lot in LOTS if lot['id'] == lot_id), None)
+
+# ─── Lot Routes ───────────────────────────────────────────────────────────────
+
+@admin_views.route('/admin/lots', methods=['GET'])
+def admin_manage_lots():
+    lots = db.session.scalars(db.select(Lot)).all()
+    return render_template('admin/manage_lots.html', title='Manage Lots', lots=lots)
+
+@admin_views.route('/admin/lots/add', methods=['POST'])
+def admin_add_lot():
+    lab_type = request.form.get('lab_type')
+    lab_size = request.form.get('lab_size')
+    budget = request.form.get('budget')
+    
+    create_lot(lab_type, lab_size, budget)
+
+    return redirect(url_for('admin_views.admin_manage_lots'))
+
+@admin_views.route('/admin/lots/<int:lot_id>/edit', methods=['POST'])
+def admin_edit_lot(lot_id):
+    labType = request.form.get('lab_type')
+    labSize = request.form.get('lab_size')
+    budget = request.form.get('budget')
+    
+    edit_lot(lot_id, labType, labSize, budget)
+
+    return redirect(url_for('admin_views.admin_manage_lots'))
+
+@admin_views.route('/admin/lots/<int:lot_id>/remove', methods=['POST'])
+def admin_remove_lot(lot_id):
+    
+    remove_lot(lot_id)
+
+    return redirect(url_for('admin_views.admin_manage_lots'))
+
+# ─── Bid Routes ───────────────────────────────────────────────────────────────
+
+@admin_views.route('/admin/manage-bids')
+def admin_manage_bids():
+    return render_template(
+        'admin/manage_bids.html',
+        bid_groups=GROUPS,
+        title='Manage Bids',
+        active_page='bids'
+    )
+
+@admin_views.route('/admin/manage-bids/group/<int:group_id>')
+def admin_view_group_bids(group_id):
+    group = next((g for g in GROUPS if g['id'] == group_id), None)
+    if not group:
+        return redirect(url_for('admin_views.admin_manage_bids'))
+    return render_template(
+        'admin/group_bids.html',
+        group=group,
+        title=f"Bids Placed By G{group['id']} {group['name']}",
+        active_page='bids'
+    )
+
+@admin_views.route('/admin/manage-bids/group/<int:group_id>/bid/<int:bid_id>')
+def admin_view_bid_document(group_id, bid_id):
+    return f"Bid document for group {group_id}, bid {bid_id}"
+
+@admin_views.route('/admin/manage-bids/group/<int:group_id>/bid/<int:bid_id>/remove', methods=['POST'])
+def admin_remove_bid(group_id, bid_id):
+    return redirect(url_for('admin_views.admin_view_group_bids', group_id=group_id))
+
+# ─── Group Routes ─────────────────────────────────────────────────────────────
 
 @admin_views.route('/admin/groups/<int:group_id>/assign-lots', methods=['GET', 'POST'])
 def admin_assign_lots(group_id):
     group = next((g for g in GROUPS if g['id'] == group_id), None)
     if request.method == 'POST':
-        # Here you would update the group's lots in the database
         lot1 = request.form.get('lot1')
         lot2 = request.form.get('lot2')
         group['lots'] = [int(lot1), int(lot2)]
@@ -171,12 +222,10 @@ def admin_assign_lots(group_id):
 
 @admin_views.route('/admin/group-requests/<int:group_id>/approve', methods=['POST'])
 def admin_approve_group(group_id):
-    # Here you would approve the group request in the database
     return redirect(url_for('admin_views.admin_manage_groups'))
 
 @admin_views.route('/admin/group-requests/<int:group_id>/decline', methods=['POST'])
 def admin_decline_group(group_id):
-    # Here you would decline the group request in the database
     return redirect(url_for('admin_views.admin_manage_groups'))
 
 @admin_views.route('/admin/group-requests/<int:group_id>/approve-and-assign', methods=['POST'])
@@ -185,7 +234,6 @@ def admin_approve_and_assign_group(group_id):
     if request_item:
         lot1 = request.form.get('lot1')
         lot2 = request.form.get('lot2')
-        # Create new group
         new_group = {
             'id': len(GROUPS) + 1,
             'name': request_item['name'],
@@ -198,16 +246,16 @@ def admin_approve_and_assign_group(group_id):
 
 @admin_views.route('/admin/manage-groups')
 def admin_manage_groups():
-    return render_template('admin/manage_groups.html', 
-                         tab='requests', 
-                         title='Manage Groups', 
-                         group_requests=GROUP_REQUESTS, 
-                         groups=GROUPS, 
+    return render_template('admin/manage_groups.html',
+                         tab='requests',
+                         title='Manage Groups',
+                         group_requests=GROUP_REQUESTS,
+                         groups=GROUPS,
                          lots=LOTS,
                          active_page='groups')
 
+# ─── RFP Routes ───────────────────────────────────────────────────────────────
 
-# Unified RFP management page with tab switching and modal preview
 @admin_views.route('/admin/manage-rfps')
 def admin_manage_rfps():
     rfp_requests = [
@@ -221,7 +269,6 @@ def admin_manage_rfps():
         {'id': 2, 'name': 'G8 O(no)', 'timestamp': '11/6/2025, 12:06am'},
         {'id': 3, 'name': 'G1 NovaCore', 'timestamp': '11/5/2025, 10:44pm'}
     ]
-    # Dummy RFP details for modal preview (could be dynamic in real app)
     rfp_details = {
         'type': 'Workstation/Laptop/Tablet',
         'screen_size': 'Screen Size & Resolution',
@@ -238,10 +285,10 @@ def admin_manage_rfps():
         title='Manage RFPs',
         active_page='rfps')
 
-# --- Admin Manage Evaluations Page ---
+# ─── Evaluation Routes ────────────────────────────────────────────────────────
+
 @admin_views.route('/admin/manage-evaluations')
 def admin_manage_evaluations():
-    # Dummy data for demonstration, matching the UI
     evaluation_groups = [
         {"id": 1, "name": "NovaCore", "timestamp": "11/5/2025, 6:46pm"},
         {"id": 2, "name": "TechSphere", "timestamp": "11/5/2025, 6:46pm"},

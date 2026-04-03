@@ -43,22 +43,22 @@ class Workflow1IntegrationTests(unittest.TestCase):
     def test_creating_lots(self):
         db.drop_all()
         create_db()
-        create_lot("GIS Lab", 20, 160000.00)
-        create_lot("Government Office Lab", 12, 110000.00)
+        create_lot("GIS Lab", "Medium, capable of having 20 machines", 160000.00)
+        create_lot("Government Office Lab", "Medium, capable of having 20 machines", 110000.00)
         lots_json = get_all_lots_json()
         self.assertListEqual([
         {
             'id': 1,
             'name': "Lot 1",
             'labType': "GIS Lab",
-            'labSize': 20,
+            'labSize': "Medium, capable of having 20 machines",
             'budget': 160000.00
         },
         {
             'id': 2,
             'name': "Lot 2",
             'labType': "Government Office Lab",
-            'labSize': 12,
+            'labSize': "Medium, capable of having 20 machines",
             'budget': 110000.00
         }
         ], lots_json)
@@ -83,10 +83,10 @@ class Workflow2IntegrationTests(unittest.TestCase):
     @pytest.mark.run(order=39)
     def test_create_groupRequest(self):
         remove_lot(2)
-        create_lot("GIS Lab", 20, 160000.00)
-        create_lot("Government Office Lab", 12, 110000.00)
-        create_lot("University Computer Lab", 40, 250000.00)
-        create_lot("Data Center", 1000, 25000000.00)
+        create_lot("GIS Lab", "Medium, capable of having 20 machines", 160000.00)
+        create_lot("Government Office Lab", "Medium, capable of having 20 machines", 110000.00)
+        create_lot("University Computer Lab", "Medium, capable of having 20 machines", 250000.00)
+        create_lot("Data Center", "Medium, capable of having 20 machines", 25000000.00)
 
         create_student("jack", "jackpass")
         create_student("cooper", "cooperpass")

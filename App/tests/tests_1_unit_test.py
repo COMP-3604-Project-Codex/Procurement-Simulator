@@ -106,34 +106,34 @@ class StudentGroupUnitTests(unittest.TestCase):
 class LotUnitTests(unittest.TestCase):
     @pytest.mark.run(order=17)
     def test_new_lot(self):
-        lot = Lot("Biology", 30, 5000.00)
+        lot = Lot("Biology", "Medium, capable of having 20 machines", 5000.00)
         assert lot.labType == "Biology"
 
     @pytest.mark.run(order=18)
     def test_lot_lab_size(self):
-        lot = Lot("Biology", 30, 5000.00)
-        assert lot.labSize == 30
+        lot = Lot("Biology", "Medium, capable of having 20 machines", 5000.00)
+        assert lot.labSize == "Medium, capable of having 20 machines"
 
     @pytest.mark.run(order=19)
     def test_lot_budget(self):
-        lot = Lot("Biology", 30, 5000.00)
+        lot = Lot("Biology", "Medium, capable of having 20 machines", 5000.00)
         assert lot.budget == 5000.00
 
     @pytest.mark.run(order=20)
     def test_lot_get_json(self):
-        lot = Lot("Biology", 30, 5000.00)
+        lot = Lot("Biology", "Medium, capable of having 20 machines", 5000.00)
         lot_json = lot.get_json()
         self.assertDictEqual(lot_json, {
             "id": None,
             "name": None,
             "labType": "Biology",
-            "labSize": 30,
+            "labSize": "Medium, capable of having 20 machines",
             "budget": 5000.00
         })
 
     @pytest.mark.run(order=21)
     def test_lot_budget_comparison(self):
-        lot = Lot("Biology", 30, 5000.00)
+        lot = Lot("Biology", "Medium, capable of having 20 machines", 5000.00)
         assert 4999.99 < lot.budget
         assert 5000.01 > lot.budget
 
