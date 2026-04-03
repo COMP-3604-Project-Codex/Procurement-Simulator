@@ -15,7 +15,9 @@ def get_user(id):
     return db.session.get(User, id)
 
 def get_all_users():
-    return db.session.scalars(db.select(User)).all()
+    return db.session.scalars(
+        db.select(User)
+    ).all()
 
 def get_all_users_json():
     users = get_all_users()

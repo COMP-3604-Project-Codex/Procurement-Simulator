@@ -140,7 +140,11 @@ class Workflow2IntegrationTests(unittest.TestCase):
         duplicates = []
 
         for member in members:
-            existing = db.session.scalars(db.select(StudentGroup).filter_by(studentID = member)).first()
+            existing = db.session.scalars(
+                db.select(StudentGroup)
+                .filter_by(studentID = member)
+            ).first()
+
             if existing:
                 duplicates.append(member)
         
@@ -180,18 +184,6 @@ class Workflow3IntegrationTests(unittest.TestCase):
     @pytest.mark.run(order=42)
     def test_rejecting_a_group_request(self):
         groupID = 2
-
-        entries = db.session.scalars(db.select(StudentGroup).filter_by(groupID = groupID)).all()
-
-        for entry in entries:
-            removed = remove_studentGroup(entry.studentID, groupID)
-            assert removed
-
-        entries = db.session.scalars(db.select(LotGroup).filter_by(groupID = groupID)).all()
-
-        for entry in entries:
-            removed = remove_lotGroup(entry.lotID, groupID)
-            assert removed
 
         removed = remove_group(groupID)
         assert removed
@@ -310,7 +302,11 @@ class Workflow5IntegrationTests(unittest.TestCase):
         lotID = 1
         groupID = 1
 
-        rfp = db.session.scalars(db.select(RFP).filter_by(groupID=groupID, lotID=lotID)).first()
+        rfp = db.session.scalars(
+            db.select(RFP)
+            .filter_by(groupID=groupID, lotID=lotID)
+        ).first()
+        
         assert rfp
         assert rfp.status == "requested"
 

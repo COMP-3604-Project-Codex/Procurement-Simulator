@@ -46,7 +46,9 @@ def get_evaluation(id):
     return db.session.get(Evaluation, id)
 
 def get_all_evaluations():
-    return db.session.scalars(db.select(Evaluation)).all()
+    return db.session.scalars(
+        db.select(Evaluation)
+    ).all()
 
 def get_all_evaluations_json():
     evals = get_all_evaluations()

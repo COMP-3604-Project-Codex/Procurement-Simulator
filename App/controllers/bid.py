@@ -11,7 +11,9 @@ def get_bid(id):
     return db.session.get(Bid, id)
 
 def get_all_bids():
-    return db.session.scalars(db.select(Bid)).all()
+    return db.session.scalars(
+        db.select(Bid)
+    ).all()
 
 def get_all_bids_json():
     bids = get_all_bids()

@@ -30,7 +30,9 @@ def get_rfp(groupID, lotID):
     return db.session.get(RFP, (groupID, lotID))
 
 def get_all_rfps():
-    return db.session.scalars(db.select(RFP)).all()
+    return db.session.scalars(
+        db.select(RFP)
+    ).all()
 
 def get_all_rfps_json():
     rfps = get_all_rfps()

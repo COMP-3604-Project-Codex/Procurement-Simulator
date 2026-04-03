@@ -159,7 +159,10 @@ def get_lot_by_id(lot_id):
 @admin_views.route('/admin/lots', methods=['GET'])
 @admin_required
 def admin_manage_lots():
-    lots = db.session.scalars(db.select(Lot)).all()
+    lots = db.session.scalars(
+        db.select(Lot)
+    ).all()
+
     return render_template('admin/manage_lots.html', title='Manage Lots', lots=lots)
 
 @admin_views.route('/admin/lots/add', methods=['POST'])
@@ -229,16 +232,76 @@ def admin_remove_bid(group_id, bid_id):
 
 # ─── Group Routes ─────────────────────────────────────────────────────────────
 
-@admin_views.route('/admin/groups/<int:group_id>/assign-lots', methods=['GET', 'POST'])
+@admin_views.route('/admin/manage-groups')
+@admin_required
+def admin_manage_groups():
+
+    GROUPS = []
+    GROUP_REQUESTS = []
+
+    groups = db.session.scalars(
+        db.select(Group)
+    ).all()
+
+    for group in groups:
+        dic = {}
+        dic["id"] = group.id
+        dic["name"] = group.groupName
+
+        students = db.session.scalars(
+            db.select(Student)
+            .join(StudentGroup, Student.id == StudentGroup.studentID)
+            .filter(StudentGroup.groupID == group.id)
+        ).all()
+
+        members = []
+        for student in students:
+            member = {}
+            member["name"] = student.name
+            member["id"] = student.username
+            members.append(member)
+
+        dic["members"] = members
+
+        if group.status == "requested":
+            GROUP_REQUESTS.append(dic)
+        else:
+            entries = db.session.scalars(
+                db.select(LotGroup)
+                .filter_by(groupID=group.id)
+            ).all()
+
+            lots = []
+            for entry in entries:
+                lots.append(entry.lotID)
+
+            dic["lots"] = lots
+
+            GROUPS.append(dic)
+
+    LOTS = db.session.scalars(
+        db.select(Lot)
+    ).all()
+
+    return render_template('admin/manage_groups.html',
+                         tab='requests',
+                         title='Manage Groups',
+                         group_requests=GROUP_REQUESTS,
+                         groups=GROUPS,
+                         lots=LOTS,
+                         active_page='groups')
+
+
+@admin_views.route('/admin/groups/<int:group_id>/remove', methods=['POST'])
 @admin_required
 def admin_assign_lots(group_id):
-    group = next((g for g in GROUPS if g['id'] == group_id), None)
-    if request.method == 'POST':
-        lot1 = request.form.get('lot1')
-        lot2 = request.form.get('lot2')
-        group['lots'] = [int(lot1), int(lot2)]
-        return redirect(url_for('admin_views.admin_manage_groups'))
-    return render_template('admin/assign_lots_modal.html', group=group, lots=LOTS)
+    group = get_group(group_id)
+
+    if group:
+        removed = remove_group(group_id)
+        flash("Group Removed")
+
+    return redirect(url_for('admin_views.admin_manage_groups'))
 
 @admin_views.route('/admin/group-requests/<int:group_id>/approve', methods=['POST'])
 @admin_required
@@ -248,35 +311,71 @@ def admin_approve_group(group_id):
 @admin_views.route('/admin/group-requests/<int:group_id>/decline', methods=['POST'])
 @admin_required
 def admin_decline_group(group_id):
+    group = get_group(group_id)
+
+    if group:
+        removed = remove_group(group_id)
+        flash("Group Rejected")
+
     return redirect(url_for('admin_views.admin_manage_groups'))
 
 @admin_views.route('/admin/group-requests/<int:group_id>/approve-and-assign', methods=['POST'])
 @admin_required
 def admin_approve_and_assign_group(group_id):
-    request_item = next((r for r in GROUP_REQUESTS if r['id'] == group_id), None)
-    if request_item:
-        lot1 = request.form.get('lot1')
-        lot2 = request.form.get('lot2')
-        new_group = {
-            'id': len(GROUPS) + 1,
-            'name': request_item['name'],
-            'members': request_item['members'],
-            'lots': [int(lot1), int(lot2)]
-        }
-        GROUPS.append(new_group)
-        GROUP_REQUESTS.remove(request_item)
-    return redirect(url_for('admin_views.admin_manage_groups'))
+    group = get_group(group_id)
+    if group:
+        already_has_lots = db.session.scalars(
+            db.select(LotGroup)
+            .filter_by(groupID=group_id)
+        ).first()
 
-@admin_views.route('/admin/manage-groups')
-@admin_required
-def admin_manage_groups():
-    return render_template('admin/manage_groups.html',
-                         tab='requests',
-                         title='Manage Groups',
-                         group_requests=GROUP_REQUESTS,
-                         groups=GROUPS,
-                         lots=LOTS,
-                         active_page='groups')
+        if already_has_lots:
+            flash("Lots have already been assigned for this group")
+            return redirect(url_for('admin_views.admin_manage_groups'))
+
+        lot1ID = request.form.get('lot1')
+        lot2ID = request.form.get('lot2')
+
+        if lot1ID == lot2ID:
+            flash("Lot1 and Lot2 must be different lots")
+            return redirect(url_for('admin_views.admin_manage_groups'))
+        
+        lot1 = False
+        lot2 = False
+
+        lot_check = db.session.scalars(
+            db.select(LotGroup)
+            .filter_by(lotID=lot1ID)
+        ).first()
+
+        if lot_check:
+            lot1 = True
+
+        lot_check = db.session.scalars(
+            db.select(LotGroup)
+            .filter_by(lotID=lot2ID)
+        ).first()
+
+        if lot_check:
+            lot2 = True
+
+        if lot1 and lot2:
+            flash("Lot1 and Lot2 have already been assigned")
+            return redirect(url_for('admin_views.admin_manage_groups'))
+        elif lot1:
+            flash("Lot1 has already been assigned")
+            return redirect(url_for('admin_views.admin_manage_groups'))
+        elif lot2:
+            flash("Lot2 has already been assigned")
+            return redirect(url_for('admin_views.admin_manage_groups'))
+
+        add_lotGroup(lot1ID, group_id)
+        add_lotGroup(lot2ID, group_id)
+
+        approve_group(group_id)
+
+    flash("successfully approved group")
+    return redirect(url_for('admin_views.admin_manage_groups'))
 
 # ─── RFP Routes ───────────────────────────────────────────────────────────────
 

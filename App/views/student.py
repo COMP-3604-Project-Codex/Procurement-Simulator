@@ -109,7 +109,11 @@ def student_create_group_page():
         duplicates = []
 
         for member in members:
-            existing = db.session.scalars(db.select(StudentGroup).filter_by(studentID = member)).first()
+            existing = db.session.scalars(
+                db.select(StudentGroup)
+                .filter_by(studentID = member)
+            ).first()
+
             if existing:
                 duplicates.append(member)
             
@@ -122,7 +126,11 @@ def student_create_group_page():
                     you = True
                     continue
 
-                student = db.session.scalars(db.select(Student).filter_by(id=ID)).first()
+                student = db.session.scalars(
+                    db.select(Student)
+                    .filter_by(id=ID)
+                ).first()
+
                 if student:
                     students.append(student)
             
@@ -173,7 +181,9 @@ def student_create_group_page():
         flash(f"Group '{name}' created successfully!")
         return redirect(url_for('student_views.student_group_details_page'))
     
-    students = db.session.scalars(db.select(Student)).all()
+    students = db.session.scalars(
+        db.select(Student)
+    ).all()
 
     candidates = []
 
@@ -215,13 +225,11 @@ def student_group_details_page():
     else:
         status = "Confirmed"
 
-    entries = db.session.scalars(db.select(StudentGroup).filter_by(groupID=current_group.id)).all()
-    
-    members = []
-
-    for entry in entries:
-        member = db.session.scalars(db.select(Student).filter_by(id=entry.studentID)).first()
-        members.append(member)
+    members = db.session.scalars(
+        db.select(Student)
+        .join(StudentGroup, Student.id == StudentGroup.studentID)
+        .filter(StudentGroup.groupID == current_group.id)
+    ).all()
 
     return render_template(
         'student/group_details.html',

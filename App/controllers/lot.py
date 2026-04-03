@@ -13,7 +13,9 @@ def get_lot(id):
     return db.session.get(Lot, id)
 
 def get_all_lots():
-    return db.session.scalars(db.select(Lot)).all()
+    return db.session.scalars(
+        db.select(Lot)
+    ).all()
 
 def get_all_lots_json():
     lots = get_all_lots()

@@ -24,7 +24,9 @@ def get_group(id):
     return db.session.get(Group, id)
 
 def get_all_groups():
-    return db.session.scalars(db.select(Group)).all()
+    return db.session.scalars(
+        db.select(Group)
+    ).all()
 
 def get_all_groups_json():
     groups = get_all_groups()
@@ -36,27 +38,42 @@ def get_all_groups_json():
 def remove_group(id):
     group = get_group(id)
     if group:
-        entries = db.session.scalars(db.select(Bid).filter(or_(Bid.sourceGroupID == id, Bid.receipientGroupID == id))).all()
+        entries = db.session.scalars(
+            db.select(Bid)
+            .filter(or_(Bid.sourceGroupID == id, Bid.receipientGroupID == id))
+        ).all()
 
         for entry in entries:
             removed = remove_bid(entry.id)
 
-        entries = db.session.scalars(db.select(Evaluation).filter(or_(Evaluation.sourceGroupID == id, Evaluation.receipientGroupID == id))).all()
+        entries = db.session.scalars(
+            db.select(Evaluation)
+            .filter(or_(Evaluation.sourceGroupID == id, Evaluation.receipientGroupID == id))
+        ).all()
 
         for entry in entries:
             removed = remove_evaluation(entry.id)
 
-        entries = db.session.scalars(db.select(RFP).filter_by(groupID = id)).all()
+        entries = db.session.scalars(
+            db.select(RFP)
+            .filter_by(groupID = id)
+        ).all()
 
         for entry in entries:
             removed = remove_rfp(id, entry.lotID)
 
-        entries = db.session.scalars(db.select(StudentGroup).filter_by(groupID = id)).all()
+        entries = db.session.scalars(
+            db.select(StudentGroup)
+            .filter_by(groupID = id)
+        ).all()
 
         for entry in entries:
             removed = remove_studentGroup(entry.studentID, id)
 
-        entries = db.session.scalars(db.select(LotGroup).filter_by(groupID = id)).all()
+        entries = db.session.scalars(
+            db.select(LotGroup)
+            .filter_by(groupID = id)
+        ).all()
 
         for entry in entries:
             removed = remove_lotGroup(entry.lotID, id)

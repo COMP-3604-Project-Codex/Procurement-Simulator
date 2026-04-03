@@ -10,7 +10,9 @@ def get_lotGroup(lotID, groupID):
     return db.session.get(LotGroup, (lotID, groupID))
 
 def get_all_lotGroups():
-    return db.session.scalars(db.select(LotGroup)).all()
+    return db.session.scalars(
+        db.select(LotGroup)
+    ).all()
 
 def get_all_lotGroups_json():
     entries = get_all_lotGroups()
