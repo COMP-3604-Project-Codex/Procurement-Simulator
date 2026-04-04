@@ -41,25 +41,25 @@ def edit_lot(id, labType=None, labSize=None, budget=None):
 def edit_lotRFP_details(id, deviceType=None, resolution=None, os=None, cpu=None, ram=None, drive=None, gpu=None, peripherals=None, features=None, io=None):
     lot = get_lot(id)
     if lot:
-        if deviceType:
+        if deviceType is not None:
             lot.deviceType = deviceType
-        if resolution:
+        if resolution is not None:
             lot.resolution = resolution
-        if os:
+        if os is not None:
             lot.os = os
-        if cpu:
+        if cpu is not None:
             lot.cpu = cpu
-        if ram:
+        if ram is not None:
             lot.ram = ram
-        if drive:
+        if drive is not None:
             lot.drive = drive
-        if gpu:
+        if gpu is not None:
             lot.gpu = gpu
-        if peripherals:
+        if peripherals is not None:
             lot.peripherals = peripherals
-        if features:
+        if features is not None:
             lot.features = features
-        if io:
+        if io is not None:
             lot.io = io
 
         db.session.commit()

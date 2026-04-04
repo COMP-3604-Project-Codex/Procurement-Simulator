@@ -250,48 +250,92 @@ def student_lots_page():
         lot_id = request.form.get('lot_id')
         
         # Capture data from form
-        rfp_data = {
-            'lot_id': lot_id,
-            'screen': request.form.get('screen'),
-            'os': request.form.get('os'),
-            'cpu': request.form.get('cpu'),
-            'ram': request.form.get('ram'),
-            'storage': request.form.get('storage'),
-            'graphics': request.form.get('graphics'),
-            'peripherals': request.form.get('peripherals'),
-            'features': request.form.get('features'),
-            'io': request.form.get('io'),
-            'status': 'Submitted' if action == 'submit' else 'Draft'
-        }
-        
-        #  Update if exists, else Append
-        existing_index = next((i for i, r in enumerate(STUDENT_RFPS) if r['lot_id'] == lot_id), None)
-        
-        if existing_index is not None:
-            STUDENT_RFPS[existing_index] = rfp_data
-        else:
-            STUDENT_RFPS.append(rfp_data)
+        deviceType = request.form.get('deviceType')
+        resolution = request.form.get('screen')
+        os = request.form.get('os')
+        cpu = request.form.get('cpu')
+        ram = request.form.get('ram')
+        drive = request.form.get('storage')
+        gpu = request.form.get('graphics')
+        peripherals = request.form.get('peripherals')
+        features = request.form.get('features')
+        io = request.form.get('io')
+
+        lot = edit_lotRFP_details(
+            id=lot_id,
+            deviceType=deviceType,
+            resolution=resolution,
+            os=os,
+            cpu=cpu,
+            ram=ram,
+            drive=drive,
+            gpu=gpu,
+            peripherals=peripherals,
+            features=features,
+            io=io
+        )
         
         #  Success Message
         if action == 'submit':
-            flash(f"RFP for Lot {lot_id} has been submitted!", "success")
+            entry = db.session.scalars(
+                db.select(LotGroup)
+                .filter_by(lotID=lot_id)
+            ).first()
+
+            rfp = get_rfp(entry.groupID, lot_id)
+
+            if not rfp:
+                rfp = create_rfp(entry.groupID, lot_id)
+                flash(f"RFP for Lot {lot_id} has been submitted!", "success")
+            else:
+                if rfp.status == "requested":
+                    remove = remove_rfp(entry.groupID, lot_id)
+                    val = create_rfp(entry.groupID, lot_id)
+                    flash(f"RFP for Lot {lot_id} has been edited!", "success")
+                else:
+                    flash(f"RFP for Lot {lot_id} has already been approved and therefore cannot be changed further", "info")
         else:
             flash(f"Draft for Lot {lot_id} saved successfully.", "info")
             
         return redirect(url_for('student_views.student_lots_page', selected_lot=lot_id))
 
-    # GET req info
-    selected_lot_id = request.args.get('selected_lot', '1')
-    current_lot = next((l for l in ASSIGNED_LOTS if str(l['id']) == selected_lot_id), ASSIGNED_LOTS[0])
-    
-    # Looks for existing rfp
-    existing_rfp = next((r for r in STUDENT_RFPS if r['lot_id'] == selected_lot_id), None)
+    entry = db.session.scalars(
+        db.select(StudentGroup)
+        .filter_by(studentID=current_user.id)
+    ).first()
+
+    entry.groupID
+
+    entries = db.session.scalars(
+        db.select(LotGroup)
+        .filter_by(groupID=entry.groupID)
+    ).all()
+
+    lotIDs = []
+    for entry in entries:
+        lotIDs.append(entry.lotID)
+
+    lotIDs.sort()
+
+    selected_lot_id = request.args.get('selected_lot', str(lotIDs[0]))
+
+    lots = db.session.scalars(
+        db.select(Lot)
+        .where(Lot.id.in_(lotIDs))
+    ).all()
+
+    current_lot = next((lot for lot in lots if lot.id == int(selected_lot_id)), lots[0])
+
+    existing_rfp = db.session.scalars(
+        db.select(RFP)
+        .filter_by(lotID=int(selected_lot_id))
+    ).first()
 
     return render_template(
         'student/client_lots.html', 
         active_page='lots',
         title='Assigned Lots & RFPs',
-        lots=ASSIGNED_LOTS,
+        lots=lots,
         current_lot=current_lot,
         existing_rfp=existing_rfp
     )
