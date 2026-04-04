@@ -8,9 +8,6 @@
             <button type="button" onclick="window.location.href='?selected_lot={{ lot.id }}'"
                     class="px-6 py-3 font-heading font-bold transition-all border-b-4 {% if request.args.get('selected_lot', '1') == lot.id|string %} border-brand-500 text-brand-600 {% else %} border-transparent text-slate-500 hover:text-slate-800 {% endif %}">
                 LOT {{ lot.id }}
-                {% if existing_rfp and existing_rfp.status == 'approved' %}
-                    <span class="ml-2 text-xs text-emerald-500">✓</span>
-                {% endif %}
             </button>
             {% endfor %}
         </div>

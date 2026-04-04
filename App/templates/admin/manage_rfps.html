@@ -13,10 +13,25 @@
       <h3 class="text-lg font-semibold">{{ rfp.name }}</h3>
       <p class="text-sm text-gray-500">TimeStamp: {{ rfp.timestamp }}</p>
       <div class="mt-4 flex justify-between">
-        <button class="px-4 py-2 bg-blue-500 text-white rounded" onclick="showRfpPreviewModal({{ rfp.id }})">Preview RFP</button>
-        <form method="post" action="#">
-          <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded">Approve</button>
-          <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded">Reject</button>
+        <button class="px-4 py-2 bg-blue-500 text-white rounded" onclick="showRfpPreviewModal(this)"
+          data-lot="{{ rfp.Lot }}"
+          data-devicetype="{{ rfp.deviceType }}"
+          data-resolution="{{ rfp.resolution }}"
+          data-os="{{ rfp.os }}"
+          data-cpu="{{ rfp.cpu }}"
+          data-ram="{{ rfp.ram }}"
+          data-drive="{{ rfp.drive }}"
+          data-gpu="{{ rfp.gpu }}"
+          data-peripherals="{{ rfp.peripherals }}"
+          data-features="{{ rfp.features }}"
+          data-io="{{ rfp.io }}">
+          Preview RFP
+        </button>
+        <form method="post" action="{{ url_for('admin_views.admin_manage_rfps') }}">
+          <input type="hidden" name="groupID" value="{{ rfp.groupID }}">
+          <input type="hidden" name="lotID" value="{{ rfp.lotID }}">
+          <button type="submit" name="action" value="approve" class="px-4 py-2 bg-green-500 text-white rounded">Approve</button>
+          <button type="submit" name="action" value="reject" class="px-4 py-2 bg-red-500 text-white rounded">Reject</button>
         </form>
       </div>
     </div>
@@ -28,9 +43,24 @@
       <h3 class="text-lg font-semibold">{{ rfp.name }}</h3>
       <p class="text-sm text-gray-500">TimeStamp: {{ rfp.timestamp }}</p>
       <div class="mt-4 flex justify-between">
-        <button class="px-4 py-2 bg-blue-500 text-white rounded" onclick="showRfpPreviewModal({{ rfp.id }})">Preview</button>
-        <form method="post" action="#">
-          <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded">Remove</button>
+        <button class="px-4 py-2 bg-blue-500 text-white rounded" onclick="showRfpPreviewModal(this)"
+          data-lot="{{ rfp.Lot }}"
+          data-devicetype="{{ rfp.deviceType }}"
+          data-resolution="{{ rfp.resolution }}"
+          data-os="{{ rfp.os }}"
+          data-cpu="{{ rfp.cpu }}"
+          data-ram="{{ rfp.ram }}"
+          data-drive="{{ rfp.drive }}"
+          data-gpu="{{ rfp.gpu }}"
+          data-peripherals="{{ rfp.peripherals }}"
+          data-features="{{ rfp.features }}"
+          data-io="{{ rfp.io }}">
+          Preview
+        </button>
+        <form method="post" action="{{ url_for('admin_views.admin_manage_rfps') }}">
+          <input type="hidden" name="groupID" value="{{ rfp.groupID }}">
+          <input type="hidden" name="lotID" value="{{ rfp.lotID }}">
+          <button type="submit" name="action" value="remove" class="px-4 py-2 bg-red-500 text-white rounded">Remove</button>
         </form>
       </div>
     </div>
@@ -45,13 +75,17 @@
       <button class="text-gray-500 hover:text-gray-700" onclick="hideRfpPreviewModal()">&times;</button>
     </div>
     <div class="mt-4 space-y-4">
-      <p><strong>Type:</strong> {{ rfp_details.type }}</p>
-      <p><strong>Screen Size & Resolution:</strong> {{ rfp_details.screen_size }}</p>
-      <p><strong>Operating System(s):</strong> {{ rfp_details.os }}</p>
-      <p><strong>CPU:</strong> {{ rfp_details.cpu }}</p>
-      <p><strong>Memory (RAM):</strong> {{ rfp_details.memory }}</p>
-      <p><strong>Hard Drive:</strong> {{ rfp_details.hard_drive }}</p>
-      <p><strong>Graphics:</strong> {{ rfp_details.graphics }}</p>
+      <p><strong>Lot:</strong> <span id="modal-lot"></span></p>
+      <p><strong>Type:</strong> <span id="modal-type"></span></p>
+      <p><strong>Screen Size & Resolution:</strong> <span id="modal-screen"></span></p>
+      <p><strong>Operating System(s):</strong> <span id="modal-os"></span></p>
+      <p><strong>CPU:</strong> <span id="modal-cpu"></span></p>
+      <p><strong>Memory (RAM):</strong> <span id="modal-ram"></span></p>
+      <p><strong>Hard Drive:</strong> <span id="modal-drive"></span></p>
+      <p><strong>Graphics:</strong> <span id="modal-gpu"></span></p>
+      <p><strong>I/O Ports:</strong> <span id="modal-io"></span></p>
+      <p><strong>Peripherals:</strong> <span id="modal-peripherals"></span></p>
+      <p><strong>Special Features:</strong> <span id="modal-features"></span></p>
     </div>
     <div class="mt-6 text-right">
       <button class="px-4 py-2 bg-gray-300 text-gray-700 rounded" onclick="hideRfpPreviewModal()">Close</button>
@@ -71,10 +105,22 @@ function showRfpTab(tab) {
   document.getElementById('tab-gallery').classList.toggle('border-transparent', tab !== 'gallery');
   document.getElementById('tab-gallery').classList.toggle('text-slate-700', tab !== 'gallery');
 }
-function showRfpPreviewModal(rfpId) {
-  // In a real app, fetch RFP details by rfpId via AJAX and update modal content
+
+function showRfpPreviewModal(btn) {
+  document.getElementById('modal-lot').textContent        = btn.dataset.lot;
+  document.getElementById('modal-type').textContent       = btn.dataset.devicetype;
+  document.getElementById('modal-screen').textContent     = btn.dataset.resolution;
+  document.getElementById('modal-os').textContent         = btn.dataset.os;
+  document.getElementById('modal-cpu').textContent        = btn.dataset.cpu;
+  document.getElementById('modal-ram').textContent        = btn.dataset.ram;
+  document.getElementById('modal-drive').textContent      = btn.dataset.drive;
+  document.getElementById('modal-gpu').textContent        = btn.dataset.gpu;
+  document.getElementById('modal-peripherals').textContent = btn.dataset.peripherals;
+  document.getElementById('modal-features').textContent   = btn.dataset.features;
+  document.getElementById('modal-io').textContent         = btn.dataset.io;
   document.getElementById('rfpPreviewModal').classList.remove('hidden');
 }
+
 function hideRfpPreviewModal() {
   document.getElementById('rfpPreviewModal').classList.add('hidden');
 }

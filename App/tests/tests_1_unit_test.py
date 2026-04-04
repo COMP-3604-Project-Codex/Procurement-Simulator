@@ -200,7 +200,7 @@ class BidUnitTests(unittest.TestCase):
     @pytest.mark.run(order=29)
     def test_bid_timestamp_is_recent(self):
         bid = Bid(1, 2, 3, "http://example.com/doc")
-        delta = datetime.utcnow() - bid.timestamp
+        delta = datetime.now() - bid.timestamp
         assert delta.seconds < 5
 
     @pytest.mark.run(order=30)

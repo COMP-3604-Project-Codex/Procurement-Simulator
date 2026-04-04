@@ -379,35 +379,111 @@ def admin_approve_and_assign_group(group_id):
 
 # ─── RFP Routes ───────────────────────────────────────────────────────────────
 
-@admin_views.route('/admin/manage-rfps')
+@admin_views.route('/admin/manage-rfps', methods=['GET', 'POST'])
 @admin_required
 def admin_manage_rfps():
-    rfp_requests = [
-        {'id': 1, 'name': 'G5 JRS Technologies', 'timestamp': '11/5/2025, 11:32pm'},
-        {'id': 2, 'name': 'G5 JRS Technologies', 'timestamp': '11/5/2025, 11:32pm'},
-        {'id': 3, 'name': 'G5 JRS Technologies', 'timestamp': '11/5/2025, 11:32pm'},
-        {'id': 4, 'name': 'G5 JRS Technologies', 'timestamp': '11/5/2025, 11:32pm'}
-    ]
-    rfp_gallery = [
-        {'id': 1, 'name': 'G7 ANK Productions', 'timestamp': '11/5/2025, 6:46pm'},
-        {'id': 2, 'name': 'G8 O(no)', 'timestamp': '11/6/2025, 12:06am'},
-        {'id': 3, 'name': 'G1 NovaCore', 'timestamp': '11/5/2025, 10:44pm'}
-    ]
-    rfp_details = {
-        'type': 'Workstation/Laptop/Tablet',
-        'screen_size': 'Screen Size & Resolution',
-        'os': 'Mac/Windows/Android/IOS/Linux/Chromium',
-        'cpu': 'Core and frequency range eg (quad-core @ 2.2 - 3.0 GHz)',
-        'memory': 'DDR4/DDR5, 8-16GB',
-        'hard_drive': 'HDD/SSD, 512GB to 1TB',
-        'graphics': 'Integrated/Dedicated',
-    }
+    if request.method == 'POST':
+        action = request.form.get('action')
+        lotID = request.form.get('lotID')
+        groupID = request.form.get('groupID')
+
+        if action == "approve":
+            approve_rfp(groupID, lotID)
+            flash(f'RFP for Lot {lotID} approved successfully')
+
+        elif action == "reject":
+            removed = remove_rfp(groupID, lotID)
+            flash(f'RFP for Lot {lotID} rejected successfully')
+
+        elif action == "remove":
+            removed = remove_rfp(groupID, lotID)
+            flash(f'RFP for Lot {lotID} removed successfully')
+
+        return redirect(url_for('admin_views.admin_manage_rfps'))
+
+    rfp_requests = db.session.scalars(
+        db.select(RFP)
+        .filter_by(status="requested")
+    ).all()
+    
+    rfp_gallery = db.session.scalars(
+        db.select(RFP)
+        .filter_by(status="approved")
+    ).all()
+
+    rfp_requests_json = []
+    rfp_gallery_json = []
+
+    for entry in rfp_requests:
+        data = {}
+        
+        data["groupID"] = entry.groupID
+        data["lotID"] = entry.lotID
+
+        group = db.session.scalars(
+            db.select(Group)
+            .filter_by(id=entry.groupID)
+        ).first()
+
+        lot = db.session.scalars(
+            db.select(Lot)
+            .filter_by(id=entry.lotID)
+        ).first()
+
+        data["name"] = group.groupName
+        data["Lot"] = lot.labType
+        data["timestamp"] = entry.timestamp.strftime('%#m/%#d/%Y, %#I:%M%p').lower()
+        data["deviceType"] = entry.deviceType
+        data["resolution"] = entry.resolution
+        data["os"] = entry.os
+        data["cpu"] = entry.cpu
+        data["ram"] = entry.ram
+        data["drive"] = entry.drive
+        data["gpu"] = entry.gpu
+        data["io"] = entry.io
+        data["peripherals"] = entry.peripherals
+        data["features"] = entry.features
+
+        rfp_requests_json.append(data)
+
+    for entry in rfp_gallery:
+        data = {}
+        
+        data["groupID"] = entry.groupID
+        data["lotID"] = entry.lotID
+
+        group = db.session.scalars(
+            db.select(Group)
+            .filter_by(id=entry.groupID)
+        ).first()
+
+        lot = db.session.scalars(
+            db.select(Lot)
+            .filter_by(id=entry.lotID)
+        ).first()
+
+        data["name"] = group.groupName
+        data["Lot"] = lot.labType
+        data["timestamp"] = entry.timestamp.strftime('%#m/%#d/%Y, %#I:%M%p').lower()
+        data["deviceType"] = entry.deviceType
+        data["resolution"] = entry.resolution
+        data["os"] = entry.os
+        data["cpu"] = entry.cpu
+        data["ram"] = entry.ram
+        data["drive"] = entry.drive
+        data["gpu"] = entry.gpu
+        data["io"] = entry.io
+        data["peripherals"] = entry.peripherals
+        data["features"] = entry.features
+
+        rfp_gallery_json.append(data)
+
     return render_template('admin/manage_rfps.html',
-        rfp_requests=rfp_requests,
-        rfp_gallery=rfp_gallery,
-        rfp_details=rfp_details,
+        rfp_requests=rfp_requests_json,
+        rfp_gallery=rfp_gallery_json,
         title='Manage RFPs',
         active_page='rfps')
+
 
 # ─── Evaluation Routes ────────────────────────────────────────────────────────
 

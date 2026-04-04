@@ -1,4 +1,5 @@
 from App.database import db
+from datetime import datetime
 
 class Evaluation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -8,6 +9,7 @@ class Evaluation(db.Model):
     lotID = db.Column(db.Integer, db.ForeignKey('lot.id'), nullable=False)
     status = db.Column(db.String(30), default="draft")
     overallScore = db.Column(db.Float, default=0.0)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now)
     deviceType = db.Column(db.String(1000), default="")
     resolution = db.Column(db.String(1000), default="")
     os = db.Column(db.String(1000), default="")
@@ -25,6 +27,7 @@ class Evaluation(db.Model):
         self.sourceGroupID = sourceGroupID
         self.receipientGroupID = receipientGroupID
         self.overallScore = round((((specsMet + presentation + professionalism + budget)/25) * 10), 1)
+        self.timestamp = datetime.now()
 
     def get_json(self):
         return {
