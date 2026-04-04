@@ -12,7 +12,7 @@ def student_required(f):
     @jwt_required()
     def decorated_function(*args, **kwargs):
         if not current_user.is_student():
-            flash("You are logged in as an admin and therefore cannot access student page")
+            flash("You are logged in as an admin and therefore cannot access student page", "failed")
             return redirect(url_for('index_views.index_page'))
         return f(*args, **kwargs)
     return decorated_function
@@ -23,13 +23,13 @@ def group_status_check(f):
         exists = check_studentGroup(current_user.id)
     
         if not exists:
-            flash("You either have not created a group yet or your group has been reject or removed, create a new one")
+            flash("You either have not created a group yet or your group has been reject or removed, create a new one", "info")
             return redirect(url_for('student_views.student_create_group_page'))
         
         group = get_group(exists.groupID)
 
         if group.status == "requested":
-            flash("Your group has not been approved yet")
+            flash("Your group has not been approved yet", "info")
             return redirect(request.referrer)
         
         return f(*args, **kwargs)
@@ -97,7 +97,7 @@ def student_create_group_page():
     exists = check_studentGroup(current_user.id)
     
     if exists:
-        flash ("You are already in a group")
+        flash ("You are already in a group", "failed")
         return redirect(request.referrer)
 
     if request.method == 'POST':
@@ -141,19 +141,19 @@ def student_create_group_page():
                     strings.append(string)
 
                 if not strings:
-                    flash("You are already in a group")
+                    flash("You are already in a group", "failed")
                     return redirect(url_for('student_views.student_group_details_page'))
 
                 if len(strings) >= 2:
                     strings[-2] = f"{students[-2].name} and "
                     strings[-1] = f"{students[-1].name}"
 
-                    flash(f"You are already in a group and {''.join(strings)} are already in groups")
+                    flash(f"You are already in a group and {''.join(strings)} are already in groups", "failed")
                     return redirect(url_for('student_views.student_group_details_page'))
                 else:
                     strings[0] = f"{students[0].name}"
 
-                    flash(f"You are already in a group and {''.join(strings)} is already in a group")
+                    flash(f"You are already in a group and {''.join(strings)} is already in a group", "failed")
                     return redirect(url_for('student_views.student_group_details_page'))
             else:
                 strings = []
@@ -165,12 +165,12 @@ def student_create_group_page():
                     strings[-2] = f"{students[-2].name} and "
                     strings[-1] = f"{students[-1].name}"
 
-                    flash(f"{''.join(strings)} are already in groups")
+                    flash(f"{''.join(strings)} are already in groups", "failed")
                     return redirect(url_for('student_views.student_group_details_page'))
                 else:
                     strings[0] = f"{students[0].name}"
 
-                    flash(f"{''.join(strings)} is already in a group")
+                    flash(f"{''.join(strings)} is already in a group", "failed")
                     return redirect(url_for('student_views.student_group_details_page'))
 
         group = create_group(name)
@@ -178,7 +178,7 @@ def student_create_group_page():
         for member in members:
             add_studentGroup(member, group.id)
         
-        flash(f"Group '{name}' created successfully!")
+        flash(f"Group '{name}' created successfully!", "success")
         return redirect(url_for('student_views.student_group_details_page'))
     
     students = db.session.scalars(
@@ -213,7 +213,7 @@ def student_group_details_page():
     exists = check_studentGroup(current_user.id)
     
     if not exists:
-        flash("You either have not created a group yet or your group has been reject or removed, create a new one")
+        flash("You either have not created a group yet or your group has been reject or removed, create a new one", "info")
         return redirect(url_for('student_views.student_create_group_page'))
 
     exists.groupID
@@ -387,7 +387,7 @@ def student_bid_details_page(bid_id):
 
     if request.method == 'POST':
         # Logic for saving comments to go here
-        flash("Comment saved for review.")
+        flash("Comment saved for review.", "success")
         return redirect(url_for('student_views.student_bid_details_page', bid_id=bid_id))
 
     return render_template(
@@ -435,37 +435,103 @@ def student_client_evaluation_page():
 
 #Student view as vendor
 
-@student_views.route('/student/rfp-gallery', methods=['GET'])
+@student_views.route('/student/rfp-gallery', methods=['GET', 'POST'])
 @student_required
 @group_status_check
 def rfp_gallery_page():
+    if request.method == "POST":
+        pdf = request.files['pdf']
+        receipientGroupID = int(request.form.get("groupID"))
+        sourceGroupID = int(request.form.get("sourceGroupID"))
+        lotID = int(request.form.get("lotID"))
 
-    # rfps available
-    
-    available_rfps = [
-        {
-            'id': 'RFP-001',
-            'title': 'GIS Lab Workstations',
-            'client': 'Group 3 Tech Titans',
-            'deadline': '2026-04-15',
-            'status': 'Open',
-            'description': 'One large GIS Lab with 60 workstations'
-        },
-        {
-            'id': 'RFP-002',
-            'title': 'Cyber Cafe',
-            'client': 'Group 2 Cyber Shield',
-            'deadline': '2026-04-20',
-            'status': 'Open',
-            'description': 'One small Cyber Cafe with 20 workstations.'
-        }
-    ]
+        entries = db.session.scalars(
+            db.select(LotGroup)
+            .filter_by(groupID=sourceGroupID)
+        ).all()
+
+        yourLots = []
+
+        for entry in entries:
+            yourLots.append(entry.lotID)
+
+        lot = db.session.scalars(
+            db.select(Lot)
+            .filter_by(id=lotID)
+        ).first()
+
+        if lotID in yourLots:
+            flash(f"{lotID} ({lot.labType}) is assigned to your group, you cannot place a bid on your own lot", "failed")
+            return redirect(url_for('student_views.rfp_gallery_page'))
+        
+        duplicate = db.session.scalars(
+            db.select(Bid)
+            .filter_by(lotID=lotID)
+        ).first()
+
+        if duplicate:
+            flash(f"You have already placed a bid on Lot {lotID} ({lot.labType}), you can only place 1 bid on each lot", "failed")
+            return redirect(url_for('student_views.rfp_gallery_page'))
+
+        bid = create_bid(lotID, sourceGroupID, receipientGroupID, pdf.read(), pdf.filename)
+        flash(f"Bid successfully placed on Lot {lotID} ({lot.labType})", "success")
+        return redirect(url_for('student_views.rfp_gallery_page'))
+
+    entry = db.session.scalars(
+        db.select(StudentGroup)
+        .filter_by(studentID=current_user.id)
+    ).first()
+
+    sourceGroupID = entry.groupID
+
+    rfp_gallery = db.session.scalars(
+        db.select(RFP)
+        .filter_by(status="approved")
+    ).all()
+
+    available_rfps = []
+
+    for rfp in rfp_gallery:
+        data = {}
+
+        data["groupID"] = rfp.groupID
+        data["lotID"] = rfp.lotID
+
+        lot = db.session.scalars(
+            db.select(Lot)
+            .filter_by(id=rfp.lotID)
+        ).first()
+
+        data["title"] = lot.labType
+
+        group = db.session.scalars(
+            db.select(Group)
+            .filter_by(id=rfp.groupID)
+        ).first()
+
+        data["client"] = group.groupName
+        data["timestamp"] = rfp.timestamp.strftime('%#m/%#d/%Y, %#I:%M%p').lower()
+        data["status"] = rfp.status 
+        data["description"] = lot.labSize
+        data["deviceType"] = rfp.deviceType
+        data["resolution"] = rfp.resolution
+        data["os"] = rfp.os
+        data["cpu"] = rfp.cpu
+        data["ram"] = rfp.ram
+        data["drive"] = rfp.drive
+        data["gpu"] = rfp.gpu
+        data["io"] = rfp.io
+        data["peripherals"] = rfp.peripherals
+        data["features"] = rfp.features
+
+        available_rfps.append(data)
 
     return render_template(
         'student/vendor_rfp_gallery.html',
         # title='View RFPs',
         active_page='rfp-gallery',
-        rfps=available_rfps
+        rfps=available_rfps,
+        sourceGroupID=sourceGroupID
     )
 
 

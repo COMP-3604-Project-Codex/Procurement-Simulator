@@ -90,9 +90,17 @@
           {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
               {% for category, message in messages %}
-                <div class="mb-6 p-4 rounded-xl border bg-emerald-50 border-emerald-200 text-emerald-800 shadow-sm flex justify-between items-center">
-                  <span>{{ message }}</span>
-                  <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700">✕</button>
+                <div class="mb-6 p-4 rounded-xl border shadow-sm flex justify-between items-center
+                    {% if category == 'success' %} bg-emerald-50 border-emerald-200 text-emerald-800
+                    {% elif category == 'failed' %} bg-red-50 border-red-200 text-red-800
+                    {% elif category == 'info' %} bg-yellow-50 border-yellow-200 text-yellow-800
+                    {% endif %}">
+                    <span>{{ message }}</span>
+                    <button onclick="this.parentElement.remove()" class="
+                        {% if category == 'success' %} text-emerald-500 hover:text-emerald-700
+                        {% elif category == 'failed' %} text-red-500 hover:text-red-700
+                        {% elif category == 'info' %} text-yellow-500 hover:text-yellow-700
+                        {% endif %}">✕</button>
                 </div>
               {% endfor %}
             {% endif %}

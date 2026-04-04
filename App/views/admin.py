@@ -13,7 +13,7 @@ class AdminView(ModelView):
         return current_user is not None
 
     def inaccessible_callback(self, name, **kwargs):
-        flash("Login to access admin")
+        flash("Login to access admin", "info")
         return redirect(url_for('index_page', next=request.url))
 
 def setup_admin(app):
@@ -27,7 +27,7 @@ def admin_required(f):
     @jwt_required()
     def decorated_function(*args, **kwargs):
         if not current_user.is_admin():
-            flash("You are logged in as a student and therefore cannot access admin page")
+            flash("You are logged in as a student and therefore cannot access admin page", "failed")
             return redirect(url_for('index_views.index_page'))
         return f(*args, **kwargs)
     return decorated_function
@@ -299,7 +299,7 @@ def admin_assign_lots(group_id):
 
     if group:
         removed = remove_group(group_id)
-        flash("Group Removed")
+        flash("Group Removed", "success")
 
     return redirect(url_for('admin_views.admin_manage_groups'))
 
@@ -315,7 +315,7 @@ def admin_decline_group(group_id):
 
     if group:
         removed = remove_group(group_id)
-        flash("Group Rejected")
+        flash("Group Rejected", "success")
 
     return redirect(url_for('admin_views.admin_manage_groups'))
 
@@ -330,14 +330,14 @@ def admin_approve_and_assign_group(group_id):
         ).first()
 
         if already_has_lots:
-            flash("Lots have already been assigned for this group")
+            flash("Lots have already been assigned for this group", "failed")
             return redirect(url_for('admin_views.admin_manage_groups'))
 
         lot1ID = request.form.get('lot1')
         lot2ID = request.form.get('lot2')
 
         if lot1ID == lot2ID:
-            flash("Lot1 and Lot2 must be different lots")
+            flash("Lot1 and Lot2 must be different lots", "failed")
             return redirect(url_for('admin_views.admin_manage_groups'))
         
         lot1 = False
@@ -360,13 +360,13 @@ def admin_approve_and_assign_group(group_id):
             lot2 = True
 
         if lot1 and lot2:
-            flash("Lot1 and Lot2 have already been assigned")
+            flash("Lot1 and Lot2 have already been assigned", "failed")
             return redirect(url_for('admin_views.admin_manage_groups'))
         elif lot1:
-            flash("Lot1 has already been assigned")
+            flash("Lot1 has already been assigned", "failed")
             return redirect(url_for('admin_views.admin_manage_groups'))
         elif lot2:
-            flash("Lot2 has already been assigned")
+            flash("Lot2 has already been assigned", "failed")
             return redirect(url_for('admin_views.admin_manage_groups'))
 
         add_lotGroup(lot1ID, group_id)
@@ -374,7 +374,7 @@ def admin_approve_and_assign_group(group_id):
 
         approve_group(group_id)
 
-    flash("successfully approved group")
+    flash("successfully approved group", "success")
     return redirect(url_for('admin_views.admin_manage_groups'))
 
 # ─── RFP Routes ───────────────────────────────────────────────────────────────
@@ -389,15 +389,15 @@ def admin_manage_rfps():
 
         if action == "approve":
             approve_rfp(groupID, lotID)
-            flash(f'RFP for Lot {lotID} approved successfully')
+            flash(f'RFP for Lot {lotID} approved successfully', "success")
 
         elif action == "reject":
             removed = remove_rfp(groupID, lotID)
-            flash(f'RFP for Lot {lotID} rejected successfully')
+            flash(f'RFP for Lot {lotID} rejected successfully', "success")
 
         elif action == "remove":
             removed = remove_rfp(groupID, lotID)
-            flash(f'RFP for Lot {lotID} removed successfully')
+            flash(f'RFP for Lot {lotID} removed successfully', "success")
 
         return redirect(url_for('admin_views.admin_manage_rfps'))
 

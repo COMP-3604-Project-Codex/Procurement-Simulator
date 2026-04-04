@@ -7,13 +7,15 @@ class Bid(db.Model):
     sourceGroupID = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=False)
     receipientGroupID = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now)
-    bidDocumentLink = db.Column(db.String(1000), nullable=False)
+    bidDocument = db.Column(db.LargeBinary, nullable=False)
+    bidDocumentName = db.Column(db.String(255), nullable=False)  # to store the original filename
 
-    def __init__(self, lotID, sourceGroupID, receipientGroupID, bidDocumentLink):
+    def __init__(self, lotID, sourceGroupID, receipientGroupID, bidDocument, bidDocumentName):
         self.lotID = lotID
         self.sourceGroupID = sourceGroupID
         self.receipientGroupID = receipientGroupID
-        self.bidDocumentLink = bidDocumentLink
+        self.bidDocument = bidDocument
+        self.bidDocumentName = bidDocumentName
         self.timestamp = datetime.now()
 
     def get_json(self):
@@ -23,5 +25,5 @@ class Bid(db.Model):
             'sourceGroupID': self.sourceGroupID,
             'receipientGroupID': self.receipientGroupID,
             'timestamp': self.timestamp.isoformat(),
-            'bidDocumentLink': self.bidDocumentLink
+            'bidDocumentName': self.bidDocumentName
         }
