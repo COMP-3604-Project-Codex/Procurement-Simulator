@@ -372,14 +372,16 @@ class Workflow8IntegrationTests(unittest.TestCase):
         lotID = 3
         bidDocument=b'fake pdf content'
         bidDocumentName='test.pdf'
+        quotationAmount= 25000.0
 
-        bid = create_bid(lotID, sourceGroupID, receipientGroupID, bidDocument, bidDocumentName)
+        bid = create_bid(lotID, sourceGroupID, receipientGroupID, bidDocument, bidDocumentName, quotationAmount)
         
         assert bid
         assert bid.sourceGroupID == 1
         assert bidDocumentName == 'test.pdf'
         assert receipientGroupID == 2
         assert lotID == 3
+        assert quotationAmount == 25000.0
 
 class Workflow9IntegrationTests(unittest.TestCase):
     @pytest.mark.run(order=51)
@@ -394,16 +396,18 @@ class Workflow9IntegrationTests(unittest.TestCase):
         lotID = 3
         bidDocument=b'fake pdf content'
         bidDocumentName='test.pdf'
+        quotationAmount= 25000.0
 
-        bid = create_bid(lotID, sourceGroupID, receipientGroupID, bidDocument, bidDocumentName)
+        bid = create_bid(lotID, sourceGroupID, receipientGroupID, bidDocument, bidDocumentName, quotationAmount)
 
         sourceGroupID = 2
         receipientGroupID = 1
         lotID = 1
         bidDocument=b'fake pdf content'
         bidDocumentName='test.pdf'
+        quotationAmount= 25000.0
 
-        bid = create_bid(lotID, sourceGroupID, receipientGroupID, bidDocument, bidDocumentName)
+        bid = create_bid(lotID, sourceGroupID, receipientGroupID, bidDocument, bidDocumentName, quotationAmount)
 
 class Workflow10IntegrationTests(unittest.TestCase):
     @pytest.mark.run(order=52)

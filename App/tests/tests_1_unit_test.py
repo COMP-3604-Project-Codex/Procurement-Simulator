@@ -182,30 +182,30 @@ class RFPUnitTests(unittest.TestCase):
 class BidUnitTests(unittest.TestCase):
     @pytest.mark.run(order=26)
     def test_new_bid(self):
-        bid = Bid(1, 2, 3, b'fake pdf content', 'test.pdf')
+        bid = Bid(1, 2, 3, b'fake pdf content', 'test.pdf', 14000.0)
         assert bid.lotID == 1
         assert bid.sourceGroupID == 2
         assert bid.receipientGroupID == 3
 
     @pytest.mark.run(order=27)
     def test_bid_document_link(self):
-        bid = Bid(1, 2, 3, b'fake pdf content', 'test.pdf')
+        bid = Bid(1, 2, 3, b'fake pdf content', 'test.pdf', 14000.0)
         assert bid.bidDocumentName == 'test.pdf'
 
     @pytest.mark.run(order=28)
     def test_bid_timestamp_auto_set(self):
-        bid = Bid(1, 2, 3, b'fake pdf content', 'test.pdf')
+        bid = Bid(1, 2, 3, b'fake pdf content', 'test.pdf', 14000.0)
         assert isinstance(bid.timestamp, datetime)
 
     @pytest.mark.run(order=29)
     def test_bid_timestamp_is_recent(self):
-        bid = Bid(1, 2, 3, b'fake pdf content', 'test.pdf')
+        bid = Bid(1, 2, 3, b'fake pdf content', 'test.pdf', 14000.0)
         delta = datetime.now() - bid.timestamp
         assert delta.seconds < 5
 
     @pytest.mark.run(order=30)
     def test_bid_get_json(self):
-        bid = Bid(1, 2, 3, b'fake pdf content', 'test.pdf')
+        bid = Bid(1, 2, 3, b'fake pdf content', 'test.pdf', 14000.0)
         bid_json = bid.get_json()
         assert bid_json["lotID"] == 1
         assert bid_json["sourceGroupID"] == 2

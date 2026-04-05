@@ -1,6 +1,7 @@
 
 from flask import Blueprint, flash, request, redirect, render_template, url_for, send_file
 import io
+from sqlalchemy import and_
 from functools import wraps
 from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, set_access_cookies
 from datetime import datetime
@@ -143,19 +144,19 @@ def student_create_group_page():
 
                 if not strings:
                     flash("You are already in a group", "failed")
-                    return redirect(url_for('student_views.student_group_details_page'))
+                    return redirect(url_for('student_views.student_create_group_page'))
 
                 if len(strings) >= 2:
                     strings[-2] = f"{students[-2].name} and "
                     strings[-1] = f"{students[-1].name}"
 
                     flash(f"You are already in a group and {''.join(strings)} are already in groups", "failed")
-                    return redirect(url_for('student_views.student_group_details_page'))
+                    return redirect(url_for('student_views.student_create_group_page'))
                 else:
                     strings[0] = f"{students[0].name}"
 
                     flash(f"You are already in a group and {''.join(strings)} is already in a group", "failed")
-                    return redirect(url_for('student_views.student_group_details_page'))
+                    return redirect(url_for('student_views.student_create_group_page'))
             else:
                 strings = []
                 for student in students:
@@ -167,12 +168,20 @@ def student_create_group_page():
                     strings[-1] = f"{students[-1].name}"
 
                     flash(f"{''.join(strings)} are already in groups", "failed")
-                    return redirect(url_for('student_views.student_group_details_page'))
+                    return redirect(url_for('student_views.student_create_group_page'))
                 else:
                     strings[0] = f"{students[0].name}"
 
                     flash(f"{''.join(strings)} is already in a group", "failed")
-                    return redirect(url_for('student_views.student_group_details_page'))
+                    return redirect(url_for('student_views.student_create_group_page'))
+
+        if name == "":
+            flash("You must enter a group name", "failed")
+            return redirect(url_for('student_views.student_create_group_page'))
+
+        if len(members) != 4:
+            flash("You must select 3 group members to make a group of 4", "failed")
+            return redirect(url_for('student_views.student_create_group_page'))
 
         group = create_group(name)
 
@@ -347,11 +356,64 @@ def student_lots_page():
 @group_status_check
 def student_view_bids_page():
 
-    selected_lot_id = request.args.get('selected_lot', '1')
-    current_lot = next((l for l in ASSIGNED_LOTS if str(l['id']) == selected_lot_id), ASSIGNED_LOTS[0])
-    
+    ASSIGNED_LOTS = [] 
 
-    bids_for_lot = [b for b in STUDENT_BIDS if b['lot_id'] == selected_lot_id]
+    yourGroup = db.session.scalars(
+        db.select(Group)
+        .join(StudentGroup, StudentGroup.groupID == Group.id)
+        .filter(StudentGroup.studentID == current_user.id)
+    ).first()
+
+    yourLots = db.session.scalars(
+        db.select(Lot)
+        .join(LotGroup, LotGroup.lotID == Lot.id)
+        .filter(LotGroup.groupID == yourGroup.id)
+        .order_by(Lot.id)
+    ).all()
+
+    for lot in yourLots:
+        data = {}
+
+        data["id"] = lot.id
+        data["lab_type"] = lot.labType
+        data["budget"] = lot.budget
+        data["description"] = lot.labSize
+
+        ASSIGNED_LOTS.append(data)
+
+    selected_lot_id = request.args.get('selected_lot', ASSIGNED_LOTS[0]["id"])
+
+    current_lot_obj = get_lot(selected_lot_id)
+
+    current_lot = {}
+    current_lot["id"] = current_lot_obj.id
+    current_lot["lab_type"] = current_lot_obj.labType
+    current_lot["budget"] = lot.budget
+    current_lot["description"] = lot.labSize    
+
+    bids_for_lot = []
+
+    bidsReceived = db.session.scalars(
+        db.select(Bid)
+        .filter_by(lotID=current_lot["id"])
+    ).all()
+
+    for bid in bidsReceived:
+        data = {}
+
+        data["bid_id"] = bid.id
+        data["lot_id"] = bid.lotID
+
+        sourceGroup = db.session.scalars(
+            db.select(Group)
+            .filter_by(id=bid.sourceGroupID)
+        ).first()
+
+        data["vendor_name"] = sourceGroup.groupName
+        data["total_price"] = bid.quotationAmount
+        data["timestamp"] = bid.timestamp.strftime('%#m/%#d/%Y, %#I:%M%p').lower()
+
+        bids_for_lot.append(data)
 
     return render_template(
         'student/client_viewbid.html',
@@ -369,27 +431,87 @@ def student_bid_details_page(bid_id):
 
     # list of specs to loop through in template
     technical_specs = [
-        ('screen', 'Screen Size & Resolution'),
+        ('deviceType', 'Device Type'),
+        ('resolution', 'Screen Size & Resolution'),
         ('os', 'Operating System(s)'),
         ('cpu', 'CPU'),
         ('ram', 'Memory (RAM)'),
-        ('hdd', 'Hard Drive'),
-        ('graphics', 'Graphics'),
+        ('drive', 'Hard Drive'),
+        ('gpu', 'Graphics'),
         ('peripherals', 'External Peripherals'),
         ('features', 'Features'),
         ('io', 'I/O')
     ]
 
     # Find bid
-    bid = next((b for b in STUDENT_BIDS if b['bid_id'] == bid_id), None)
-    
-    # Find associated lot
-    lot = next((l for l in ASSIGNED_LOTS if str(l['id']) == str(bid['lot_id'])), None)
+
+    bidObj = get_bid(bid_id)
+
+    bid = {}
+    bid["bid_id"] = bidObj.id
+    bid["lot_id"] = bidObj.lotID
+
+    sourceGroup = db.session.scalars(
+        db.select(Group)
+        .filter_by(id=bidObj.sourceGroupID)
+    ).first()
+
+    bid["vendor_name"] = sourceGroup.groupName
+    bid["total_price"] = bidObj.quotationAmount
+    bid["timestamp"] = bidObj.timestamp.strftime('%#m/%#d/%Y, %#I:%M%p').lower()
+
+    lotObj = get_lot(bidObj.lotID)
+
+    lot = {}
+    lot["id"] = lotObj.id
+    lot["lab_type"] = lotObj.labType
+    lot["budget"] = lotObj.budget
+    lot["description"] = lotObj.labSize
 
     if request.method == 'POST':
-        # Logic for saving comments to go here
-        flash("Comment saved for review.", "success")
+        specsMet = request.form.getlist("specs_selected")
+        professionalism = int(request.form.get("professionalism_stars"))
+        presentation = int(request.form.get("presentation_stars"))
+        budget = int(request.form.get("budget_stars"))
+
+        deviceType = request.form.get("comment_deviceType")
+        resolution = request.form.get("comment_resolution")
+        os = request.form.get("comment_os")
+        cpu = request.form.get("comment_cpu")
+        ram = request.form.get("comment_ram")
+        drive = request.form.get("comment_drive")
+        gpu = request.form.get("comment_gpu")
+        peripherals = request.form.get("comment_peripherals")
+        features = request.form.get("comment_features")
+        io = request.form.get("comment_io")
+
+        bid = get_bid(bid_id)
+
+        sourceGroupID = bid.receipientGroupID
+        receipientGroupID = bid.sourceGroupID
+        lotID = bid.lotID
+
+        existing = db.session.scalars(
+            db.select(Evaluation)
+            .filter_by(bidID=bid_id)
+        ).first()
+
+        if existing:
+            editted = edit_evaluation(existing.id, len(specsMet), presentation, professionalism, budget, deviceType=deviceType, resolution=resolution, os=os, cpu=cpu, ram=ram, drive=drive, gpu=gpu, peripherals=peripherals, features=features, io=io, specsSelected=','.join(specsMet))
+
+            flash("Evaluation updated successfully", "success")
+            return redirect(url_for('student_views.student_bid_details_page', bid_id=bid_id))
+
+        evaluation = create_evaluation(sourceGroupID, receipientGroupID, bid_id, lotID, len(specsMet), presentation, professionalism, budget)
+        editted = edit_evaluation(evaluation.id, len(specsMet), presentation, professionalism, budget, deviceType=deviceType, resolution=resolution, os=os, cpu=cpu, ram=ram, drive=drive, gpu=gpu, peripherals=peripherals, features=features, io=io, specsSelected=','.join(specsMet))
+
+        flash("Evaluation created successfully", "success")
         return redirect(url_for('student_views.student_bid_details_page', bid_id=bid_id))
+
+    existing = db.session.scalars(
+        db.select(Evaluation)
+        .filter_by(bidID=bid_id)
+    ).first()
 
     return render_template(
         'student/client_bid_details.html',
@@ -397,7 +519,8 @@ def student_bid_details_page(bid_id):
         title=f"Bid Analysis: {bid['vendor_name']}",
         bid=bid,
         lot=lot,
-        technical_specs=technical_specs
+        technical_specs=technical_specs,
+        existing=existing
     )
 
 
@@ -435,7 +558,6 @@ def student_client_evaluation_page():
 
 
 #Student view as vendor
-
 @student_views.route('/student/rfp-gallery', methods=['GET', 'POST'])
 @student_required
 @group_status_check
@@ -445,6 +567,7 @@ def rfp_gallery_page():
         receipientGroupID = int(request.form.get("groupID"))
         sourceGroupID = int(request.form.get("sourceGroupID"))
         lotID = int(request.form.get("lotID"))
+        amount = float(request.form.get("amount"))
 
         entries = db.session.scalars(
             db.select(LotGroup)
@@ -462,19 +585,25 @@ def rfp_gallery_page():
         ).first()
 
         if lotID in yourLots:
-            flash(f"{lotID} ({lot.labType}) is assigned to your group, you cannot place a bid on your own lot", "failed")
+            flash(f"Lot {lotID} ({lot.labType}) is assigned to your group, you cannot place a bid on your own lot", "failed")
             return redirect(url_for('student_views.rfp_gallery_page'))
         
+        yourGroup = db.session.scalars(
+            db.select(Group)
+            .join(StudentGroup, StudentGroup.groupID == Group.id)
+            .filter(StudentGroup.studentID == current_user.id)
+        ).first()
+
         duplicate = db.session.scalars(
             db.select(Bid)
-            .filter_by(lotID=lotID)
+            .filter(and_(Bid.lotID == lotID, Bid.sourceGroupID == yourGroup.id))
         ).first()
 
         if duplicate:
             flash(f"You have already placed a bid on Lot {lotID} ({lot.labType}), you can only place 1 bid on each lot", "failed")
             return redirect(url_for('student_views.rfp_gallery_page'))
 
-        bid = create_bid(lotID, sourceGroupID, receipientGroupID, pdf.read(), pdf.filename)
+        bid = create_bid(lotID, sourceGroupID, receipientGroupID, pdf.read(), pdf.filename, amount)
         flash(f"Bid successfully placed on Lot {lotID} ({lot.labType})", "success")
         return redirect(url_for('student_views.rfp_gallery_page'))
 
@@ -534,7 +663,6 @@ def rfp_gallery_page():
         rfps=available_rfps,
         sourceGroupID=sourceGroupID
     )
-
 
 # Vendor-submitted bids
 @student_views.route('/student/vendor-bids', methods=['GET'])

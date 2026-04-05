@@ -8,15 +8,17 @@ class Bid(db.Model):
     receipientGroupID = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now)
     bidDocument = db.Column(db.LargeBinary, nullable=False)
-    bidDocumentName = db.Column(db.String(255), nullable=False)  # to store the original filename
+    bidDocumentName = db.Column(db.String(255), nullable=False)
+    quotationAmount = db.Column(db.Float, default=0.0)
 
-    def __init__(self, lotID, sourceGroupID, receipientGroupID, bidDocument, bidDocumentName):
+    def __init__(self, lotID, sourceGroupID, receipientGroupID, bidDocument, bidDocumentName, quotationAmount):
         self.lotID = lotID
         self.sourceGroupID = sourceGroupID
         self.receipientGroupID = receipientGroupID
         self.bidDocument = bidDocument
         self.bidDocumentName = bidDocumentName
         self.timestamp = datetime.now()
+        self.quotationAmount = quotationAmount
 
     def get_json(self):
         return {

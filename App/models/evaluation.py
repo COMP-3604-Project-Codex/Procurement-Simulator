@@ -7,6 +7,7 @@ class Evaluation(db.Model):
     receipientGroupID = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=False)
     bidID = db.Column(db.Integer, db.ForeignKey('bid.id'), nullable=False)
     lotID = db.Column(db.Integer, db.ForeignKey('lot.id'), nullable=False)
+    specsSelected = db.Column(db.String(500), default="")
     status = db.Column(db.String(30), default="draft")
     overallScore = db.Column(db.Float, default=0.0)
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now)
@@ -20,12 +21,20 @@ class Evaluation(db.Model):
     peripherals = db.Column(db.String(1000), default="")
     features = db.Column(db.String(1000), default="")
     io = db.Column(db.String(1000), default="")
+    professionalism = db.Column(db.Integer, default=0)
+    presentation = db.Column(db.Integer, default=0)
+    budget = db.Column(db.Integer, default=0)
+    specsMet = db.Column(db.Integer, default=0)
 
     def __init__(self, sourceGroupID, receipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget):
         self.bidID = bidID
         self.lotID = lotID
         self.sourceGroupID = sourceGroupID
         self.receipientGroupID = receipientGroupID
+        self.specsMet = specsMet
+        self.presentation = presentation
+        self.professionalism = professionalism
+        self.budget = budget
         self.overallScore = round((((specsMet + presentation + professionalism + budget)/25) * 10), 1)
         self.timestamp = datetime.now()
 
