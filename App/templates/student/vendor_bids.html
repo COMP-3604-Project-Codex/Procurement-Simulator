@@ -11,7 +11,7 @@
             <div class="p-5 bg-emerald-50 border border-emerald-100 rounded-2xl flex justify-between items-center">
                 <div>
                     <p class="text-[10px] uppercase font-bold text-emerald-600 tracking-widest">Accepted Bids</p>
-                    <p class="text-3xl font-bold text-emerald-700">1</p>
+                    <p class="text-3xl font-bold text-emerald-700">{{accepted}}</p>
                 </div>
                 <div class="text-emerald-200">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -22,7 +22,7 @@
             <div class="p-5 bg-amber-50 border border-amber-100 rounded-2xl flex justify-between items-center">
                 <div>
                     <p class="text-[10px] uppercase font-bold text-amber-600 tracking-widest">Pending Review</p>
-                    <p class="text-3xl font-bold text-amber-700">1</p>
+                    <p class="text-3xl font-bold text-amber-700">{{pending}}</p>
                 </div>
                 <div class="text-amber-200">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -69,8 +69,8 @@
                             {% endif %}
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <button onclick="alert('Viewing bid details...')" 
-                            class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-900 hover:text-white transition">
+                            <button onclick="viewBidDetails('{{ bid.bid_id }}')"
+                                class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-900 hover:text-white transition">
                                 View Details
                             </button>
                         </td>
@@ -80,4 +80,35 @@
             </table>
         </div>
     </div>
+    <!-- Bid Details Modal -->
+    <div id="bidDetailsModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-3/4 h-4/5 flex flex-col">
+            <div class="flex justify-between items-center border-b pb-4">
+                <h2 class="text-xl font-bold">Bid Document</h2>
+                <button class="text-gray-500 hover:text-gray-700" onclick="hideBidDetails()">&times;</button>
+            </div>
+            <iframe id="bid-pdf-preview" src="" class="flex-1 mt-4 w-full rounded-lg border border-slate-200"></iframe>
+            <div class="mt-4 text-right border-t pt-4">
+                <a id="bid-pdf-download" href="" download class="px-4 py-2 bg-brand-500 text-white font-bold rounded hover:bg-brand-600 transition mr-2">
+                    Download
+                </a>
+                <button onclick="hideBidDetails()" class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+    <script>
+        function viewBidDetails(bidId) {
+            const url = `/student/bid-document/${bidId}`;
+            document.getElementById('bid-pdf-preview').src = url;
+            document.getElementById('bid-pdf-download').href = url;
+            document.getElementById('bidDetailsModal').classList.remove('hidden');
+        }
+
+        function hideBidDetails() {
+            document.getElementById('bid-pdf-preview').src = '';
+            document.getElementById('bidDetailsModal').classList.add('hidden');
+        }
+    </script>
 {% endblock %}

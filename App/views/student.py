@@ -1,5 +1,6 @@
 
-from flask import Blueprint, flash, request, redirect, render_template, url_for
+from flask import Blueprint, flash, request, redirect, render_template, url_for, send_file
+import io
 from functools import wraps
 from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, set_access_cookies
 from datetime import datetime
@@ -542,32 +543,78 @@ def rfp_gallery_page():
 def submitted_bids_page():
 
     # This data represents bids 
-    submitted_bids = [
-        {
-            'bid_id': 'BID-901',
-            'rfp_title': 'GIS Lab',
-            'target_group': 'Group 3 (Tech Titans)',
-            'submitted_at': datetime(2026, 3, 25, 14, 30),             
-            'status': 'Accepted', 
-        },
-        {
-            'bid_id': 'BID-902',
-            'rfp_title': 'Design Studio',
-            'target_group': 'Group 2 (Cyber Shield)',
-            'submitted_at': datetime(2026, 3, 26, 10, 15), 
-            'status': 'Pending', 
-        },
-        {
-            'bid_id': 'BID-903',
-            'rfp_title': 'Cyber Cafe ',
-            'target_group': 'Group 1 (Global Systems)',
-            'submitted_at': datetime(2026, 3, 20, 9, 0), 
-            'status': 'Rejected', 
-        }
-    ]
+    submitted_bids = []
+    accepted = 0
+    pending = 0
+
+    yourGroup = db.session.scalars(
+        db.select(Group)
+        .join(StudentGroup, StudentGroup.groupID == Group.id)
+        .filter(StudentGroup.studentID == current_user.id)
+    ).first()
+
+    yourBids = db.session.scalars(
+        db.select(Bid)
+        .filter_by(sourceGroupID=yourGroup.id)
+    ).all()
+
+    for bid in yourBids:
+        data = {}
+
+        data["bid_id"] = bid.id
+
+        lot = db.session.scalars(
+            db.select(Lot)
+            .filter_by(id=bid.lotID)
+        ).first()
+
+        data["rfp_title"] = lot.labType
+
+        group = db.session.scalars(
+            db.select(Group)
+            .filter_by(id=bid.receipientGroupID)
+        ).first()
+
+        data["target_group"] = group.groupName
+        data["submitted_at"] = bid.timestamp
+
+        evaluation = db.session.scalars(
+            db.select(Evaluation)
+            .filter_by(lotID=bid.lotID)
+        ).first()
+
+        if evaluation:
+            if evaluation.bidID == bid.id:   
+                data["status"] = "Accepted"
+                accepted += 1
+            else:
+                data["status"] = "Rejected"
+        else:
+            data["status"] = "Pending"
+            pending += 1
+
+        data["bidDocument"] = bid.bidDocument
+        data["bidDocumentName"] = bid.bidDocumentName
+
+        submitted_bids.append(data)
+    
 
     return render_template(
         'student/vendor_bids.html',
         active_page='my-bids',
-        bids=submitted_bids
+        bids=submitted_bids,
+        accepted = accepted,
+        pending = pending
+    )
+
+@student_views.route('/student/bid-document/<int:bid_id>')
+@student_required
+def serve_bid_document(bid_id):
+    bid = get_bid(bid_id)
+    if not bid:
+        return "Not found", 404
+    return send_file(
+        io.BytesIO(bid.bidDocument),
+        mimetype='application/pdf',
+        download_name=bid.bidDocumentName
     )
