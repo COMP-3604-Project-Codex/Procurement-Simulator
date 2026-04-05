@@ -7,7 +7,7 @@
             <p class="text-slate-600 italic text-sm">Track the status of your proposals sent to clients.</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="p-5 bg-emerald-50 border border-emerald-100 rounded-2xl flex justify-between items-center">
                 <div>
                     <p class="text-[10px] uppercase font-bold text-emerald-600 tracking-widest">Accepted Bids</p>
@@ -27,6 +27,17 @@
                 <div class="text-amber-200">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            </div>
+            <div class="p-5 bg-red-50 border border-red-100 rounded-2xl flex justify-between items-center">
+                <div>
+                    <p class="text-[10px] uppercase font-bold text-red-600 tracking-widest">Rejected Bids</p>
+                    <p class="text-3xl font-bold text-red-700">{{rejected}}</p>
+                </div>
+                <div class="text-red-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
             </div>

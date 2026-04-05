@@ -420,15 +420,9 @@ def admin_manage_rfps():
         data["groupID"] = entry.groupID
         data["lotID"] = entry.lotID
 
-        group = db.session.scalars(
-            db.select(Group)
-            .filter_by(id=entry.groupID)
-        ).first()
+        group = get_group(entry.groupID)
 
-        lot = db.session.scalars(
-            db.select(Lot)
-            .filter_by(id=entry.lotID)
-        ).first()
+        lot = get_lot(entry.lotID)
 
         data["name"] = group.groupName
         data["Lot"] = lot.labType
@@ -452,15 +446,9 @@ def admin_manage_rfps():
         data["groupID"] = entry.groupID
         data["lotID"] = entry.lotID
 
-        group = db.session.scalars(
-            db.select(Group)
-            .filter_by(id=entry.groupID)
-        ).first()
+        group = get_group(entry.groupID)
 
-        lot = db.session.scalars(
-            db.select(Lot)
-            .filter_by(id=entry.lotID)
-        ).first()
+        lot = get_lot(entry.lotID)
 
         data["name"] = group.groupName
         data["Lot"] = lot.labType

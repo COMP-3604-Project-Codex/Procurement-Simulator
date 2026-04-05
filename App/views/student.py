@@ -128,10 +128,7 @@ def student_create_group_page():
                     you = True
                     continue
 
-                student = db.session.scalars(
-                    db.select(Student)
-                    .filter_by(id=ID)
-                ).first()
+                student = get_student(ID)
 
                 if student:
                     students.append(student)
@@ -404,10 +401,7 @@ def student_view_bids_page():
         data["bid_id"] = bid.id
         data["lot_id"] = bid.lotID
 
-        sourceGroup = db.session.scalars(
-            db.select(Group)
-            .filter_by(id=bid.sourceGroupID)
-        ).first()
+        sourceGroup = get_group(bid.sourceGroupID)
 
         data["vendor_name"] = sourceGroup.groupName
         data["total_price"] = bid.quotationAmount
@@ -451,14 +445,12 @@ def student_bid_details_page(bid_id):
     bid["bid_id"] = bidObj.id
     bid["lot_id"] = bidObj.lotID
 
-    sourceGroup = db.session.scalars(
-        db.select(Group)
-        .filter_by(id=bidObj.sourceGroupID)
-    ).first()
-
+    sourceGroup = get_group(bidObj.sourceGroupID)
     bid["vendor_name"] = sourceGroup.groupName
     bid["total_price"] = bidObj.quotationAmount
     bid["timestamp"] = bidObj.timestamp.strftime('%#m/%#d/%Y, %#I:%M%p').lower()
+    bid["pdf"] = bidObj.bidDocument
+    bid["filename"] = bidObj.bidDocumentName
 
     lotObj = get_lot(bidObj.lotID)
 
@@ -524,29 +516,84 @@ def student_bid_details_page(bid_id):
     )
 
 
-@student_views.route('/student/client-evaluation', methods=['GET'])
+@student_views.route('/student/client-evaluation', methods=['GET', 'POST'])
 @student_required
 @group_status_check
 def student_client_evaluation_page():
+    yourGroup = db.session.scalars(
+        db.select(Group)
+        .join(StudentGroup, StudentGroup.groupID == Group.id)
+        .filter(StudentGroup.studentID == current_user.id)
+    ).first()
 
-    selected_lot_id = request.args.get('selected_lot', '1')
+    yourLots = db.session.scalars(
+        db.select(Lot)
+        .join(LotGroup, LotGroup.lotID == Lot.id)
+        .filter(LotGroup.groupID == yourGroup.id)
+        .order_by(Lot.id)
+    ).all()
 
-    ALL_EVALUATIONS = [
-        {'bid_id': 101, 'lot_id': '1', 'group_name': 'Tech Titans', 'cost': 14500.0, 'specs_met': '9/9', 'rating': 4.8, 'is_selected': True},
-        {'bid_id': 102, 'lot_id': '1', 'group_name': 'Global Systems', 'cost': 12200.0, 'specs_met': '7/9', 'rating': 3.5, 'is_selected': False},
-        {'bid_id': 201, 'lot_id': '2', 'group_name': 'NetConnect Ltd', 'cost': 8500.0, 'specs_met': '5/5', 'rating': 4.2, 'is_selected': False},
-        {'bid_id': 202, 'lot_id': '2', 'group_name': 'Cyber Shield', 'cost': 9200.0, 'specs_met': '4/5', 'rating': 3.9, 'is_selected': False}
-    ]
+    selected_lot_id = request.args.get('selected_lot', yourLots[0].id)
 
-    # filtering evals
-    filtered_evals = [e for e in ALL_EVALUATIONS if e['lot_id'] == selected_lot_id]
+    if request.method == "POST":
+        evaluationID = int(request.form.get("evaluationID"))
 
-     
-    lots_list = [
-        {'id': 1, 'lab_type': 'Workstations'},
-        {'id': 2, 'lab_type': 'Networking Gear'}
-    ]
+        selected = db.session.scalars(
+            db.select(Evaluation)
+            .filter(and_(Evaluation.sourceGroupID == yourGroup.id, Evaluation.lotID == selected_lot_id, Evaluation.status == "selected"))
+        ).first()
 
+        if selected:
+            flash("You have already selected an evaluation for this group. Your choice is permanent unless the admin removes the evaluation", "failed")
+            return redirect(request.referrer) 
+
+        else:
+            select_evaluation(evaluationID)
+
+            flash("You have successfully selected selected an evaluation", "success")
+            return redirect(request.referrer) 
+
+    filtered_evals = []
+
+    yourEvaluations = db.session.scalars(
+        db.select(Evaluation)
+        .filter(and_(Evaluation.sourceGroupID == yourGroup.id, Evaluation.lotID == selected_lot_id))
+    ).all()
+        
+
+    for evaluation in yourEvaluations:
+        data = {}
+
+        data["id"] = evaluation.id
+        data["bid_id"] = evaluation.bidID
+        data["lot_id"] = evaluation.lotID
+
+        receipientGroup = get_group(evaluation.receipientGroupID)
+        data["group_name"] = receipientGroup.groupName
+
+        evaluatedBid = get_bid(evaluation.bidID)
+        data["cost"] = evaluatedBid.quotationAmount
+
+        data["specs_met"] = f"{evaluation.specsMet}/10"
+        data["rating"] = evaluation.overallScore
+
+        if evaluation.status == "draft":
+            data["is_selected"] = False
+        else:
+            data["is_selected"] = True
+
+        filtered_evals.append(data)
+
+    lots_list = []
+
+    for lot in yourLots:
+        data = {}
+
+        data["id"] = lot.id
+        data["lab_type"] = lot.labType
+
+        lots_list.append(data)
+    
     return render_template(
         'student/client_eval.html',
         active_page='client-evaluation',
@@ -579,10 +626,7 @@ def rfp_gallery_page():
         for entry in entries:
             yourLots.append(entry.lotID)
 
-        lot = db.session.scalars(
-            db.select(Lot)
-            .filter_by(id=lotID)
-        ).first()
+        lot = get_lot(lotID)
 
         if lotID in yourLots:
             flash(f"Lot {lotID} ({lot.labType}) is assigned to your group, you cannot place a bid on your own lot", "failed")
@@ -627,17 +671,11 @@ def rfp_gallery_page():
         data["groupID"] = rfp.groupID
         data["lotID"] = rfp.lotID
 
-        lot = db.session.scalars(
-            db.select(Lot)
-            .filter_by(id=rfp.lotID)
-        ).first()
+        lot = get_lot(rfp.lotID)
 
         data["title"] = lot.labType
 
-        group = db.session.scalars(
-            db.select(Group)
-            .filter_by(id=rfp.groupID)
-        ).first()
+        group = get_group(rfp.groupID)
 
         data["client"] = group.groupName
         data["timestamp"] = rfp.timestamp.strftime('%#m/%#d/%Y, %#I:%M%p').lower()
@@ -674,6 +712,7 @@ def submitted_bids_page():
     submitted_bids = []
     accepted = 0
     pending = 0
+    rejected = 0
 
     yourGroup = db.session.scalars(
         db.select(Group)
@@ -691,32 +730,27 @@ def submitted_bids_page():
 
         data["bid_id"] = bid.id
 
-        lot = db.session.scalars(
-            db.select(Lot)
-            .filter_by(id=bid.lotID)
-        ).first()
+        lot = get_lot(bid.lotID)
 
         data["rfp_title"] = lot.labType
 
-        group = db.session.scalars(
-            db.select(Group)
-            .filter_by(id=bid.receipientGroupID)
-        ).first()
+        group = get_group(bid.receipientGroupID)
 
         data["target_group"] = group.groupName
         data["submitted_at"] = bid.timestamp
 
-        evaluation = db.session.scalars(
+        selected = db.session.scalars(
             db.select(Evaluation)
-            .filter_by(lotID=bid.lotID)
+            .filter(Evaluation.lotID == bid.lotID, Evaluation.status == "selected")
         ).first()
 
-        if evaluation:
-            if evaluation.bidID == bid.id:   
+        if selected:
+            if selected.bidID == bid.id:   
                 data["status"] = "Accepted"
                 accepted += 1
             else:
                 data["status"] = "Rejected"
+                rejected += 1
         else:
             data["status"] = "Pending"
             pending += 1
@@ -732,7 +766,8 @@ def submitted_bids_page():
         active_page='my-bids',
         bids=submitted_bids,
         accepted = accepted,
-        pending = pending
+        pending = pending,
+        rejected = rejected
     )
 
 @student_views.route('/student/bid-document/<int:bid_id>')

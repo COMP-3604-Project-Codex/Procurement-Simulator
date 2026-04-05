@@ -17,9 +17,9 @@
                 <div class="rounded-2xl border-2 border-slate-300 bg-slate-200 overflow-hidden shadow-inner flex flex-col">
                     <div class="bg-slate-800 p-3 text-white text-xs font-bold uppercase tracking-widest flex justify-between">
                         <span>Vendor Proposal Document</span>
-                        <span>{{ bid.vendor_name }}_Proposal.pdf</span>
+                        <span>{{ bid.filename }}</span>
                     </div>
-                    <iframe src="https://www.w3.org/W3C/DesignIssues/Architecture.pdf" class="w-full flex-1" frameborder="0"></iframe>
+                    <iframe src="{{ url_for('student_views.serve_bid_document', bid_id=bid.bid_id) }}" class="w-full flex-1" frameborder="0"></iframe>
                 </div>
 
                 <div class="overflow-y-auto pr-2 space-y-6">
