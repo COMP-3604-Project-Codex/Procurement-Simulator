@@ -592,14 +592,33 @@ def admin_manage_rfps():
 @admin_views.route('/admin/manage-evaluations')
 @admin_required
 def admin_manage_evaluations():
-    evaluation_groups = [
-        {"id": 1, "name": "NovaCore", "timestamp": "11/5/2025, 6:46pm"},
-        {"id": 2, "name": "TechSphere", "timestamp": "11/5/2025, 6:46pm"},
-        {"id": 3, "name": "CodeMatrix", "timestamp": "11/6/2025, 12:06am"},
-        {"id": 4, "name": "Datawave", "timestamp": "11/5/2025, 10:12pm"},
-        {"id": 5, "name": "CyberFusion", "timestamp": "11/5/2025, 10:44pm"},
-        {"id": 6, "name": "LogicForge", "timestamp": "11/5/2025, 10:44pm"},
-    ]
+
+    evaluations = db.session.scalars(
+        db.select(Evaluation)
+        .filter_by(status="selected")
+    ).all()
+
+    evaluation_groups = []
+
+    for evaluation in evaluations:
+        data = {}
+
+        data["id"] = evaluation.id
+
+        group = get_group(evaluation.sourceGroupID)
+        data["name"] = group.groupName
+
+        group = get_group(evaluation.recipientGroupID)
+        data["to_group_name"] = group.groupName
+
+        data["lotID"] = evaluation.lotID
+
+        lot = get_lot(evaluation.lotID)
+        data["labType"] = lot.labType
+        data["timestamp"] = evaluation.timestamp.strftime('%#m/%#d/%Y, %#I:%M%p').lower()
+
+        evaluation_groups.append(data)
+
     return render_template('admin/manage_evaluations.html',
         evaluation_groups=evaluation_groups,
         title='Manage Evaluations',
