@@ -1,8 +1,8 @@
 from App.models import Bid
 from App.database import db
 
-def create_bid(lotID, sourceGroupID, receipientGroupID, bidDocument, bidDocumentName, quotationAmount):
-    newbid = Bid(lotID, sourceGroupID, receipientGroupID, bidDocument, bidDocumentName, quotationAmount)
+def create_bid(lotID, sourceGroupID, recipientGroupID, bidDocument, bidDocumentName, quotationAmount):
+    newbid = Bid(lotID, sourceGroupID, recipientGroupID, bidDocument, bidDocumentName, quotationAmount)
     db.session.add(newbid)
     db.session.commit()
     return newbid

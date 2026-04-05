@@ -39,59 +39,10 @@ def group_status_check(f):
 
 student_views = Blueprint('student_views', __name__, template_folder='../templates')
 
-#Global variables for testing ui pre-models
-ASSIGNED_LOTS =[
-    {
-        'id': 1,
-        'lab_type': 'One large GIS Lab with 60 workstations',
-        'budget': 150000.00,
-        'description': 'The lab should be outfitted with machines that can run enterprise-level Geographic Information Systems Software.'
-    },
-    {
-        'id': 2,
-        'lab_type': 'One small Cyber Cafe with 20 workstations',
-        'budget': 10000.00,
-        'description': 'General purpose machines for web browsing and office tasks.'
-    }
-]
-
-STUDENT_RFPS = []
-
-STUDENT_GRP = []
-
-STUDENT_DATA = [
-    {'name': 'Daniel Roberts', 'student_id': '20240123'},
-    {'name': 'Michael Johnson', 'student_id': '20231245'},
-    {'name': 'Samantha Lewis', 'student_id': '20229876'},
-    {'name': 'Christopher Brown', 'student_id': '20235678'},
-    {'name': 'Ashley Williams', 'student_id': '20246789'},
-    {'name': 'Emily Thompson', 'student_id': '20242345'},
-    {'name': 'Brandon Phillips', 'student_id': '20238901'},
-]
-
-STUDENT_BIDS = [
-    {
-        'bid_id': 101,
-        'lot_id': '1',
-        'vendor_name': 'Dell Technologies',
-        'total_price': 145000.00,
-        'status': 'Pending',
-        'spec_summary': 'Precision Workstations with i9 Processors'
-    },
-    {
-        'bid_id': 102,
-        'lot_id': '1',
-        'vendor_name': 'HP Enterprise',
-        'total_price': 152000.00,
-        'status': 'Pending',
-        'spec_summary': 'Z-Book Fury with Xeon Processors'
-    }
-]
 @student_views.route('/student', methods=['GET'])
 @student_required
 def student_home_page():
     return redirect(url_for('student_views.student_group_details_page'))
-
 
 @student_views.route('/student/create-group', methods=['GET', 'POST']) 
 @student_required
@@ -213,7 +164,6 @@ def student_create_group_page():
         candidates=candidates,
     )
 
-
 @student_views.route('/student/group-details', methods=['GET'])
 @student_required
 def student_group_details_page():
@@ -246,7 +196,6 @@ def student_group_details_page():
         group=current_group,
         members=members
     )
-
 
 @student_views.route('/student/lots', methods=['GET', 'POST'])
 @student_required
@@ -347,7 +296,6 @@ def student_lots_page():
         existing_rfp=existing_rfp
     )
          
-    
 @student_views.route('/student/client-view-bids', methods=['GET'])
 @student_required
 @group_status_check
@@ -479,8 +427,8 @@ def student_bid_details_page(bid_id):
 
         bid = get_bid(bid_id)
 
-        sourceGroupID = bid.receipientGroupID
-        receipientGroupID = bid.sourceGroupID
+        sourceGroupID = bid.recipientGroupID
+        recipientGroupID = bid.sourceGroupID
         lotID = bid.lotID
 
         existing = db.session.scalars(
@@ -494,7 +442,7 @@ def student_bid_details_page(bid_id):
             flash("Evaluation updated successfully", "success")
             return redirect(url_for('student_views.student_bid_details_page', bid_id=bid_id))
 
-        evaluation = create_evaluation(sourceGroupID, receipientGroupID, bid_id, lotID, len(specsMet), presentation, professionalism, budget)
+        evaluation = create_evaluation(sourceGroupID, recipientGroupID, bid_id, lotID, len(specsMet), presentation, professionalism, budget)
         editted = edit_evaluation(evaluation.id, len(specsMet), presentation, professionalism, budget, deviceType=deviceType, resolution=resolution, os=os, cpu=cpu, ram=ram, drive=drive, gpu=gpu, peripherals=peripherals, features=features, io=io, specsSelected=','.join(specsMet))
 
         flash("Evaluation created successfully", "success")
@@ -514,7 +462,6 @@ def student_bid_details_page(bid_id):
         technical_specs=technical_specs,
         existing=existing
     )
-
 
 @student_views.route('/student/client-evaluation', methods=['GET', 'POST'])
 @student_required
@@ -568,7 +515,7 @@ def student_client_evaluation_page():
         data["bid_id"] = evaluation.bidID
         data["lot_id"] = evaluation.lotID
 
-        receipientGroup = get_group(evaluation.receipientGroupID)
+        receipientGroup = get_group(evaluation.recipientGroupID)
         data["group_name"] = receipientGroup.groupName
 
         evaluatedBid = get_bid(evaluation.bidID)
@@ -603,7 +550,6 @@ def student_client_evaluation_page():
         selected_lot=selected_lot_id
     )
 
-
 #Student view as vendor
 @student_views.route('/student/rfp-gallery', methods=['GET', 'POST'])
 @student_required
@@ -611,7 +557,7 @@ def student_client_evaluation_page():
 def rfp_gallery_page():
     if request.method == "POST":
         pdf = request.files['pdf']
-        receipientGroupID = int(request.form.get("groupID"))
+        recipientGroupID = int(request.form.get("groupID"))
         sourceGroupID = int(request.form.get("sourceGroupID"))
         lotID = int(request.form.get("lotID"))
         amount = float(request.form.get("amount"))
@@ -647,7 +593,7 @@ def rfp_gallery_page():
             flash(f"You have already placed a bid on Lot {lotID} ({lot.labType}), you can only place 1 bid on each lot", "failed")
             return redirect(url_for('student_views.rfp_gallery_page'))
 
-        bid = create_bid(lotID, sourceGroupID, receipientGroupID, pdf.read(), pdf.filename, amount)
+        bid = create_bid(lotID, sourceGroupID, recipientGroupID, pdf.read(), pdf.filename, amount)
         flash(f"Bid successfully placed on Lot {lotID} ({lot.labType})", "success")
         return redirect(url_for('student_views.rfp_gallery_page'))
 
@@ -734,7 +680,7 @@ def submitted_bids_page():
 
         data["rfp_title"] = lot.labType
 
-        group = get_group(bid.receipientGroupID)
+        group = get_group(bid.recipientGroupID)
 
         data["target_group"] = group.groupName
         data["submitted_at"] = bid.timestamp

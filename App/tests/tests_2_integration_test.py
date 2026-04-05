@@ -368,18 +368,18 @@ class Workflow8IntegrationTests(unittest.TestCase):
     @pytest.mark.run(order=50)
     def test_place_bid(self):
         sourceGroupID = 1
-        receipientGroupID = 2
+        recipientGroupID = 2
         lotID = 3
         bidDocument=b'fake pdf content'
         bidDocumentName='test.pdf'
         quotationAmount= 25000.0
 
-        bid = create_bid(lotID, sourceGroupID, receipientGroupID, bidDocument, bidDocumentName, quotationAmount)
+        bid = create_bid(lotID, sourceGroupID, recipientGroupID, bidDocument, bidDocumentName, quotationAmount)
         
         assert bid
         assert bid.sourceGroupID == 1
         assert bidDocumentName == 'test.pdf'
-        assert receipientGroupID == 2
+        assert recipientGroupID == 2
         assert lotID == 3
         assert quotationAmount == 25000.0
 
@@ -392,28 +392,28 @@ class Workflow9IntegrationTests(unittest.TestCase):
         assert removed
 
         sourceGroupID = 1
-        receipientGroupID = 2
+        recipientGroupID = 2
         lotID = 3
         bidDocument=b'fake pdf content'
         bidDocumentName='test.pdf'
         quotationAmount= 25000.0
 
-        bid = create_bid(lotID, sourceGroupID, receipientGroupID, bidDocument, bidDocumentName, quotationAmount)
+        bid = create_bid(lotID, sourceGroupID, recipientGroupID, bidDocument, bidDocumentName, quotationAmount)
 
         sourceGroupID = 2
-        receipientGroupID = 1
+        recipientGroupID = 1
         lotID = 1
         bidDocument=b'fake pdf content'
         bidDocumentName='test.pdf'
         quotationAmount= 25000.0
 
-        bid = create_bid(lotID, sourceGroupID, receipientGroupID, bidDocument, bidDocumentName, quotationAmount)
+        bid = create_bid(lotID, sourceGroupID, recipientGroupID, bidDocument, bidDocumentName, quotationAmount)
 
 class Workflow10IntegrationTests(unittest.TestCase):
     @pytest.mark.run(order=52)
     def test_create_evaluation(self):
         sourceGroupID = 1
-        receipientGroupID = 2
+        recipientGroupID = 2
         bidID = 2
         lotID = 1
         specsMet = 5
@@ -421,7 +421,7 @@ class Workflow10IntegrationTests(unittest.TestCase):
         professionalism = 2
         budget = 4
 
-        evaluation = create_evaluation(sourceGroupID, receipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget)
+        evaluation = create_evaluation(sourceGroupID, recipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget)
 
         assert evaluation
         assert evaluation.status == "draft"

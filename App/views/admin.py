@@ -200,6 +200,63 @@ def admin_remove_lot(lot_id):
 @admin_views.route('/admin/manage-bids')
 @admin_required
 def admin_manage_bids():
+
+    groups = db.session.scalars(
+        db.select(Group)
+    ).all()
+
+    GROUPS = []
+
+    for group in groups:
+        data = {}
+
+        data["id"] = group.id
+        data["name"] = group.groupName
+
+        students = db.session.scalars(
+            db.select(StudentGroup)
+            .filter_by(groupID=group.id)
+            .order_by(StudentGroup.studentID)
+        ).all()
+
+        members = []
+        for student in students:
+            innerData = {}
+            student = get_student(student.studentID)
+
+            innerData["name"] = student.name
+            innerData["id"] = student.id
+            members.append(innerData)
+
+        data["members"] = members
+
+        lots = []
+
+        lotObjs = db.session.scalars(
+            db.select(Lot)
+            .join(LotGroup, LotGroup.lotID == Lot.id)
+            .filter(LotGroup.groupID == group.id)
+        ).all()
+
+        for lotObj in lotObjs:
+            lots.append(lotObj.id)
+
+        data["lots"] = lots
+
+        bids = []
+
+        bidObjs = db.session.scalars(
+            db.select(Bid)
+            .filter_by(sourceGroupID=group.id)
+        )
+
+        for bidObj in bidObjs:
+            bids.append(bidObj)
+
+        data["bids"] = bids
+
+        GROUPS.append(data)
+
     return render_template(
         'admin/manage_bids.html',
         bid_groups=GROUPS,
@@ -210,13 +267,70 @@ def admin_manage_bids():
 @admin_views.route('/admin/manage-bids/group/<int:group_id>')
 @admin_required
 def admin_view_group_bids(group_id):
-    group = next((g for g in GROUPS if g['id'] == group_id), None)
+
+    groupJson = {}
+
+    group = get_group(group_id)
+
     if not group:
         return redirect(url_for('admin_views.admin_manage_bids'))
+
+    groupJson["id"] = group.id
+    groupJson["name"] = group.groupName
+
+    students = db.session.scalars(
+        db.select(StudentGroup)
+        .filter_by(groupID=group.id)
+        .order_by(StudentGroup.studentID)
+    ).all()
+
+    members = []
+    for student in students:
+        innerData = {}
+        student = get_student(student.studentID)
+
+        innerData["name"] = student.name
+        innerData["id"] = student.id
+        members.append(innerData)
+
+    groupJson["members"] = members
+
+    lots = []
+
+    lotObjs = db.session.scalars(
+        db.select(Lot)
+        .join(LotGroup, LotGroup.lotID == Lot.id)
+        .filter(LotGroup.groupID == group.id)
+    ).all()
+
+    for lotObj in lotObjs:
+        lots.append(lotObj.id)
+
+    groupJson["lots"] = lots
+
+    bids = []
+
+    bidObjs = db.session.scalars(
+        db.select(Bid)
+        .filter_by(sourceGroupID=group.id)
+    )
+
+    for bidObj in bidObjs:
+        bidJson = {}
+
+        toGroup = get_group(bidObj.recipientGroupID)
+
+        bidJson["to_group_name"] = toGroup.groupName
+        bidJson["timestamp"] = bidObj.timestamp
+        bidJson["id"] = bidObj.id
+        bids.append(bidJson)
+
+    groupJson["bids"] = bids
+
     return render_template(
         'admin/group_bids.html',
-        group=group,
-        title=f"Bids Placed By G{group['id']} {group['name']}",
+        group=groupJson,
+        title=f"Bids Placed By {groupJson['name']}",
         active_page='bids'
     )
 

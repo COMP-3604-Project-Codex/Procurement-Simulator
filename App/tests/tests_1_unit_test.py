@@ -185,7 +185,7 @@ class BidUnitTests(unittest.TestCase):
         bid = Bid(1, 2, 3, b'fake pdf content', 'test.pdf', 14000.0)
         assert bid.lotID == 1
         assert bid.sourceGroupID == 2
-        assert bid.receipientGroupID == 3
+        assert bid.recipientGroupID == 3
 
     @pytest.mark.run(order=27)
     def test_bid_document_link(self):
@@ -209,7 +209,7 @@ class BidUnitTests(unittest.TestCase):
         bid_json = bid.get_json()
         assert bid_json["lotID"] == 1
         assert bid_json["sourceGroupID"] == 2
-        assert bid_json["receipientGroupID"] == 3
+        assert bid_json["recipientGroupID"] == 3
         assert bid_json["bidDocumentName"] == 'test.pdf'
         assert "timestamp" in bid_json
 
@@ -218,7 +218,7 @@ class EvaluationUnitTests(unittest.TestCase):
     @pytest.mark.run(order=31)
     def test_new_evaluation(self):
         sourceGroupID = 1
-        receipientGroupID = 2
+        recipientGroupID = 2
         bidID = 2
         lotID = 1
         specsMet = 5
@@ -226,14 +226,14 @@ class EvaluationUnitTests(unittest.TestCase):
         professionalism = 2
         budget = 4
 
-        evaluation = Evaluation(sourceGroupID, receipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget)
+        evaluation = Evaluation(sourceGroupID, recipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget)
         assert evaluation
         assert evaluation.overallScore == 5.6
 
     @pytest.mark.run(order=32)
     def test_evaluation_get_json(self):
         sourceGroupID = 1
-        receipientGroupID = 2
+        recipientGroupID = 2
         bidID = 2
         lotID = 1
         specsMet = 5
@@ -241,11 +241,11 @@ class EvaluationUnitTests(unittest.TestCase):
         professionalism = 2
         budget = 4
 
-        evaluation = Evaluation(sourceGroupID, receipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget)
+        evaluation = Evaluation(sourceGroupID, recipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget)
         self.assertDictEqual({
             'id': None,
             'sourceGroupID': 1,
-            'receipientGroupID': 2,
+            'recipientGroupID': 2,
             'bidID': 2,
             'lotID': 1,
             'overallScore': 5.6

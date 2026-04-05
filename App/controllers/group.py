@@ -40,7 +40,7 @@ def remove_group(id):
     if group:
         entries = db.session.scalars(
             db.select(Bid)
-            .filter(or_(Bid.sourceGroupID == id, Bid.receipientGroupID == id))
+            .filter(or_(Bid.sourceGroupID == id, Bid.recipientGroupID == id))
         ).all()
 
         for entry in entries:
@@ -48,7 +48,7 @@ def remove_group(id):
 
         entries = db.session.scalars(
             db.select(Evaluation)
-            .filter(or_(Evaluation.sourceGroupID == id, Evaluation.receipientGroupID == id))
+            .filter(or_(Evaluation.sourceGroupID == id, Evaluation.recipientGroupID == id))
         ).all()
 
         for entry in entries:

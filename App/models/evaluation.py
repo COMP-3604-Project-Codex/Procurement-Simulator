@@ -4,7 +4,7 @@ from datetime import datetime
 class Evaluation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     sourceGroupID = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=False)
-    receipientGroupID = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=False)
+    recipientGroupID = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=False)
     bidID = db.Column(db.Integer, db.ForeignKey('bid.id'), nullable=False)
     lotID = db.Column(db.Integer, db.ForeignKey('lot.id'), nullable=False)
     specsSelected = db.Column(db.String(500), default="")
@@ -26,11 +26,11 @@ class Evaluation(db.Model):
     budget = db.Column(db.Integer, default=0)
     specsMet = db.Column(db.Integer, default=0)
 
-    def __init__(self, sourceGroupID, receipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget):
+    def __init__(self, sourceGroupID, recipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget):
         self.bidID = bidID
         self.lotID = lotID
         self.sourceGroupID = sourceGroupID
-        self.receipientGroupID = receipientGroupID
+        self.recipientGroupID = recipientGroupID
         self.specsMet = specsMet
         self.presentation = presentation
         self.professionalism = professionalism
@@ -42,7 +42,7 @@ class Evaluation(db.Model):
         return {
             'id': self.id,
             'sourceGroupID': self.sourceGroupID,
-            'receipientGroupID': self.receipientGroupID,
+            'recipientGroupID': self.recipientGroupID,
             'bidID': self.bidID,
             'lotID': self.lotID,
             'overallScore': self.overallScore

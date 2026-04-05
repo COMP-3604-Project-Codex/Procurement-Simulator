@@ -1,8 +1,8 @@
 from App.models import Evaluation
 from App.database import db
 
-def create_evaluation(sourceGroupID, receipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget):
-    neweval = Evaluation(sourceGroupID, receipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget)
+def create_evaluation(sourceGroupID, recipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget):
+    neweval = Evaluation(sourceGroupID, recipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget)
     db.session.add(neweval)
     db.session.commit()
     return neweval
