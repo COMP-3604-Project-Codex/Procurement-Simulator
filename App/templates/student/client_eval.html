@@ -72,9 +72,9 @@
                                 Selected
                             </div>
                         {% else %}
-                            <form method="POST">
+                            <form method="POST" class="select-eval-form" data-eval-id="{{ eval.id }}">
                                 <input type="hidden" name="evaluationID" value="{{ eval.id }}">
-                                <button type="submit" class="px-4 py-1.5 rounded-lg border border-slate-300 text-slate-500 text-[10px] font-bold uppercase hover:bg-slate-900 hover:text-white transition-all">
+                                <button type="button" class="px-4 py-1.5 rounded-lg border border-slate-300 text-slate-500 text-[10px] font-bold uppercase hover:bg-slate-900 hover:text-white transition-all select-bid-btn">
                                     Select Bid
                                 </button>
                             </form>
@@ -86,4 +86,48 @@
         </table>
     </div>
 </div>
+<!-- Confirm Select Evaluation Modal -->
+<div id="confirmSelectModal" class="fixed inset-0 flex items-center justify-center bg-black/30 z-50 hidden">
+    <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-lg relative">
+        <button class="absolute top-4 right-4 text-3xl font-bold text-slate-700 close-modal">&times;</button>
+        <h2 class="text-xl font-bold text-slate-900 mb-4">Confirm Selection</h2>
+        <p class="text-slate-600 mb-6">
+            Are you sure you want to select this bid as the winning evaluation? This action cannot be undone.
+        </p>
+        <div class="flex gap-4">
+            <button id="cancelSelectBtn" class="flex-1 rounded-xl border border-slate-300 px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50 transition">
+                Cancel
+            </button>
+            <button id="confirmSelectBtn" class="flex-1 rounded-xl bg-slate-900 px-4 py-3 font-semibold text-white hover:bg-brand-600 transition">
+                Confirm
+            </button>
+        </div>
+    </div>
+</div>
+<script>
+    let selectedForm = null;
+
+    // Open modal on select bid click
+    document.querySelectorAll('.select-bid-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            selectedForm = btn.closest('.select-eval-form');
+            document.getElementById('confirmSelectModal').classList.remove('hidden');
+        });
+    });
+
+    // Close modal
+    document.querySelectorAll('#confirmSelectModal .close-modal, #cancelSelectBtn').forEach(el => {
+        el.addEventListener('click', function() {
+            selectedForm = null;
+            document.getElementById('confirmSelectModal').classList.add('hidden');
+        });
+    });
+
+    // Confirm selection
+    document.getElementById('confirmSelectBtn').addEventListener('click', function() {
+        if (selectedForm) {
+            selectedForm.submit();
+        }
+    });
+</script>
 {% endblock %}
