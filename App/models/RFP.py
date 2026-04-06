@@ -20,6 +20,7 @@ class RFP(db.Model):
     def __init__(self, groupID, lotID):
         self.groupID = groupID
         self.lotID = lotID
+        self.timestamp = datetime.now()
 
     def get_json(self):
         return {

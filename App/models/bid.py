@@ -18,6 +18,7 @@ class Bid(db.Model):
         self.bidDocument = bidDocument
         self.bidDocumentName = bidDocumentName
         self.quotationAmount = quotationAmount
+        self.timestamp = datetime.now()
 
     def get_json(self):
         return {

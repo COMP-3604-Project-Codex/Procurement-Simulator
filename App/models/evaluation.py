@@ -36,6 +36,7 @@ class Evaluation(db.Model):
         self.professionalism = professionalism
         self.budget = budget
         self.overallScore = round((((specsMet + presentation + professionalism + budget)/25) * 10), 1)
+        self.timestamp = datetime.now()
         
     def get_json(self):
         return {
