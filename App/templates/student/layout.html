@@ -34,14 +34,14 @@
   </head>
   <body class="bg-slate-100 font-body text-slate-900 antialiased">
     <div class="min-h-screen lg:grid lg:grid-cols-[280px_1fr]">
-      <aside class="border-b border-slate-300 bg-white p-5 lg:border-b-0 lg:border-r lg:p-6">
+      <aside class="border-b border-slate-300 bg-white p-5 lg:border-b-0 lg:border-r lg:p-6 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto">
         <div class="mb-8">
           <p class="font-heading text-3xl font-semibold tracking-tight text-slate-900">PROCUREMENT</p>
           <p class="font-heading text-3xl font-semibold tracking-tight text-slate-900">SIMULATOR</p>
         </div>
 
         {% block sidebar_nav %}
-        <nav class="space-y-6 text-[1.7rem] leading-tight text-slate-800 sm:text-lg">
+        <nav class="space-y-3 text-[1.7rem] leading-tight text-slate-800 sm:text-lg">
           <a href="{{ url_for('student_views.student_create_group_page') }}" class="block rounded-xl px-3 py-2 font-semibold {% if active_page == 'create-group' %}bg-brand-100 text-brand-600{% else %}hover:bg-slate-100{% endif %}">Create Group</a>
           <a href="{{ url_for('student_views.student_group_details_page') }}" class="block rounded-xl px-3 py-2 font-semibold {% if active_page == 'group-details' %}bg-brand-100 text-brand-600{% else %}hover:bg-slate-100{% endif %}">Group Details</a>
 
@@ -80,7 +80,7 @@
             </div>
           </div>
 
-          <a href="/logout" class="block rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">Logout</a>
+          <a href="/logout" class="block mt-4 rounded-xl px-3 py-2 font-semibold hover:bg-slate-100">Logout</a>
         </nav>
         {% endblock %}
       </aside>

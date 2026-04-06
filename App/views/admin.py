@@ -42,7 +42,7 @@ def admin_manage_lots():
         db.select(Lot)
     ).all()
 
-    return render_template('admin/manage_lots.html', title='Manage Lots', lots=lots)
+    return render_template('admin/manage_lots.html', title='Manage Lots', lots=lots, active_page="lots")
 
 @admin_views.route('/admin/lots/add', methods=['POST'])
 @admin_required
