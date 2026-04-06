@@ -27,18 +27,27 @@ def identify_page():
 @auth_views.route('/login', methods=['POST'])
 def login_action():
     data = request.form
-    token = login(data['username'], data['password'])
-    response = redirect(request.referrer)
+    token, role = login(data['username'], data['password']) 
+    
     if not token:
-        flash('Bad username or password given', "failed"), 401
+        flash('Bad username or password given', "failed")
+        return redirect(request.referrer) 
+    
+    flash('Login Successful', "success")
+    
+    if role == "student":
+        response = redirect('/student')
+    elif role == "admin":
+        response = redirect('/admin/manage-groups')
     else:
-        flash('Login Successful', "success")
-        set_access_cookies(response, token) 
+        response = redirect('/')  
+
+    set_access_cookies(response, token)
     return response
 
 @auth_views.route('/logout', methods=['GET'])
 def logout_action():
-    response = redirect(request.referrer) 
+    response = redirect(url_for('index_views.index_page')) 
     flash("Logged Out!", "success")
     unset_jwt_cookies(response)
     return response

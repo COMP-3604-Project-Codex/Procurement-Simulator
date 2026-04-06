@@ -10,7 +10,7 @@ class Evaluation(db.Model):
     specsSelected = db.Column(db.String(500), default="")
     status = db.Column(db.String(30), default="draft")
     overallScore = db.Column(db.Float, default=0.0)
-    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    timestamp = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
     deviceType = db.Column(db.String(1000), default="")
     resolution = db.Column(db.String(1000), default="")
     os = db.Column(db.String(1000), default="")
@@ -36,8 +36,7 @@ class Evaluation(db.Model):
         self.professionalism = professionalism
         self.budget = budget
         self.overallScore = round((((specsMet + presentation + professionalism + budget)/25) * 10), 1)
-        self.timestamp = datetime.now()
-
+        
     def get_json(self):
         return {
             'id': self.id,

@@ -5,7 +5,7 @@ class RFP(db.Model):
     groupID = db.Column(db.Integer, db.ForeignKey('group.id'), primary_key=True)
     lotID = db.Column(db.Integer, db.ForeignKey('lot.id'), primary_key=True)
     status = db.Column(db.String(30), default="requested")
-    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    timestamp = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
     deviceType = db.Column(db.String(1000), default="")
     resolution = db.Column(db.String(1000), default="")
     os = db.Column(db.String(1000), default="")
@@ -20,7 +20,6 @@ class RFP(db.Model):
     def __init__(self, groupID, lotID):
         self.groupID = groupID
         self.lotID = lotID
-        self.timestamp = datetime.now()
 
     def get_json(self):
         return {
