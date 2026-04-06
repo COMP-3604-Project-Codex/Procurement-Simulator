@@ -9,7 +9,7 @@ def login(username, password):
   if user and user.check_password(password):
     # Store ONLY the user id as a string in JWT 'sub'
     return user, create_access_token(identity=str(user.id)), user.type
-  return None, None
+  return None, None, None
 
 
 def setup_jwt(app):

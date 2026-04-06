@@ -61,17 +61,50 @@
       <h2 class="text-2xl font-semibold mb-6 text-center text-slate-900">Assign Lots:</h2>
       <form id="assignLotsForm" method="post">
         <label for="lot1" class="block mb-2 text-slate-800 font-semibold">1st Lot:</label>
-        <select name="lot1" id="lot1" class="block w-full mb-4 rounded-lg border border-slate-300 px-3 py-2">
-          {% for lot in lots %}
-          <option value="{{ lot.id }}">Lot {{ lot.id }}: {{lot.labType}}</option>
-          {% endfor %}
-        </select>
+        <div class="relative w-full mb-4">
+          <button type="button" onclick="toggleDropdown('lot1Dropdown')" 
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-left bg-white">
+            Select Lot
+          </button>
+
+          <div id="lot1Dropdown" 
+            class="hidden absolute z-50 mt-1 w-full rounded-lg border border-slate-300 bg-white shadow-lg max-h-40 overflow-y-auto">
+            
+            {% for lot in lots %}
+            <div 
+              onclick="selectLot('lot1', '{{ lot.id }}', this)"
+              class="px-4 py-2 hover:bg-slate-100 cursor-pointer">
+              Lot {{ lot.id }}: {{ lot.labType }}
+            </div>
+            {% endfor %}
+            
+          </div>
+          <!-- hidden input to submit value -->
+          <input type="hidden" name="lot1" id="lot1">
+        </div>
         <label for="lot2" class="block mb-2 text-slate-800 font-semibold">2nd Lot:</label>
-        <select name="lot2" id="lot2" class="block w-full mb-6 rounded-lg border border-slate-300 px-3 py-2">
-          {% for lot in lots %}
-          <option value="{{ lot.id }}">Lot {{ lot.id }}: {{lot.labType}}</option>
-          {% endfor %}
-        </select>
+        <div class="relative w-full mb-4">
+          <button type="button" onclick="toggleDropdown('lot2Dropdown')" 
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-left bg-white">
+            Select Lot
+          </button>
+
+          <div id="lot2Dropdown" 
+            class="hidden absolute z-50 mt-1 w-full rounded-lg border border-slate-300 bg-white shadow-lg max-h-40 overflow-y-auto">
+            
+            {% for lot in lots %}
+            <div 
+              onclick="selectLot('lot2', '{{ lot.id }}', this)"
+              class="px-4 py-2 hover:bg-slate-100 cursor-pointer">
+              Lot {{ lot.id }}: {{ lot.labType }}
+            </div>
+            {% endfor %}
+            
+          </div>
+
+          <!-- hidden input -->
+          <input type="hidden" name="lot2" id="lot2">
+        </div>
         <button type="button" id="confirmAssignBtn" class="w-full rounded-xl border border-slate-900 bg-white px-4 py-3 text-lg font-semibold text-slate-900 transition hover:bg-slate-100">Confirm</button>
       </form>
     </div>
@@ -94,6 +127,24 @@
     </div>
 </div>
 <script>
+function toggleDropdown(id) {
+  document.getElementById(id).classList.toggle('hidden');
+}
+
+function selectLot(inputId, value, el) {
+  document.getElementById(inputId).value = value;
+  el.closest('.relative').querySelector('button').textContent = el.textContent;
+  el.parentElement.classList.add('hidden');
+}
+
+// Optional: close when clicking outside
+document.addEventListener('click', function(e) {
+  document.querySelectorAll('[id$="Dropdown"]').forEach(drop => {
+    if (!drop.parentElement.contains(e.target)) {
+      drop.classList.add('hidden');
+    }
+  });
+});
 function showTab(tab) {
   document.getElementById('section-requests').classList.toggle('hidden', tab !== 'requests');
   document.getElementById('section-groups').classList.toggle('hidden', tab !== 'groups');

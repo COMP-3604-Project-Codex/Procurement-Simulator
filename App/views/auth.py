@@ -28,11 +28,11 @@ def identify_page():
 def login_action():
     data = request.form
     user, token, role = login(data['username'], data['password']) 
-    
+
     if not token:
         flash('Bad username or password given', "failed")
         return redirect(request.referrer) 
-    
+
     flash('Login Successful', "success")
 
     name = user.username if user.is_admin() else user.name

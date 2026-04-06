@@ -1,5 +1,6 @@
 from flask_admin.contrib.sqla import ModelView
 import io
+from sqlalchemy import outerjoin
 from functools import wraps
 from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, set_access_cookies
 from flask_admin import Admin as FlaskAdmin
@@ -288,6 +289,8 @@ def admin_manage_groups():
 
     LOTS = db.session.scalars(
         db.select(Lot)
+        .outerjoin(LotGroup, LotGroup.lotID == Lot.id)
+        .where(LotGroup.lotID == None)
     ).all()
 
     return render_template('admin/manage_groups.html',
