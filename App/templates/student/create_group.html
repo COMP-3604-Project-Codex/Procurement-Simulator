@@ -17,7 +17,9 @@
           <div class="max-h-[360px] overflow-y-auto pr-2">
             <ul class="divide-y divide-slate-200">
               {% for candidate in candidates %}
-                <li class="flex items-center justify-between gap-4 py-4">
+                <li class="candidate-item flex items-center justify-between gap-4 py-4"
+                  data-name="{{ candidate.name|lower }}"
+                  data-id="{{ candidate.student_id|lower }}">
                   <label class="flex w-full cursor-pointer items-center justify-between">
                     <span class="text-xl font-medium text-slate-800">{{ candidate.name }} ({{ candidate.student_id }})</span>
                     
@@ -30,6 +32,7 @@
                 </li>
               {% endfor %}
             </ul>
+            <p id="no-results" class="hidden text-center text-slate-500 py-4">No members found</p>
           </div>
         </section>
 
@@ -38,6 +41,29 @@
         </div>
    </form>
   </div>
+  <script>
+    const searchInput = document.getElementById('member-search');
+    const candidates = document.querySelectorAll('.candidate-item');
+    const noResults = document.getElementById('no-results');
 
+    searchInput.addEventListener('input', function () {
+      const query = this.value.toLowerCase();
+      let visible = 0;
+
+      candidates.forEach(candidate => {
+        const name = candidate.dataset.name;
+        const id = candidate.dataset.id;
+
+        if (name.includes(query) || id.includes(query)) {
+          candidate.style.display = 'flex';
+          visible++;
+        } else {
+          candidate.style.display = 'none';
+        }
+      });
+
+      noResults.classList.toggle('hidden', visible !== 0);
+    });
+  </script>
 
 {% endblock %}
