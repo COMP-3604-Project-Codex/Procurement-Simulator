@@ -127,8 +127,8 @@ def student_create_group_page():
             flash("You must enter a group name", "failed")
             return redirect(url_for('student_views.student_create_group_page'))
 
-        if len(members) != 4:
-            flash("You must select 3 group members to make a group of 4", "failed")
+        if len(members) != 3:
+            flash("You must select 2 group members to make a group of 3", "failed")
             return redirect(url_for('student_views.student_create_group_page'))
 
         group = create_group(name)
