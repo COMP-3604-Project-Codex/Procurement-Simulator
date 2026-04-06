@@ -77,6 +77,22 @@
     </div>
   </div>
 </div>
+
+<!-- Confirm Action Modal -->
+<div id="confirmModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+    <div class="bg-white rounded-2xl p-8 w-full max-w-md relative">
+        <h2 class="text-xl font-bold text-slate-900 mb-2" id="confirmTitle">Are you sure?</h2>
+        <p class="text-slate-600 mb-6" id="confirmMessage">This action cannot be undone.</p>
+        <div class="flex gap-4">
+            <button onclick="hideConfirmModal()" class="flex-1 rounded-xl border border-slate-300 px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50 transition">
+                Cancel
+            </button>
+            <button id="confirmActionBtn" class="flex-1 rounded-xl bg-red-600 px-4 py-3 font-semibold text-white hover:bg-red-700 transition">
+                Confirm
+            </button>
+        </div>
+    </div>
+</div>
 <script>
 function showTab(tab) {
   document.getElementById('section-requests').classList.toggle('hidden', tab !== 'requests');
@@ -110,6 +126,20 @@ function hideAssignLotsModal() {
   document.getElementById('assignLotsModal').classList.add('hidden');
 }
 
+let pendingForm = null;
+
+function showConfirmModal(title, message, form) {
+    pendingForm = form;
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMessage').textContent = message;
+    document.getElementById('confirmModal').classList.remove('hidden');
+}
+
+function hideConfirmModal() {
+    pendingForm = null;
+    document.getElementById('confirmModal').classList.add('hidden');
+}
+
 // Attach event listeners to Assign Lots buttons after DOM loads
 window.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.assign-lots-btn').forEach(function(btn) {
@@ -127,28 +157,39 @@ window.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  document.getElementById('confirmActionBtn').addEventListener('click', function() {
+      if (pendingForm) {
+          document.body.appendChild(pendingForm);
+          pendingForm.submit();
+      }
+  });
+
   document.querySelectorAll('.decline-btn').forEach(function(btn) {
-    btn.addEventListener('click', function(e) {
-        const groupId = e.target.dataset.groupId;
-        
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/admin/group-requests/${groupId}/decline`;
-        document.body.appendChild(form);
-        form.submit();
-    });
+      btn.addEventListener('click', function(e) {
+          const groupId = e.target.dataset.groupId;
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = `/admin/group-requests/${groupId}/decline`;
+          showConfirmModal(
+              'Reject Group Request?',
+              'This will permanently reject the group request and cannot be undone.',
+              form
+          );
+      });
   });
 
   document.querySelectorAll('.remove-btn').forEach(function(btn) {
-    btn.addEventListener('click', function(e) {
-        const groupId = e.target.dataset.groupId;
-        
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/admin/groups/${groupId}/remove`;
-        document.body.appendChild(form);
-        form.submit();
-    });
+      btn.addEventListener('click', function(e) {
+          const groupId = e.target.dataset.groupId;
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = `/admin/groups/${groupId}/remove`;
+          showConfirmModal(
+              'Remove Group?',
+              'This will permanently remove the group and all associated data. This cannot be undone.',
+              form
+          );
+      });
   });
 
   // Handle confirm assign button

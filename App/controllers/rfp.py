@@ -1,6 +1,7 @@
-from App.models import RFP
+from App.models import RFP, Bid
 from App.database import db
 from .lot import get_lot
+from .bid import remove_bid
 
 def create_rfp(groupID, lotID):
     rfp = RFP(groupID, lotID)
@@ -44,6 +45,14 @@ def get_all_rfps_json():
 def remove_rfp(groupID, lotID):
     rfp = get_rfp(groupID, lotID)
     if rfp:
+        bids = db.session.scalars(
+            db.select(Bid)
+            .filter_by(lotID= lotID)
+        )
+
+        for bid in bids:
+            remove_bid(bid.id)
+
         db.session.delete(rfp)
         db.session.commit()
         return True

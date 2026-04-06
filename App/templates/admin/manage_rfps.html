@@ -30,8 +30,10 @@
         <form method="post" action="{{ url_for('admin_views.admin_manage_rfps') }}">
           <input type="hidden" name="groupID" value="{{ rfp.groupID }}">
           <input type="hidden" name="lotID" value="{{ rfp.lotID }}">
-          <button type="submit" name="action" value="approve" class="px-4 py-2 bg-green-500 text-white rounded">Approve</button>
-          <button type="submit" name="action" value="reject" class="px-4 py-2 bg-red-500 text-white rounded">Reject</button>
+          <button type="button" class="rfp-approve-btn px-4 py-2 bg-green-500 text-white rounded"
+            data-group-id="{{ rfp.groupID }}" data-lot-id="{{ rfp.lotID }}">Approve</button>
+          <button type="button" class="rfp-reject-btn px-4 py-2 bg-red-500 text-white rounded"
+            data-group-id="{{ rfp.groupID }}" data-lot-id="{{ rfp.lotID }}">Reject</button>
         </form>
       </div>
     </div>
@@ -60,7 +62,8 @@
         <form method="post" action="{{ url_for('admin_views.admin_manage_rfps') }}">
           <input type="hidden" name="groupID" value="{{ rfp.groupID }}">
           <input type="hidden" name="lotID" value="{{ rfp.lotID }}">
-          <button type="submit" name="action" value="remove" class="px-4 py-2 bg-red-500 text-white rounded">Remove</button>
+          <button type="button" class="rfp-remove-btn px-4 py-2 bg-red-500 text-white rounded"
+            data-group-id="{{ rfp.groupID }}" data-lot-id="{{ rfp.lotID }}">Remove</button>
         </form>
       </div>
     </div>
@@ -92,7 +95,102 @@
     </div>
   </div>
 </div>
+<!-- Confirm RFP Action Modal -->
+<div id="confirmRfpModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+    <div class="bg-white rounded-2xl p-8 w-full max-w-md relative">
+        <h2 class="text-xl font-bold text-slate-900 mb-2" id="confirmRfpTitle">Are you sure?</h2>
+        <p class="text-slate-600 mb-6" id="confirmRfpMessage">This action cannot be undone.</p>
+        <div class="flex gap-4">
+            <button onclick="hideConfirmRfpModal()" class="flex-1 rounded-xl border border-slate-300 px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50 transition">
+                Cancel
+            </button>
+            <button id="confirmRfpActionBtn" class="flex-1 rounded-xl px-4 py-3 font-semibold text-white transition">
+                Confirm
+            </button>
+        </div>
+    </div>
+</div>
 <script>
+let pendingRfpForm = null;
+
+function hideConfirmRfpModal() {
+    pendingRfpForm = null;
+    document.getElementById('confirmRfpModal').classList.add('hidden');
+}
+
+function showConfirmRfpModal(title, message, form, btnColor) {
+    pendingRfpForm = form;
+    document.getElementById('confirmRfpTitle').textContent = title;
+    document.getElementById('confirmRfpMessage').textContent = message;
+    const btn = document.getElementById('confirmRfpActionBtn');
+    btn.className = `flex-1 rounded-xl px-4 py-3 font-semibold text-white transition ${btnColor}`;
+    document.getElementById('confirmRfpModal').classList.remove('hidden');
+}
+
+document.getElementById('confirmRfpActionBtn').addEventListener('click', function() {
+    if (pendingRfpForm) {
+        document.body.appendChild(pendingRfpForm);
+        pendingRfpForm.submit();
+    }
+});
+
+document.querySelectorAll('.rfp-approve-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{{ url_for('admin_views.admin_manage_rfps') }}";
+        form.innerHTML = `
+            <input type="hidden" name="groupID" value="${btn.dataset.groupId}">
+            <input type="hidden" name="lotID" value="${btn.dataset.lotId}">
+            <input type="hidden" name="action" value="approve">
+        `;
+        showConfirmRfpModal(
+            'Approve RFP?',
+            'This will approve the RFP and make it visible in the gallery.',
+            form,
+            'bg-green-600 hover:bg-green-700'
+        );
+    });
+});
+
+document.querySelectorAll('.rfp-reject-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{{ url_for('admin_views.admin_manage_rfps') }}";
+        form.innerHTML = `
+            <input type="hidden" name="groupID" value="${btn.dataset.groupId}">
+            <input type="hidden" name="lotID" value="${btn.dataset.lotId}">
+            <input type="hidden" name="action" value="reject">
+        `;
+        showConfirmRfpModal(
+            'Reject RFP?',
+            'This will permanently reject and remove the RFP. This cannot be undone.',
+            form,
+            'bg-red-600 hover:bg-red-700'
+        );
+    });
+});
+
+document.querySelectorAll('.rfp-remove-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{{ url_for('admin_views.admin_manage_rfps') }}";
+        form.innerHTML = `
+            <input type="hidden" name="groupID" value="${btn.dataset.groupId}">
+            <input type="hidden" name="lotID" value="${btn.dataset.lotId}">
+            <input type="hidden" name="action" value="remove">
+        `;
+        showConfirmRfpModal(
+            'Remove RFP?',
+            'This will permanently remove the RFP from the gallery. This cannot be undone.',
+            form,
+            'bg-red-600 hover:bg-red-700'
+        );
+    });
+});
+
 function showRfpTab(tab) {
   document.getElementById('section-requests').classList.toggle('hidden', tab !== 'requests');
   document.getElementById('section-gallery').classList.toggle('hidden', tab !== 'gallery');

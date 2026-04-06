@@ -21,18 +21,11 @@ block content %}
                 >
                     Edit
                 </button>
-                <form
-                    method="POST"
-                    action="{{ url_for('admin_views.admin_remove_lot', lot_id=lot.id) }}"
-                    style="display: inline"
-                >
-                    <button
-                        type="submit"
-                        class="rounded-xl border border-red-600 bg-red-50 px-8 py-2 text-base font-semibold text-red-700 transition hover:bg-red-100"
-                    >
-                        Remove
-                    </button>
-                </form>
+                <button type="button"
+                    class="remove-lot-btn rounded-xl border border-red-600 bg-red-50 px-8 py-2 text-base font-semibold text-red-700 transition hover:bg-red-100"
+                    data-lot-id="{{ lot.id }}">
+                    Remove
+                </button>
             </div>
         </div>
         {% endfor %}
@@ -137,4 +130,63 @@ block content %}
         </form>
     </div>
 </div>
+<!-- Confirm Remove Modal -->
+<div id="confirmLotModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+    <div class="bg-white rounded-2xl p-8 w-full max-w-md relative">
+        <h2 class="text-xl font-bold text-slate-900 mb-2">Remove Lot?</h2>
+        <p class="text-slate-600 mb-6">This will permanently remove the lot and all associated data. This cannot be undone.</p>
+        <div class="flex gap-4">
+            <button onclick="hideConfirmLotModal()" class="flex-1 rounded-xl border border-slate-300 px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50 transition">
+                Cancel
+            </button>
+            <button id="confirmLotRemoveBtn" class="flex-1 rounded-xl bg-red-600 px-4 py-3 font-semibold text-white hover:bg-red-700 transition">
+                Confirm
+            </button>
+        </div>
+    </div>
+</div>
+<script>
+    let pendingLotForm = null;
+
+    function hideConfirmLotModal() {
+        pendingLotForm = null;
+        document.getElementById('confirmLotModal').classList.add('hidden');
+    }
+
+    document.getElementById('confirmLotRemoveBtn').addEventListener('click', function() {
+        if (pendingLotForm) {
+            document.body.appendChild(pendingLotForm);
+            pendingLotForm.submit();
+        }
+    });
+
+    document.querySelectorAll('.remove-lot-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const lotId = btn.dataset.lotId;
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/admin/lots/${lotId}/remove`;
+            pendingLotForm = form;
+            document.getElementById('confirmLotModal').classList.remove('hidden');
+        });
+    });
+
+    // existing modal JS
+    document.getElementById('add-lot-btn').addEventListener('click', function() {
+        document.getElementById('add-lot-modal').classList.remove('hidden');
+    });
+    document.querySelectorAll('.close-modal').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.getElementById('add-lot-modal').classList.add('hidden');
+            document.getElementById('edit-lot-modal').classList.add('hidden');
+        });
+    });
+    document.querySelectorAll('.edit-lot-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const lotId = btn.dataset.lotId;
+            document.getElementById('edit-lot-form').action = `/admin/lots/${lotId}/edit`;
+            document.getElementById('edit-lot-modal').classList.remove('hidden');
+        });
+    });
+</script>
 {% endblock %}

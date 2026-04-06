@@ -38,45 +38,21 @@ def get_all_groups_json():
 def remove_group(id):
     group = get_group(id)
     if group:
-        entries = db.session.scalars(
-            db.select(Bid)
-            .filter(or_(Bid.sourceGroupID == id, Bid.recipientGroupID == id))
-        ).all()
-
-        for entry in entries:
-            removed = remove_bid(entry.id)
-
-        entries = db.session.scalars(
-            db.select(Evaluation)
-            .filter(or_(Evaluation.sourceGroupID == id, Evaluation.recipientGroupID == id))
-        ).all()
-
-        for entry in entries:
-            removed = remove_evaluation(entry.id)
-
-        entries = db.session.scalars(
-            db.select(RFP)
-            .filter_by(groupID = id)
-        ).all()
-
-        for entry in entries:
-            removed = remove_rfp(id, entry.lotID)
-
-        entries = db.session.scalars(
+        members = db.session.scalars(
             db.select(StudentGroup)
-            .filter_by(groupID = id)
+            .filter_by(groupID=id)
         ).all()
 
-        for entry in entries:
-            removed = remove_studentGroup(entry.studentID, id)
+        for member in members:
+            remove_studentGroup(member.studentID, member.groupID)
 
-        entries = db.session.scalars(
+        lotGroups = db.session.scalars(
             db.select(LotGroup)
-            .filter_by(groupID = id)
+            .filter_by(groupID=id)
         ).all()
 
-        for entry in entries:
-            removed = remove_lotGroup(entry.lotID, id)
+        for lotGroup in lotGroups:
+            remove_lotGroup(lotGroup.lotID, lotGroup.groupID)
         
         db.session.delete(group)
         db.session.commit()

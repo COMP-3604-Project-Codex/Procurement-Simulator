@@ -1,6 +1,7 @@
-from App.models import Lot
+from App.models import Lot, LotGroup
 from App.database import db
 from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy import or_, and_
 
 def create_lot(labType, labSize, budget):
     newlot = Lot(labType, labSize, budget)
@@ -73,7 +74,21 @@ def get_lotRFP_details_json(id):
     return None
 
 def remove_lot(id):
+    from .group import remove_group
+
     lot = get_lot(id)
     if lot:
-        db.session.delete(lot)
-        db.session.commit()
+        assigned = db.session.scalars(
+            db.select(LotGroup)
+            .filter_by(lotID=lot.id)
+        ).first()
+
+        if not assigned:
+            db.session.delete(lot)
+            db.session.commit()
+            return True  
+        else:
+            remove_group(assigned.groupID)
+            db.session.delete(lot)
+            db.session.commit()
+    return False

@@ -1,8 +1,9 @@
 from flask_admin.contrib.sqla import ModelView
+import io
 from functools import wraps
 from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, set_access_cookies
 from flask_admin import Admin as FlaskAdmin
-from flask import flash, redirect, url_for, request, Blueprint, render_template
+from flask import flash, redirect, url_for, request, Blueprint, render_template, send_file
 from App.database import db
 from App.models import User, Admin, Student, Group, StudentGroup, Lot, LotGroup, Bid, Evaluation, RFP
 from App.controllers import *
@@ -31,128 +32,6 @@ def admin_required(f):
             return redirect(url_for('index_views.index_page'))
         return f(*args, **kwargs)
     return decorated_function
-
-# ─── Dummy Data ───────────────────────────────────────────────────────────────
-
-LOTS = [
-    {
-        'id': 1,
-        'lab_type': 'GIS Lab',
-        'lab_size': 'Medium, capable of having 20 machines',
-        'budget': 160000
-    },
-    {
-        'id': 2,
-        'lab_type': 'Government Office Lab',
-        'lab_size': 'Small, capable of having 12 machines',
-        'budget': 110000
-    }
-]
-
-GROUPS = [
-    {
-        'id': 1,
-        'name': 'NovaCore',
-        'members': [
-            {'name': 'Aisha Mohammed', 'id': '20231278'},
-            {'name': 'Jamal Baptiste', 'id': '20236754'},
-            {'name': 'Denzel Johnson', 'id': '20939438'}
-        ],
-        'lots': [8, 4],
-        'bids': []
-    },
-    {
-        'id': 2,
-        'name': 'TechSphere',
-        'members': [
-            {'name': 'Daniel Roberts', 'id': '20240123'},
-            {'name': 'Priya Singh', 'id': '20249811'},
-            {'name': 'Marcus Charles', 'id': '20235562'}
-        ],
-        'lots': [3, 6],
-        'bids': [
-            {'id': 1, 'to_group_id': 1, 'to_group_name': 'NovaCore', 'timestamp': '11/5/2025, 6:56pm'}
-        ]
-    },
-    {
-        'id': 3,
-        'name': 'CodeMatrix',
-        'members': [
-            {'name': 'Leah Thomas', 'id': '20238914'},
-            {'name': 'Ryan Ali', 'id': '20227654'},
-            {'name': 'Samantha Pierre', 'id': '20241209'}
-        ],
-        'lots': [2, 5],
-        'bids': [
-            {'id': 2, 'to_group_id': 2, 'to_group_name': 'TechSphere', 'timestamp': '11/5/2025, 6:46pm'},
-            {'id': 3, 'to_group_id': 1, 'to_group_name': 'NovaCore', 'timestamp': '11/5/2025, 6:50pm'}
-        ]
-    },
-    {
-        'id': 4,
-        'name': 'DataWave',
-        'members': [],
-        'lots': [],
-        'bids': [
-            {'id': 4, 'to_group_id': 5, 'to_group_name': 'CyberFusion', 'timestamp': '11/5/2025, 6:46pm'},
-            {'id': 5, 'to_group_id': 2, 'to_group_name': 'TechSphere', 'timestamp': '11/5/2025, 6:56pm'}
-        ]
-    },
-    {
-        'id': 5,
-        'name': 'CyberFusion',
-        'members': [],
-        'lots': [],
-        'bids': [
-            {'id': 6, 'to_group_id': 1, 'to_group_name': 'NovaCore', 'timestamp': '11/5/2025, 7:00pm'}
-        ]
-    },
-    {
-        'id': 6,
-        'name': 'LogicForge',
-        'members': [],
-        'lots': [],
-        'bids': [
-            {'id': 7, 'to_group_id': 2, 'to_group_name': 'TechSphere', 'timestamp': '11/5/2025, 7:10pm'},
-            {'id': 8, 'to_group_id': 3, 'to_group_name': 'CodeMatrix', 'timestamp': '11/5/2025, 7:15pm'}
-        ]
-    }
-]
-
-GROUP_REQUESTS = [
-    {
-        'id': 1,
-        'name': 'NovaCore',
-        'members': [
-            {'name': 'Aisha Mohammed', 'id': '20231278'},
-            {'name': 'Jamal Baptiste', 'id': '20236754'},
-            {'name': 'Denzel Johnson', 'id': '20939438'}
-        ]
-    },
-    {
-        'id': 3,
-        'name': 'TechSphere',
-        'members': [
-            {'name': 'Daniel Roberts', 'id': '20240123'},
-            {'name': 'Priya Singh', 'id': '20249811'},
-            {'name': 'Marcus Charles', 'id': '20235562'}
-        ]
-    },
-    {
-        'id': 2,
-        'name': 'CodeMatrix',
-        'members': [
-            {'name': 'Leah Thomas', 'id': '20238914'},
-            {'name': 'Ryan Ali', 'id': '20227654'},
-            {'name': 'Samantha Pierre', 'id': '20241209'}
-        ]
-    }
-]
-
-# ─── Helper Functions ─────────────────────────────────────────────────────────
-
-def get_lot_by_id(lot_id):
-    return next((lot for lot in LOTS if lot['id'] == lot_id), None)
 
 # ─── Lot Routes ───────────────────────────────────────────────────────────────
 
@@ -193,6 +72,7 @@ def admin_remove_lot(lot_id):
     
     remove_lot(lot_id)
 
+    flash(f"Lot {lot_id} removed successfully", "success")
     return redirect(url_for('admin_views.admin_manage_lots'))
 
 # ─── Bid Routes ───────────────────────────────────────────────────────────────
@@ -319,10 +199,15 @@ def admin_view_group_bids(group_id):
         bidJson = {}
 
         toGroup = get_group(bidObj.recipientGroupID)
+        toLot = get_lot(bidObj.lotID)
 
         bidJson["to_group_name"] = toGroup.groupName
         bidJson["timestamp"] = bidObj.timestamp
+        bidJson["to_lot_id"] = toLot.id
+        bidJson["to_lot_name"] = toLot.labType
         bidJson["id"] = bidObj.id
+        bidJson["pdf"] = bidObj.bidDocument
+        bidJson["filename"] = bidObj.bidDocumentName
         bids.append(bidJson)
 
     groupJson["bids"] = bids
@@ -334,14 +219,21 @@ def admin_view_group_bids(group_id):
         active_page='bids'
     )
 
-@admin_views.route('/admin/manage-bids/group/<int:group_id>/bid/<int:bid_id>')
-@admin_required
+@admin_views.route('/admin/view-bid/<int:group_id>/<int:bid_id>')
 def admin_view_bid_document(group_id, bid_id):
-    return f"Bid document for group {group_id}, bid {bid_id}"
+    bid = get_bid(bid_id)
+
+    return send_file(
+        io.BytesIO(bid.bidDocument),
+        download_name=bid.bidDocumentName,
+        mimetype='application/pdf'
+    )
 
 @admin_views.route('/admin/manage-bids/group/<int:group_id>/bid/<int:bid_id>/remove', methods=['POST'])
 @admin_required
 def admin_remove_bid(group_id, bid_id):
+    remove_bid(bid_id)
+    flash("Bid removed successfully", "success")
     return redirect(url_for('admin_views.admin_view_group_bids', group_id=group_id))
 
 # ─── Group Routes ─────────────────────────────────────────────────────────────
@@ -408,7 +300,7 @@ def admin_manage_groups():
 
 @admin_views.route('/admin/groups/<int:group_id>/remove', methods=['POST'])
 @admin_required
-def admin_assign_lots(group_id):
+def admin_remove_group(group_id):
     group = get_group(group_id)
 
     if group:
@@ -617,6 +509,12 @@ def admin_manage_evaluations():
         data["labType"] = lot.labType
         data["timestamp"] = evaluation.timestamp.strftime('%#m/%#d/%Y, %#I:%M%p').lower()
 
+        data["specsMet"] = evaluation.specsMet
+        data["professionalism"] = evaluation.professionalism
+        data["presentation"] = evaluation.presentation
+        data["budgetScore"] = evaluation.budget
+        data["overall"] = evaluation.overallScore 
+
         evaluation_groups.append(data)
 
     return render_template('admin/manage_evaluations.html',
@@ -624,3 +522,16 @@ def admin_manage_evaluations():
         title='Manage Evaluations',
         active_page='evaluations'
     )
+
+@admin_views.route('/admin/manage-evaluations/<int:evaluationID>/remove', methods=['POST'])
+@admin_required
+def admin_remove_evaluation(evaluationID):
+    
+    evaluation = get_evaluation(evaluationID)
+
+    evaluation.status = "draft"
+
+    db.session.commit()
+    
+    flash("Evaluation removed successfully", "success")
+    return redirect(url_for('admin_views.admin_manage_evaluations'))
