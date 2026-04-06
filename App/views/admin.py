@@ -83,6 +83,7 @@ def admin_manage_bids():
 
     groups = db.session.scalars(
         db.select(Group)
+        .filter_by(status="approved")
     ).all()
 
     GROUPS = []
