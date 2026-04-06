@@ -1,6 +1,7 @@
-from App.models import Lot
+from App.models import Lot, LotGroup
 from App.database import db
 from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy import or_, and_
 
 def create_lot(labType, labSize, budget):
     newlot = Lot(labType, labSize, budget)
@@ -13,7 +14,9 @@ def get_lot(id):
     return db.session.get(Lot, id)
 
 def get_all_lots():
-    return db.session.scalars(db.select(Lot)).all()
+    return db.session.scalars(
+        db.select(Lot)
+    ).all()
 
 def get_all_lots_json():
     lots = get_all_lots()
@@ -39,25 +42,25 @@ def edit_lot(id, labType=None, labSize=None, budget=None):
 def edit_lotRFP_details(id, deviceType=None, resolution=None, os=None, cpu=None, ram=None, drive=None, gpu=None, peripherals=None, features=None, io=None):
     lot = get_lot(id)
     if lot:
-        if deviceType:
+        if deviceType is not None:
             lot.deviceType = deviceType
-        if resolution:
+        if resolution is not None:
             lot.resolution = resolution
-        if os:
+        if os is not None:
             lot.os = os
-        if cpu:
+        if cpu is not None:
             lot.cpu = cpu
-        if ram:
+        if ram is not None:
             lot.ram = ram
-        if drive:
+        if drive is not None:
             lot.drive = drive
-        if gpu:
+        if gpu is not None:
             lot.gpu = gpu
-        if peripherals:
+        if peripherals is not None:
             lot.peripherals = peripherals
-        if features:
+        if features is not None:
             lot.features = features
-        if io:
+        if io is not None:
             lot.io = io
 
         db.session.commit()
@@ -71,7 +74,21 @@ def get_lotRFP_details_json(id):
     return None
 
 def remove_lot(id):
+    from .group import remove_group
+
     lot = get_lot(id)
     if lot:
-        db.session.delete(lot)
-        db.session.commit()
+        assigned = db.session.scalars(
+            db.select(LotGroup)
+            .filter_by(lotID=lot.id)
+        ).first()
+
+        if not assigned:
+            db.session.delete(lot)
+            db.session.commit()
+            return True  
+        else:
+            remove_group(assigned.groupID)
+            db.session.delete(lot)
+            db.session.commit()
+    return False

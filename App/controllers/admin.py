@@ -10,7 +10,9 @@ def get_admin(id):
     return db.session.get(Admin, id)
 
 def get_all_admins():
-    return db.session.scalars(db.select(Admin)).all()
+    return db.session.scalars(
+        db.select(Admin)
+    ).all()
 
 def get_all_admins_json():
     admins = get_all_admins()

@@ -2,6 +2,7 @@ import pytest
 import unittest
 from datetime import datetime
 from werkzeug.security import generate_password_hash
+from sqlalchemy import or_
 
 from App.main import create_app
 from App.database import db, create_db
@@ -25,40 +26,40 @@ class UsersIntegrationTests(unittest.TestCase):
     def test_user_children_are_users(self):
         admin = Admin("jack", "jackpass")
         db.session.add(admin)
-        student = Student("cooper", "cooperpass")
+        student = Student("cooper", "20229876", "cooperpass")
         db.session.add(student)
         db.session.commit()
         users_json = get_all_users_json()
-        self.assertListEqual([{"id":1, "username":"bob"}, {"id":2, "username":"jack", "role":"admin"}, {"id":3, "username":"cooper", "role":"student"}], users_json)
+        self.assertListEqual([{"id":1, "username":"bob"}, {"id":2, "username":"jack", "role":"admin"}, {"id":3, "username":"20229876", "role":"student"}], users_json)
 
     # Tests data changes in the database
     @pytest.mark.run(order=35)
     def test_update_user(self):
-        update_user(1, "ronnie")
+        update_user(1, "pot")
         user = get_user(1)
-        assert user.username == "ronnie"
+        assert user.username == "pot"
 
 class Workflow1IntegrationTests(unittest.TestCase):
     @pytest.mark.run(order=36)
     def test_creating_lots(self):
         db.drop_all()
         create_db()
-        create_lot("GIS Lab", 20, 160000.00)
-        create_lot("Government Office Lab", 12, 110000.00)
+        create_lot("GIS Lab", "Medium, capable of having 20 machines", 160000.00)
+        create_lot("Government Office Lab", "Medium, capable of having 20 machines", 110000.00)
         lots_json = get_all_lots_json()
         self.assertListEqual([
         {
             'id': 1,
             'name': "Lot 1",
             'labType': "GIS Lab",
-            'labSize': 20,
+            'labSize': "Medium, capable of having 20 machines",
             'budget': 160000.00
         },
         {
             'id': 2,
             'name': "Lot 2",
             'labType': "Government Office Lab",
-            'labSize': 12,
+            'labSize': "Medium, capable of having 20 machines",
             'budget': 110000.00
         }
         ], lots_json)
@@ -83,20 +84,20 @@ class Workflow2IntegrationTests(unittest.TestCase):
     @pytest.mark.run(order=39)
     def test_create_groupRequest(self):
         remove_lot(2)
-        create_lot("GIS Lab", 20, 160000.00)
-        create_lot("Government Office Lab", 12, 110000.00)
-        create_lot("University Computer Lab", 40, 250000.00)
-        create_lot("Data Center", 1000, 25000000.00)
+        create_lot("GIS Lab", "Medium, capable of having 20 machines", 160000.00)
+        create_lot("Government Office Lab", "Medium, capable of having 20 machines", 110000.00)
+        create_lot("University Computer Lab", "Medium, capable of having 20 machines", 250000.00)
+        create_lot("Data Center", "Medium, capable of having 20 machines", 25000000.00)
 
-        create_student("jack", "jackpass")
-        create_student("cooper", "cooperpass")
-        create_student("john", "johnpass")
-        create_student("tony", "tonypass")
+        create_student("jack", "20240123", "jackpass")
+        create_student("cooper", "20231245", "cooperpass")
+        create_student("john", "20229876", "johnpass")
+        create_student("tony", "20235678", "tonypass")
 
-        create_student("peper", "peperpass")
-        create_student("steve", "stevepass")
-        create_student("clint", "clintpass")
-        create_student("bruce", "brucepass")
+        create_student("peper", "20246789", "peperpass")
+        create_student("steve", "20242345", "stevepass")
+        create_student("clint", "20238901", "clintpass")
+        create_student("bruce", "20238902", "brucepass")
 
         groupName = "TechNova Solution"
         members = [1,2,3,4]
@@ -139,7 +140,11 @@ class Workflow2IntegrationTests(unittest.TestCase):
         duplicates = []
 
         for member in members:
-            existing = db.session.scalars(db.select(StudentGroup).filter_by(studentID = member)).first()
+            existing = db.session.scalars(
+                db.select(StudentGroup)
+                .filter_by(studentID = member)
+            ).first()
+
             if existing:
                 duplicates.append(member)
         
@@ -180,18 +185,6 @@ class Workflow3IntegrationTests(unittest.TestCase):
     def test_rejecting_a_group_request(self):
         groupID = 2
 
-        entries = db.session.scalars(db.select(StudentGroup).filter_by(groupID = groupID)).all()
-
-        for entry in entries:
-            removed = remove_studentGroup(entry.studentID, groupID)
-            assert removed
-
-        entries = db.session.scalars(db.select(LotGroup).filter_by(groupID = groupID)).all()
-
-        for entry in entries:
-            removed = remove_lotGroup(entry.lotID, groupID)
-            assert removed
-
         removed = remove_group(groupID)
         assert removed
 
@@ -199,18 +192,6 @@ class Workflow4IntegrationTests(unittest.TestCase):
     @pytest.mark.run(order=43)
     def test_remove_group(self):
         groupID = 1
-
-        entries = db.session.scalars(db.select(StudentGroup).filter_by(groupID = groupID)).all()
-
-        for entry in entries:
-            removed = remove_studentGroup(entry.studentID, groupID)
-            assert removed
-
-        entries = db.session.scalars(db.select(LotGroup).filter_by(groupID = groupID)).all()
-
-        for entry in entries:
-            removed = remove_lotGroup(entry.lotID, groupID)
-            assert removed
 
         removed = remove_group(groupID)
         assert removed
@@ -321,7 +302,11 @@ class Workflow5IntegrationTests(unittest.TestCase):
         lotID = 1
         groupID = 1
 
-        rfp = db.session.scalars(db.select(RFP).filter_by(groupID=groupID, lotID=lotID)).first()
+        rfp = db.session.scalars(
+            db.select(RFP)
+            .filter_by(groupID=groupID, lotID=lotID)
+        ).first()
+        
         assert rfp
         assert rfp.status == "requested"
 
@@ -383,17 +368,20 @@ class Workflow8IntegrationTests(unittest.TestCase):
     @pytest.mark.run(order=50)
     def test_place_bid(self):
         sourceGroupID = 1
-        receipientGroupID = 2
+        recipientGroupID = 2
         lotID = 3
-        bidDocumentLink = "www.exampleBid.com"
+        bidDocument=b'fake pdf content'
+        bidDocumentName='test.pdf'
+        quotationAmount= 25000.0
 
-        bid = create_bid(lotID, sourceGroupID, receipientGroupID, bidDocumentLink)
+        bid = create_bid(lotID, sourceGroupID, recipientGroupID, bidDocument, bidDocumentName, quotationAmount)
         
         assert bid
         assert bid.sourceGroupID == 1
-        assert bidDocumentLink == "www.exampleBid.com"
-        assert receipientGroupID == 2
+        assert bidDocumentName == 'test.pdf'
+        assert recipientGroupID == 2
         assert lotID == 3
+        assert quotationAmount == 25000.0
 
 class Workflow9IntegrationTests(unittest.TestCase):
     @pytest.mark.run(order=51)
@@ -404,24 +392,28 @@ class Workflow9IntegrationTests(unittest.TestCase):
         assert removed
 
         sourceGroupID = 1
-        receipientGroupID = 2
+        recipientGroupID = 2
         lotID = 3
-        bidDocumentLink = "www.exampleBid.com"
+        bidDocument=b'fake pdf content'
+        bidDocumentName='test.pdf'
+        quotationAmount= 25000.0
 
-        bid = create_bid(lotID, sourceGroupID, receipientGroupID, bidDocumentLink)
+        bid = create_bid(lotID, sourceGroupID, recipientGroupID, bidDocument, bidDocumentName, quotationAmount)
 
         sourceGroupID = 2
-        receipientGroupID = 1
+        recipientGroupID = 1
         lotID = 1
-        bidDocumentLink = "www.exampleBid.com"
+        bidDocument=b'fake pdf content'
+        bidDocumentName='test.pdf'
+        quotationAmount= 25000.0
 
-        bid = create_bid(lotID, sourceGroupID, receipientGroupID, bidDocumentLink)
+        bid = create_bid(lotID, sourceGroupID, recipientGroupID, bidDocument, bidDocumentName, quotationAmount)
 
 class Workflow10IntegrationTests(unittest.TestCase):
     @pytest.mark.run(order=52)
     def test_create_evaluation(self):
         sourceGroupID = 1
-        receipientGroupID = 2
+        recipientGroupID = 2
         bidID = 2
         lotID = 1
         specsMet = 5
@@ -429,7 +421,7 @@ class Workflow10IntegrationTests(unittest.TestCase):
         professionalism = 2
         budget = 4
 
-        evaluation = create_evaluation(sourceGroupID, receipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget)
+        evaluation = create_evaluation(sourceGroupID, recipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget)
 
         assert evaluation
         assert evaluation.status == "draft"

@@ -8,7 +8,7 @@
                 <p class="text-slate-600">Browse Requests for Proposals and submit your competitive bids.</p>
             </div>
             <div class="bg-brand-50 border border-brand-100 px-4 py-2 rounded-xl text-brand-700 text-sm font-bold">
-                {{ rfps|length }} Open RFPs
+                {{ rfps|length }} Approved RFPs
             </div>
         </div>
 
@@ -20,7 +20,7 @@
                     <span class="rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
                         {{ rfp.status }}
                     </span>
-                    <span class="text-[10px] font-mono text-slate-400">#{{ rfp.id }}</span>
+                    <span class="text-[10px] font-mono text-slate-400">{{ rfp.timestamp }}</span>
                 </div>
 
                 <div class="mb-4">
@@ -34,19 +34,26 @@
                     {{ rfp.description }}
                 </p>
 
-                <div class="mt-auto border-t border-slate-100 pt-4 flex justify-between items-center">
-                    <div>
-                        <button class=" px-4 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-bold hover:bg-brand-500 hover:text-white transition">
+                <div class="mt-auto border-t border-slate-100 pt-4 flex justify-center items-center">
+                    <div class="flex gap-2">
+                        <button class="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-bold hover:bg-brand-500 hover:text-white transition" onclick="showRfpPreviewModal(this)"
+                            data-title="{{ rfp.title  }}"
+                            data-devicetype="{{ rfp.deviceType }}"
+                            data-resolution="{{ rfp.resolution }}"
+                            data-os="{{ rfp.os }}"
+                            data-cpu="{{ rfp.cpu }}"
+                            data-ram="{{ rfp.ram }}"
+                            data-drive="{{ rfp.drive }}"
+                            data-gpu="{{ rfp.gpu }}"
+                            data-peripherals="{{ rfp.peripherals }}"
+                            data-features="{{ rfp.features }}"
+                            data-io="{{ rfp.io }}">
                             Preview RFP
                         </button>
-
-                        <button class=" px-4 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-bold hover:bg-brand-500 hover:text-white transition">
+                        <button class="px-4 py-2 rounded-lg bg-slate-100 text-slate-700 text-sm font-bold hover:bg-brand-500 hover:text-white transition"
+                            onclick="showBidModal('{{ rfp.groupID }}', '{{ rfp.lotID }}')">
                             Place Bid
                         </button>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[10px] uppercase font-bold text-slate-400">Ends In</p>
-                        <p class="text-sm font-bold text-brand-500">14 Days</p>
                     </div>
                 </div>
 
@@ -54,4 +61,155 @@
             {% endfor %}
         </div>
     </div>
+    <!-- RFP Preview Modal -->
+    <div id="rfpPreviewModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-1/2">
+            <div class="flex justify-between items-center border-b pb-4">
+            <h2 class="text-xl font-bold">RFP Details</h2>
+            <button class="text-gray-500 hover:text-gray-700" onclick="hideRfpPreviewModal()">&times;</button>
+            </div>
+            <div class="mt-4 space-y-4">
+            <p><strong>Title:</strong> <span id="modal-title"></span></p>
+            <p><strong>Type:</strong> <span id="modal-type"></span></p>
+            <p><strong>Screen Size & Resolution:</strong> <span id="modal-screen"></span></p>
+            <p><strong>Operating System(s):</strong> <span id="modal-os"></span></p>
+            <p><strong>CPU:</strong> <span id="modal-cpu"></span></p>
+            <p><strong>Memory (RAM):</strong> <span id="modal-ram"></span></p>
+            <p><strong>Hard Drive:</strong> <span id="modal-drive"></span></p>
+            <p><strong>Graphics:</strong> <span id="modal-gpu"></span></p>
+            <p><strong>I/O Ports:</strong> <span id="modal-io"></span></p>
+            <p><strong>Peripherals:</strong> <span id="modal-peripherals"></span></p>
+            <p><strong>Special Features:</strong> <span id="modal-features"></span></p>
+            </div>
+            <div class="mt-6 text-right">
+            <button class="px-4 py-2 bg-gray-300 text-gray-700 rounded" onclick="hideRfpPreviewModal()">Close</button>
+            </div>
+        </div>
+        
+        
+    </div>
+    <!-- Place Bid Modal -->
+    <div id="placeBidModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-1/2">
+            <div class="flex justify-between items-center border-b pb-4">
+                <h2 class="text-xl font-bold">Place a Bid</h2>
+                <button class="text-gray-500 hover:text-gray-700" onclick="hideBidModal()">&times;</button>
+            </div>
+
+            <form method="POST" action="{{ url_for('student_views.rfp_gallery_page') }}" enctype="multipart/form-data" class="mt-4 space-y-4">
+                <input type="hidden" id="bid-groupID" name="groupID">
+                <input type="hidden" id="bid-lotID" name="lotID">
+                <input type="hidden" name="sourceGroupID" value="{{sourceGroupID}}">
+
+                <!-- Quotation Amount -->
+                <div class="space-y-2">
+                    <label class="text-sm font-bold text-slate-700">Quotation Amount</label>
+                    <div class="flex items-center border border-slate-300 rounded-xl overflow-hidden focus-within:border-brand-500">
+                        <span class="px-4 py-3 bg-slate-100 text-slate-500 font-bold border-r border-slate-300">$</span>
+                        <input type="number" id="bid-amount" name="amount" min="0" step="0.01" placeholder="0.00"
+                            class="flex-1 px-4 py-3 bg-slate-50 focus:outline-none text-slate-800 font-semibold">
+                    </div>
+                </div>
+
+                <!-- Drag and Drop Area -->
+                <div id="drop-zone"
+                    class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center cursor-pointer hover:border-brand-400 transition"
+                    onclick="document.getElementById('bid-pdf').click()"
+                    ondragover="event.preventDefault(); this.classList.add('border-brand-500')"
+                    ondragleave="this.classList.remove('border-brand-500')"
+                    ondrop="handleDrop(event)">
+                    <p class="text-slate-500 text-sm font-semibold" id="drop-label">Drag & drop your PDF here, or click to browse</p>
+                    <p class="text-xs text-slate-400 mt-1">PDF files only</p>
+                </div>
+                <input type="file" id="bid-pdf" name="pdf" accept="application/pdf" class="hidden" onchange="handleFileSelect(this)">
+
+                <div class="flex justify-end gap-2 pt-4 border-t border-slate-200">
+                    <button type="button" onclick="hideBidModal()"
+                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition">
+                        Close
+                    </button>
+                    <button type="button" onclick="submitBid()"
+                        class="px-4 py-2 bg-brand-500 text-white font-bold rounded hover:bg-brand-600 transition">
+                        Submit Bid
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        function showRfpPreviewModal(btn) {
+        document.getElementById('modal-title').textContent        = btn.dataset.title;
+        document.getElementById('modal-type').textContent       = btn.dataset.devicetype;
+        document.getElementById('modal-screen').textContent     = btn.dataset.resolution;
+        document.getElementById('modal-os').textContent         = btn.dataset.os;
+        document.getElementById('modal-cpu').textContent        = btn.dataset.cpu;
+        document.getElementById('modal-ram').textContent        = btn.dataset.ram;
+        document.getElementById('modal-drive').textContent      = btn.dataset.drive;
+        document.getElementById('modal-gpu').textContent        = btn.dataset.gpu;
+        document.getElementById('modal-peripherals').textContent = btn.dataset.peripherals;
+        document.getElementById('modal-features').textContent   = btn.dataset.features;
+        document.getElementById('modal-io').textContent         = btn.dataset.io;
+        document.getElementById('rfpPreviewModal').classList.remove('hidden');
+        }
+
+        function hideRfpPreviewModal() {
+        document.getElementById('rfpPreviewModal').classList.add('hidden');
+        }
+        
+        function showBidModal(groupID, lotID) {
+            document.getElementById('bid-groupID').value = groupID;
+            document.getElementById('bid-lotID').value = lotID;
+            document.getElementById('drop-label').textContent = 'Drag & drop your PDF here, or click to browse';
+            document.getElementById('bid-pdf').value = '';
+            document.getElementById('placeBidModal').classList.remove('hidden');
+        }
+
+        function hideBidModal() {
+            document.getElementById('placeBidModal').classList.add('hidden');
+        }
+
+        function handleFileSelect(input) {
+            if (input.files[0]) {
+                document.getElementById('drop-label').textContent = `✅ ${input.files[0].name}`;
+                document.getElementById('drop-zone').classList.remove('border-red-500');
+                document.getElementById('drop-zone').classList.add('border-slate-300');
+            }
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            const zone = document.getElementById('drop-zone');
+            zone.classList.remove('border-brand-500');
+            const file = event.dataTransfer.files[0];
+            if (file && file.type === 'application/pdf') {
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                document.getElementById('bid-pdf').files = dt.files;
+                document.getElementById('drop-label').textContent = `✅ ${file.name}`;
+                zone.classList.remove('border-red-500');
+                zone.classList.add('border-slate-300');
+            } else {
+                document.getElementById('drop-label').textContent = '❌ Please drop a PDF file only';
+            }
+        }
+
+        function submitBid() {
+            const pdf = document.getElementById('bid-pdf');
+            const amount = document.getElementById('bid-amount').value;
+
+            if (!pdf.files || pdf.files.length === 0) {
+                document.getElementById('drop-label').textContent = '❌ Please attach a PDF before submitting';
+                document.getElementById('drop-zone').classList.add('border-red-500');
+                document.getElementById('drop-zone').classList.remove('border-slate-300');
+                return;
+            }
+
+            if (!amount || parseFloat(amount) <= 0) {
+                alert('Please enter a valid quotation amount.');
+                return;
+            }
+
+            pdf.closest('form').submit();
+        }
+    </script>
 {% endblock %}

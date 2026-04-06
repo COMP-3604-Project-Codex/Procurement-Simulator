@@ -1,36 +1,46 @@
 from App.models import Evaluation
 from App.database import db
 
-def create_evaluation(sourceGroupID, receipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget):
-    neweval = Evaluation(sourceGroupID, receipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget)
+def create_evaluation(sourceGroupID, recipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget):
+    neweval = Evaluation(sourceGroupID, recipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget)
     db.session.add(neweval)
     db.session.commit()
     return neweval
 
-def edit_evaluation(id, specsMet, presentation, professionalism, budget, deviceType=None, resolution=None, os=None, cpu=None, ram=None, drive=None, gpu=None, peripherals=None, features=None, io=None):
+def edit_evaluation(id, specsMet, presentation, professionalism, budget, specsSelected=None, deviceType=None, resolution=None, os=None, cpu=None, ram=None, drive=None, gpu=None, peripherals=None, features=None, io=None):
     eva = get_evaluation(id)
     if eva:
         eva.overallScore = round((((specsMet + presentation + professionalism + budget)/25) * 10), 1)
 
-        if deviceType:
+        if specsMet is not None:
+            eva.specsMet = specsMet
+        if presentation is not None:
+            eva.presentation = presentation
+        if professionalism is not None:
+            eva.professionalism = professionalism
+        if budget is not None:
+            eva.budget = budget
+        if specsSelected is not None:
+            eva.specsSelected = specsSelected
+        if deviceType is not None:
             eva.deviceType = deviceType
-        if resolution:
+        if resolution is not None:
             eva.resolution = resolution
-        if os:
+        if os is not None:
             eva.os = os
-        if cpu:
+        if cpu is not None:
             eva.cpu = cpu
-        if ram:
+        if ram is not None:
             eva.ram = ram
-        if drive:
+        if drive is not None:
             eva.drive = drive
-        if gpu:
+        if gpu is not None:
             eva.gpu = gpu
-        if peripherals:
+        if peripherals is not None:
             eva.peripherals = peripherals
-        if features:
+        if features is not None:
             eva.features = features
-        if io:
+        if io is not None:
             eva.io = io
 
         db.session.commit()
@@ -46,7 +56,9 @@ def get_evaluation(id):
     return db.session.get(Evaluation, id)
 
 def get_all_evaluations():
-    return db.session.scalars(db.select(Evaluation)).all()
+    return db.session.scalars(
+        db.select(Evaluation)
+    ).all()
 
 def get_all_evaluations_json():
     evals = get_all_evaluations()

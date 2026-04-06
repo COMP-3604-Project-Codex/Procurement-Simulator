@@ -72,9 +72,12 @@
                                 Selected
                             </div>
                         {% else %}
-                            <button class="px-4 py-1.5 rounded-lg border border-slate-300 text-slate-500 text-[10px] font-bold uppercase hover:bg-slate-900 hover:text-white transition-all">
-                                Select Bid
-                            </button>
+                            <form method="POST">
+                                <input type="hidden" name="evaluationID" value="{{ eval.id }}">
+                                <button type="submit" class="px-4 py-1.5 rounded-lg border border-slate-300 text-slate-500 text-[10px] font-bold uppercase hover:bg-slate-900 hover:text-white transition-all">
+                                    Select Bid
+                                </button>
+                            </form>
                         {% endif %}
                     </td>
                 </tr>

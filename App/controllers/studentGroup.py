@@ -9,8 +9,16 @@ def add_studentGroup(studentID, groupID):
 def get_studentGroup(studentID, groupID):
     return db.session.get(StudentGroup, (studentID, groupID))
 
+def check_studentGroup(studentID):
+    return db.session.scalars(
+        db.select(StudentGroup)
+        .filter_by(studentID=studentID)
+    ).first()
+
 def get_all_studentGroups():
-    return db.session.scalars(db.select(StudentGroup)).all()
+    return db.session.scalars(
+        db.select(StudentGroup)
+    ).all()
 
 def get_all_studentGroups_json():
     entries = get_all_studentGroups()

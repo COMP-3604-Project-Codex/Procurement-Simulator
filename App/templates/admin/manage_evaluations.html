@@ -1,14 +1,147 @@
 {% extends 'admin/layout.html' %}
 {% block title %}Manage Evaluations{% endblock %}
 {% block content %}
-<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
   {% for group in evaluation_groups %}
-  <div class="bg-white rounded-xl shadow-panel p-6 flex flex-col items-center">
-    <h2 class="font-heading text-2xl font-bold mb-2">G{{ group.id }} {{ group.name }}</h2>
+  <div class="bg-white rounded-xl shadow-panel p-6 flex flex-col items-left">
+    <h2 class="font-heading text-1xl font-bold mb-2">Client: {{ group.name }}</h2>
+    <p class="font-heading text-sm mb-2">Lot {{group.lotID}} ({{ group.labType }})</p>
+    <p class="font-heading text-sm mb-2">Vendor: {{ group.to_group_name }}</p>
     <p class="text-sm text-slate-600 mb-4">TimeStamp :<br>{{ group.timestamp }}</p>
-    <button type="button" class="w-full border border-slate-400 rounded py-2 font-semibold hover:bg-brand-50">Evaluation Document</button>
-    <button type="button" class="w-full border border-slate-400 rounded py-2 font-semibold hover:bg-red-50">Remove</button>
+    <button 
+      type="button"
+      onclick='openEvaluationModal({{ group | tojson }})'
+      class="w-full border border-slate-400 rounded py-2 font-semibold hover:bg-brand-50">
+      Evaluation Document
+    </button>
+    <button type="button"
+        class="remove-eval-btn w-full border border-red-400 rounded py-2 font-semibold hover:bg-red-50 text-red-700"
+        data-eval-id="{{ group.id }}">
+        Remove
+    </button>
   </div>
   {% endfor %}
 </div>
+<div id="evaluationModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+  <div class="bg-white rounded-2xl w-11/12 max-w-2xl p-6 space-y-6">
+
+    <div class="flex justify-between items-center border-b pb-2">
+      <h2 class="text-xl font-bold">Evaluation Summary</h2>
+      <button onclick="closeEvaluationModal()" class="text-red-600 text-xl font-bold">&times;</button>
+    </div>
+
+    <div id="evaluationContent" class="space-y-4"></div>
+
+  </div>
+</div>
+<!-- Confirm Remove Evaluation Modal -->
+<div id="confirmEvalModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+    <div class="bg-white rounded-2xl p-8 w-full max-w-md relative">
+        <h2 class="text-xl font-bold text-slate-900 mb-2">Remove Evaluation?</h2>
+        <p class="text-slate-600 mb-6">This will permanently remove the evaluation and cannot be undone.</p>
+        <div class="flex gap-4">
+            <button onclick="hideConfirmEvalModal()" class="flex-1 rounded-xl border border-slate-300 px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50 transition">
+                Cancel
+            </button>
+            <button id="confirmEvalRemoveBtn" class="flex-1 rounded-xl bg-red-600 px-4 py-3 font-semibold text-white hover:bg-red-700 transition">
+                Confirm
+            </button>
+        </div>
+    </div>
+</div>
+<script>
+let pendingEvalForm = null;
+
+function hideConfirmEvalModal() {
+    pendingEvalForm = null;
+    document.getElementById('confirmEvalModal').classList.add('hidden');
+}
+
+document.getElementById('confirmEvalRemoveBtn').addEventListener('click', function() {
+    if (pendingEvalForm) {
+        document.body.appendChild(pendingEvalForm);
+        pendingEvalForm.submit();
+    }
+});
+
+document.querySelectorAll('.remove-eval-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        const evalId = btn.dataset.evalId;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/manage-evaluations/${evalId}/remove`;
+        pendingEvalForm = form;
+        document.getElementById('confirmEvalModal').classList.remove('hidden');
+    });
+});
+
+function renderStars(value) {
+    let stars = '';
+    for (let i = 1; i <= 5; i++) {
+        stars += `<span class="text-2xl ${i <= value ? 'text-yellow-400' : 'text-slate-300'}">★</span>`;
+    }
+    return stars;
+}
+
+function openEvaluationModal(data) {
+    const container = document.getElementById('evaluationContent');
+    let barColor = 'bg-red-500';
+    if (data.specsMet >= 7) barColor = 'bg-green-500';
+    else if (data.specsMet >= 5) barColor = 'bg-yellow-400';
+
+    container.innerHTML = `
+        <div>
+            <p class="font-bold">Client:</p>
+            <p>${data.name}</p>
+        </div>
+
+        <div>
+            <p class="font-bold">Vendor:</p>
+            <p>${data.to_group_name}</p>
+        </div>
+
+        <div>
+          <p class="font-bold">Specs Met:</p>
+          <p class="text-lg mb-2">${data.specsMet}/10</p>
+
+          <div class="w-full bg-slate-200 rounded-full h-3">
+              <div 
+                  class="${barColor} h-3 rounded-full transition-all duration-300"
+                  style="width: ${(data.specsMet / 10) * 100}%">
+              </div>
+          </div>
+      </div>
+
+        <div>
+            <p class="font-bold">Professionalism:</p>
+            ${renderStars(data.professionalism)}
+        </div>
+
+        <div>
+            <p class="font-bold">Presentation:</p>
+            ${renderStars(data.presentation)}
+        </div>
+
+        <div>
+            <p class="font-bold">Budget:</p>
+            ${renderStars(data.budgetScore)}
+        </div>
+
+        <div>
+            <p class="font-bold">Overall Score:</p>
+            <p class="text-xl font-bold text-brand-600">${data.overall}/10</p>
+        </div>
+    `;
+
+    const modal = document.getElementById('evaluationModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeEvaluationModal() {
+    const modal = document.getElementById('evaluationModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+</script>
 {% endblock %}

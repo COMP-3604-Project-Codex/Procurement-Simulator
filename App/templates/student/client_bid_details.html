@@ -1,84 +1,116 @@
 {% extends "student/layout.html" %}
+
 {% block content %}
     <div class="mx-auto max-w-[95%] space-y-4">
         <a href="{{ url_for('student_views.student_view_bids_page', selected_lot=bid.lot_id) }}" class="text-sm font-bold text-slate-500 hover:text-brand-500 transition">
             ← Back to Lot {{ bid.lot_id }} Bids
         </a>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[85vh]">
-            
-            <div class="rounded-2xl border-2 border-slate-300 bg-slate-200 overflow-hidden shadow-inner flex flex-col">
-                <div class="bg-slate-800 p-3 text-white text-xs font-bold uppercase tracking-widest flex justify-between">
-                    <span>Vendor Proposal Document</span>
-                    <span>{{ bid.vendor_name }}_Proposal.pdf</span>
-                </div>
-                <iframe src="https://www.w3.org/W3C/DesignIssues/Architecture.pdf" class="w-full flex-1" frameborder="0"></iframe>
-            </div>
+        <form method="POST">
+            <input type="hidden" name="bid_id" value="{{ bid.bid_id }}">
+            <input type="hidden" name="professionalism_stars" id="professionalism_stars" value="{{ existing.professionalism if existing else 0 }}">
+            <input type="hidden" name="presentation_stars" id="presentation_stars" value="{{ existing.presentation if existing else 0 }}">
+            <input type="hidden" name="budget_stars" id="budget_stars" value="{{ existing.budget if existing else 0 }}">
 
-            <div class="overflow-y-auto pr-2 space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[85vh]">
                 
-                <div class="rounded-2xl border border-slate-300 bg-white p-6 shadow-panel">
-                    <h1 class="text-2xl font-bold text-slate-900">{{ bid.vendor_name }}</h1>
-                    <p class="text-brand-600 font-bold text-xl">${{ "{:,.2f}".format(bid.total_price) }}</p>
-                </div>
-
-                <div class="bg-white rounded-2xl border border-slate-300 p-6 shadow-panel">
-                    <h3 class="font-bold text-slate-800 mb-4 border-b pb-2">Technical Audit</h3>
-                    <div class="space-y-4">
-                        {% for key, label in technical_specs %}
-                        <div class="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-50 transition">
-                            <input type="checkbox" name="sat_{{ key }}" class="mt-1 h-5 w-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500">
-                            <div class="flex-1">
-                                <label class="block font-bold text-slate-700 text-sm">{{ label }}</label>
-                                <input type="text" placeholder="Add comment..." class="w-full mt-1 bg-transparent border-b border-dashed border-slate-300 focus:border-brand-500 focus:outline-none text-sm italic">
-                            </div>
-                        </div>
-                        {% endfor %}
+                <div class="rounded-2xl border-2 border-slate-300 bg-slate-200 overflow-hidden shadow-inner flex flex-col">
+                    <div class="bg-slate-800 p-3 text-white text-xs font-bold uppercase tracking-widest flex justify-between">
+                        <span>Vendor Proposal Document</span>
+                        <span>{{ bid.filename }}</span>
                     </div>
+                    <iframe src="{{ url_for('student_views.serve_bid_document', bid_id=bid.bid_id) }}" class="w-full flex-1" frameborder="0"></iframe>
                 </div>
 
-                <div class="bg-white rounded-2xl border border-slate-300 p-6 shadow-panel">
-                    <h3 class="font-bold text-slate-800 mb-4 border-b pb-2">Vendor Competency</h3>
-                    <div class="space-y-6">
-                        {% for item in ['Professionalism', 'Presentation', 'Budget'] %}
-                        <div>
-                            <label class="block text-xs font-bold uppercase text-slate-500 mb-2">{{ item }}</label>
-                            <div class="flex gap-2">
-                                {% for i in range(1, 6) %}
-                                <button type="button" 
-                                    class="star-btn text-2xl text-slate-200 hover:text-yellow-400 transition-colors" 
-                                    data-val="{{ i }}">★
-                                </button>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        {% endfor %}
+                <div class="overflow-y-auto pr-2 space-y-6">
+                    
+                    <div class="rounded-2xl border border-slate-300 bg-white p-6 shadow-panel">
+                        <h1 class="text-2xl font-bold text-slate-900">{{ bid.vendor_name }}</h1>
+                        <p class="text-brand-600 font-bold text-xl">${{ "{:,.2f}".format(bid.total_price) }}</p>
                     </div>
-                </div>
 
-                <div class="flex gap-4 pt-4">
-                    <button type="submit" class="flex-1 py-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-brand-600 transition">Save Evaluation</button>
+                    <div class="bg-white rounded-2xl border border-slate-300 p-6 shadow-panel">
+                        <h3 class="font-bold text-slate-800 mb-4 border-b pb-2">Technical Audit</h3>
+                        <div class="space-y-4">
+                            {% for key, label in technical_specs %}
+                            {% set is_checked = existing and key in existing.specsSelected.split(',') %}
+                            <div class="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-50 transition">
+                                <input type="checkbox" name="specs_selected" value="{{ key }}"
+                                    {% if is_checked %} checked {% endif %}
+                                    class="mt-1 h-5 w-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500">
+                                <div class="flex-1">
+                                    <label class="block font-bold text-slate-700 text-sm">{{ label }}</label>
+                                    <input type="text" name="comment_{{ key }}"
+                                        value="{% if existing %}{{ existing[key] or '' }}{% endif %}"
+                                        placeholder="Add comment..."
+                                        class="w-full mt-1 bg-transparent border-b border-dashed border-slate-300 focus:border-brand-500 focus:outline-none text-sm italic">
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-300 p-6 shadow-panel">
+                        <h3 class="font-bold text-slate-800 mb-4 border-b pb-2">Vendor Competency</h3>
+                        <div class="space-y-6">
+                            {% for item in ['Professionalism', 'Presentation', 'Budget'] %}
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 mb-2">{{ item }}</label>
+                                <div class="flex gap-2" data-category="{{ item | lower }}">
+                                    {% for i in range(1, 6) %}
+                                    <button type="button" 
+                                        class="star-btn text-2xl text-slate-200 hover:text-yellow-400 transition-colors" 
+                                        data-val="{{ i }}">★
+                                    </button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 pt-4">
+                        <button type="submit" class="flex-1 py-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-brand-600 transition">Save Evaluation</button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
 
     <script>
-        // Star rating logic
-    document.querySelectorAll('.star-btn').forEach(star => {
-        star.addEventListener('click', function() {
-            const val = this.dataset.val;
-            const container = this.parentElement;
-            const stars = container.querySelectorAll('.star-btn');
-            
-            stars.forEach(s => {
-                if (s.dataset.val <= val) {
-                    s.classList.replace('text-slate-200', 'text-yellow-400');
-                } else {
-                    s.classList.replace('text-yellow-400', 'text-slate-200');
-                }
+        document.querySelectorAll('.star-btn').forEach(star => {
+            star.addEventListener('click', function() {
+                const val = this.dataset.val;
+                const container = this.parentElement;
+                const category = container.dataset.category;
+                const stars = container.querySelectorAll('.star-btn');
+                
+                stars.forEach(s => {
+                    if (s.dataset.val <= val) {
+                        s.classList.replace('text-slate-200', 'text-yellow-400');
+                    } else {
+                        s.classList.replace('text-yellow-400', 'text-slate-200');
+                    }
+                });
+
+                // Update the corresponding hidden input
+                document.getElementById(`${category}_stars`).value = val;
             });
         });
-    });
-</script>
+        // Pre-fill stars on page load
+        function initStars(category, value) {
+            const container = document.querySelector(`[data-category="${category}"]`);
+            if (!container || value === 0) return;
+            const stars = container.querySelectorAll('.star-btn');
+            stars.forEach(s => {
+                if (parseInt(s.dataset.val) <= value) {
+                    s.classList.replace('text-slate-200', 'text-yellow-400');
+                }
+            });
+        }
+
+        initStars('professionalism', {{ existing.professionalism if existing else 0 }});
+        initStars('presentation', {{ existing.presentation if existing else 0 }});
+        initStars('budget', {{ existing.budget if existing else 0 }});
+    </script>
 {% endblock %}

@@ -30,16 +30,16 @@ def login_action():
     token = login(data['username'], data['password'])
     response = redirect(request.referrer)
     if not token:
-        flash('Bad username or password given'), 401
+        flash('Bad username or password given', "failed"), 401
     else:
-        flash('Login Successful')
+        flash('Login Successful', "success")
         set_access_cookies(response, token) 
     return response
 
 @auth_views.route('/logout', methods=['GET'])
 def logout_action():
     response = redirect(request.referrer) 
-    flash("Logged Out!")
+    flash("Logged Out!", "success")
     unset_jwt_cookies(response)
     return response
 

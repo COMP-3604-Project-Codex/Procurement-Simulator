@@ -5,23 +5,27 @@ class Bid(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     lotID = db.Column(db.Integer, db.ForeignKey('lot.id'), nullable=False)
     sourceGroupID = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=False)
-    receipientGroupID = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=False)
-    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    bidDocumentLink = db.Column(db.String(1000), nullable=False)
+    recipientGroupID = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    bidDocument = db.Column(db.LargeBinary, nullable=False)
+    bidDocumentName = db.Column(db.String(255), nullable=False)
+    quotationAmount = db.Column(db.Float, default=0.0)
 
-    def __init__(self, lotID, sourceGroupID, receipientGroupID, bidDocumentLink):
+    def __init__(self, lotID, sourceGroupID, recipientGroupID, bidDocument, bidDocumentName, quotationAmount):
         self.lotID = lotID
         self.sourceGroupID = sourceGroupID
-        self.receipientGroupID = receipientGroupID
-        self.bidDocumentLink = bidDocumentLink
-        self.timestamp = datetime.utcnow()
+        self.recipientGroupID = recipientGroupID
+        self.bidDocument = bidDocument
+        self.bidDocumentName = bidDocumentName
+        self.timestamp = datetime.now()
+        self.quotationAmount = quotationAmount
 
     def get_json(self):
         return {
             'id': self.id,
             'lotID': self.lotID,
             'sourceGroupID': self.sourceGroupID,
-            'receipientGroupID': self.receipientGroupID,
+            'recipientGroupID': self.recipientGroupID,
             'timestamp': self.timestamp.isoformat(),
-            'bidDocumentLink': self.bidDocumentLink
+            'bidDocumentName': self.bidDocumentName
         }

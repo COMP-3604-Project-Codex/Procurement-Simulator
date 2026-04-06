@@ -72,15 +72,23 @@
       </div>
     </header>
 
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <div class="mx-auto mt-4 flex w-full max-w-6xl flex-col gap-3 px-4 lg:px-6" id="flash-stack">
-          {% for message in messages %}
-            <div class="flash-item flex items-start justify-between gap-3 rounded-lg border border-brand-500/40 bg-brand-50 px-4 py-3 text-sm text-brand-700 shadow-panel">
-              <p>{{message}}</p>
-              <button class="dismiss-flash rounded px-2 py-1 text-cyan-200 transition hover:bg-cyan-400/20" aria-label="Dismiss">x</button>
-            </div>
-          {% endfor %}
+          {% for category, message in messages %}
+              <div class="mb-6 p-4 rounded-xl border shadow-sm flex justify-between items-center
+                  {% if category == 'success' %} bg-emerald-50 border-emerald-200 text-emerald-800
+                  {% elif category == 'failed' %} bg-red-50 border-red-200 text-red-800
+                  {% elif category == 'info' %} bg-yellow-50 border-yellow-200 text-yellow-800
+                  {% endif %}">
+                  <span>{{ message }}</span>
+                  <button onclick="this.parentElement.remove()" class="
+                      {% if category == 'success' %} text-emerald-500 hover:text-emerald-700
+                      {% elif category == 'failed' %} text-red-500 hover:text-red-700
+                      {% elif category == 'info' %} text-yellow-500 hover:text-yellow-700
+                      {% endif %}">✕</button>
+              </div>
+            {% endfor %}
         </div>
       {% endif %}
     {% endwith %}

@@ -22,7 +22,7 @@
                     <span class="text-xl font-medium text-slate-800">{{ candidate.name }} ({{ candidate.student_id }})</span>
                     
                     <div class="relative flex items-center">
-                      <input type="checkbox" name="members" value="{{ candidate.student_id }}" 
+                      <input type="checkbox" name="members" value="{{ candidate.id }}" 
                               class="h-6 w-6 rounded-full border-2 border-slate-500 text-brand-500 focus:ring-brand-500"
                               {% if candidate.selected %}checked{% endif %}>
                     </div>

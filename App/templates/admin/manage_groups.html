@@ -23,7 +23,7 @@
       </div>
       <div class="flex flex-col gap-3 min-w-[140px]">
         <button type="button" data-action="approve" data-group-id="{{ request.id }}" class="approve-btn rounded-xl border border-green-600 bg-green-50 px-6 py-2 text-sm font-semibold text-green-700 transition hover:bg-green-100 w-full">Approve</button>
-        <button type="button" data-action="decline" data-group-id="{{ request.id }}" class="decline-btn rounded-xl border border-red-600 bg-red-50 px-6 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 w-full">Decline</button>
+        <button type="button" data-action="decline" data-group-id="{{ request.id }}" class="decline-btn rounded-xl border border-red-600 bg-red-50 px-6 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 w-full">Reject</button>
       </div>
     </div>
     {% endfor %}
@@ -49,7 +49,7 @@
               {% endfor %}
             </div>
           </div>
-          <button type="button" data-group-id="{{ group.id }}" class="assign-lots-btn w-full rounded-xl border border-slate-900 bg-white px-4 py-3 text-base font-semibold text-slate-900 transition hover:bg-slate-100">Assign Lots</button>
+          <button type="button" data-action="remove" data-group-id="{{ group.id }}" class="remove-btn w-full rounded-xl border border-slate-900 bg-white px-4 py-3 text-base font-semibold text-slate-900 transition hover:bg-slate-100">Remove Group</button>
         </div>
         {% endfor %}
       </div>
@@ -63,19 +63,35 @@
         <label for="lot1" class="block mb-2 text-slate-800 font-semibold">1st Lot:</label>
         <select name="lot1" id="lot1" class="block w-full mb-4 rounded-lg border border-slate-300 px-3 py-2">
           {% for lot in lots %}
-          <option value="{{ lot }}">Lot {{ lot }}</option>
+          <option value="{{ lot.id }}">Lot {{ lot.id }}: {{lot.labType}}</option>
           {% endfor %}
         </select>
         <label for="lot2" class="block mb-2 text-slate-800 font-semibold">2nd Lot:</label>
         <select name="lot2" id="lot2" class="block w-full mb-6 rounded-lg border border-slate-300 px-3 py-2">
           {% for lot in lots %}
-          <option value="{{ lot }}">Lot {{ lot }}</option>
+          <option value="{{ lot.id }}">Lot {{ lot.id }}: {{lot.labType}}</option>
           {% endfor %}
         </select>
         <button type="button" id="confirmAssignBtn" class="w-full rounded-xl border border-slate-900 bg-white px-4 py-3 text-lg font-semibold text-slate-900 transition hover:bg-slate-100">Confirm</button>
       </form>
     </div>
   </div>
+</div>
+
+<!-- Confirm Action Modal -->
+<div id="confirmModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
+    <div class="bg-white rounded-2xl p-8 w-full max-w-md relative">
+        <h2 class="text-xl font-bold text-slate-900 mb-2" id="confirmTitle">Are you sure?</h2>
+        <p class="text-slate-600 mb-6" id="confirmMessage">This action cannot be undone.</p>
+        <div class="flex gap-4">
+            <button onclick="hideConfirmModal()" class="flex-1 rounded-xl border border-slate-300 px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50 transition">
+                Cancel
+            </button>
+            <button id="confirmActionBtn" class="flex-1 rounded-xl bg-red-600 px-4 py-3 font-semibold text-white hover:bg-red-700 transition">
+                Confirm
+            </button>
+        </div>
+    </div>
 </div>
 <script>
 function showTab(tab) {
@@ -103,11 +119,27 @@ function showAssignLotsModal(groupId) {
 function showAssignLotsModalForApproval(groupId) {
   assignLotsAction = `/admin/group-requests/${groupId}/approve-and-assign`;
   isApproval = true;
+  document.getElementById('assignLotsForm').action = assignLotsAction; // add this line
   document.getElementById('assignLotsModal').classList.remove('hidden');
 }
 function hideAssignLotsModal() {
   document.getElementById('assignLotsModal').classList.add('hidden');
 }
+
+let pendingForm = null;
+
+function showConfirmModal(title, message, form) {
+    pendingForm = form;
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMessage').textContent = message;
+    document.getElementById('confirmModal').classList.remove('hidden');
+}
+
+function hideConfirmModal() {
+    pendingForm = null;
+    document.getElementById('confirmModal').classList.add('hidden');
+}
+
 // Attach event listeners to Assign Lots buttons after DOM loads
 window.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.assign-lots-btn').forEach(function(btn) {
@@ -117,7 +149,7 @@ window.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Handle approve/decline buttons
+  // Handle approve, decline and remove buttons
   document.querySelectorAll('.approve-btn').forEach(function(btn) {
     btn.addEventListener('click', function(e) {
       const groupId = e.target.dataset.groupId;
@@ -125,49 +157,46 @@ window.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  document.getElementById('confirmActionBtn').addEventListener('click', function() {
+      if (pendingForm) {
+          document.body.appendChild(pendingForm);
+          pendingForm.submit();
+      }
+  });
+
   document.querySelectorAll('.decline-btn').forEach(function(btn) {
-    btn.addEventListener('click', function(e) {
-      const groupId = e.target.dataset.groupId;
-      fetch(`/admin/group-requests/${groupId}/decline`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      .then(response => {
-        if (response.ok) {
-          e.target.closest('.request-card').remove();
-        } else {
-          alert('Error declining group request');
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        alert('Error declining group request');
+      btn.addEventListener('click', function(e) {
+          const groupId = e.target.dataset.groupId;
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = `/admin/group-requests/${groupId}/decline`;
+          showConfirmModal(
+              'Reject Group Request?',
+              'This will permanently reject the group request and cannot be undone.',
+              form
+          );
       });
-    });
+  });
+
+  document.querySelectorAll('.remove-btn').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+          const groupId = e.target.dataset.groupId;
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = `/admin/groups/${groupId}/remove`;
+          showConfirmModal(
+              'Remove Group?',
+              'This will permanently remove the group and all associated data. This cannot be undone.',
+              form
+          );
+      });
   });
 
   // Handle confirm assign button
   document.getElementById('confirmAssignBtn').addEventListener('click', function(e) {
-    const formData = new FormData(document.getElementById('assignLotsForm'));
-    fetch(assignLotsAction, {
-      method: 'POST',
-      body: formData
-    })
-    .then(response => {
-      if (response.ok) {
-        hideAssignLotsModal();
-        location.reload(); // Reload to update the page
-      } else {
-        alert('Error assigning lots');
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      alert('Error assigning lots');
-    });
-  });
+    document.getElementById('assignLotsForm').action = assignLotsAction;
+    document.getElementById('assignLotsForm').submit();
+});
 });
 </script>
 {% endblock %}

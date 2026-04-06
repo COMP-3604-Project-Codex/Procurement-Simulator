@@ -1,8 +1,8 @@
-from App.models import Bid
+from App.models import Bid, Evaluation
 from App.database import db
 
-def create_bid(lotID, sourceGroupID, receipientGroupID, bidDocumentLink):
-    newbid = Bid(lotID, sourceGroupID, receipientGroupID, bidDocumentLink)
+def create_bid(lotID, sourceGroupID, recipientGroupID, bidDocument, bidDocumentName, quotationAmount):
+    newbid = Bid(lotID, sourceGroupID, recipientGroupID, bidDocument, bidDocumentName, quotationAmount)
     db.session.add(newbid)
     db.session.commit()
     return newbid
@@ -11,7 +11,9 @@ def get_bid(id):
     return db.session.get(Bid, id)
 
 def get_all_bids():
-    return db.session.scalars(db.select(Bid)).all()
+    return db.session.scalars(
+        db.select(Bid)
+    ).all()
 
 def get_all_bids_json():
     bids = get_all_bids()
@@ -23,6 +25,14 @@ def get_all_bids_json():
 def remove_bid(id):
     bid = get_bid(id)
     if bid:
+        evaluations = db.session.scalars(
+            db.select(Evaluation)
+            .filter_by(bidID=bid.id)
+        )
+
+        for evaluation in evaluations:
+            db.session.delete(evaluation)
+        
         db.session.delete(bid)
         db.session.commit()
         return True

@@ -41,40 +41,38 @@ class AdminUnitTests(unittest.TestCase):
         admin = Admin("alice", "alicepass")
         assert not admin.is_student()
 
-
 class StudentUnitTests(unittest.TestCase):
     @pytest.mark.run(order=7)
     def test_new_student(self):
-        student = Student("bob", "bobpass")
-        assert student.username == "bob"
+        student = Student("bob", "20231245", "bobpass")
+        assert student.username == "20231245"
 
     @pytest.mark.run(order=8)
     def test_student_get_json(self):
-        student = Student("bob", "bobpass")
+        student = Student("bob", "20240123", "bobpass")
         student_json = student.get_json()
-        assert student_json["username"] == "bob"
+        assert student_json["username"] == "20240123"
         assert student_json["role"] == "student"
 
     @pytest.mark.run(order=9)
     def test_student_hashed_password(self):
-        student = Student("bob", "bobpass")
+        student = Student("bob", "20240123", "bobpass")
         assert student.password != "bobpass"
 
     @pytest.mark.run(order=10)
     def test_student_check_password(self):
-        student = Student("bob", "bobpass")
+        student = Student("bob", "20240123", "bobpass")
         assert student.check_password("bobpass")
 
     @pytest.mark.run(order=11)
     def test_student_is_student(self):
-        student = Student("bob", "bobpass")
+        student = Student("bob", "20240123", "bobpass")
         assert student.is_student()
 
     @pytest.mark.run(order=12)
     def test_student_is_not_admin(self):
-        student = Student("bob", "bobpass")
+        student = Student("bob", "20240123", "bobpass")
         assert not student.is_admin()
-
 
 class GroupUnitTests(unittest.TestCase):
     @pytest.mark.run(order=13)
@@ -106,34 +104,34 @@ class StudentGroupUnitTests(unittest.TestCase):
 class LotUnitTests(unittest.TestCase):
     @pytest.mark.run(order=17)
     def test_new_lot(self):
-        lot = Lot("Biology", 30, 5000.00)
+        lot = Lot("Biology", "Medium, capable of having 20 machines", 5000.00)
         assert lot.labType == "Biology"
 
     @pytest.mark.run(order=18)
     def test_lot_lab_size(self):
-        lot = Lot("Biology", 30, 5000.00)
-        assert lot.labSize == 30
+        lot = Lot("Biology", "Medium, capable of having 20 machines", 5000.00)
+        assert lot.labSize == "Medium, capable of having 20 machines"
 
     @pytest.mark.run(order=19)
     def test_lot_budget(self):
-        lot = Lot("Biology", 30, 5000.00)
+        lot = Lot("Biology", "Medium, capable of having 20 machines", 5000.00)
         assert lot.budget == 5000.00
 
     @pytest.mark.run(order=20)
     def test_lot_get_json(self):
-        lot = Lot("Biology", 30, 5000.00)
+        lot = Lot("Biology", "Medium, capable of having 20 machines", 5000.00)
         lot_json = lot.get_json()
         self.assertDictEqual(lot_json, {
             "id": None,
             "name": None,
             "labType": "Biology",
-            "labSize": 30,
+            "labSize": "Medium, capable of having 20 machines",
             "budget": 5000.00
         })
 
     @pytest.mark.run(order=21)
     def test_lot_budget_comparison(self):
-        lot = Lot("Biology", 30, 5000.00)
+        lot = Lot("Biology", "Medium, capable of having 20 machines", 5000.00)
         assert 4999.99 < lot.budget
         assert 5000.01 > lot.budget
 
@@ -184,35 +182,35 @@ class RFPUnitTests(unittest.TestCase):
 class BidUnitTests(unittest.TestCase):
     @pytest.mark.run(order=26)
     def test_new_bid(self):
-        bid = Bid(1, 2, 3, "http://example.com/doc")
+        bid = Bid(1, 2, 3, b'fake pdf content', 'test.pdf', 14000.0)
         assert bid.lotID == 1
         assert bid.sourceGroupID == 2
-        assert bid.receipientGroupID == 3
+        assert bid.recipientGroupID == 3
 
     @pytest.mark.run(order=27)
     def test_bid_document_link(self):
-        bid = Bid(1, 2, 3, "http://example.com/doc")
-        assert bid.bidDocumentLink == "http://example.com/doc"
+        bid = Bid(1, 2, 3, b'fake pdf content', 'test.pdf', 14000.0)
+        assert bid.bidDocumentName == 'test.pdf'
 
     @pytest.mark.run(order=28)
     def test_bid_timestamp_auto_set(self):
-        bid = Bid(1, 2, 3, "http://example.com/doc")
+        bid = Bid(1, 2, 3, b'fake pdf content', 'test.pdf', 14000.0)
         assert isinstance(bid.timestamp, datetime)
 
     @pytest.mark.run(order=29)
     def test_bid_timestamp_is_recent(self):
-        bid = Bid(1, 2, 3, "http://example.com/doc")
-        delta = datetime.utcnow() - bid.timestamp
+        bid = Bid(1, 2, 3, b'fake pdf content', 'test.pdf', 14000.0)
+        delta = datetime.now() - bid.timestamp
         assert delta.seconds < 5
 
     @pytest.mark.run(order=30)
     def test_bid_get_json(self):
-        bid = Bid(1, 2, 3, "http://example.com/doc")
+        bid = Bid(1, 2, 3, b'fake pdf content', 'test.pdf', 14000.0)
         bid_json = bid.get_json()
         assert bid_json["lotID"] == 1
         assert bid_json["sourceGroupID"] == 2
-        assert bid_json["receipientGroupID"] == 3
-        assert bid_json["bidDocumentLink"] == "http://example.com/doc"
+        assert bid_json["recipientGroupID"] == 3
+        assert bid_json["bidDocumentName"] == 'test.pdf'
         assert "timestamp" in bid_json
 
 
@@ -220,7 +218,7 @@ class EvaluationUnitTests(unittest.TestCase):
     @pytest.mark.run(order=31)
     def test_new_evaluation(self):
         sourceGroupID = 1
-        receipientGroupID = 2
+        recipientGroupID = 2
         bidID = 2
         lotID = 1
         specsMet = 5
@@ -228,14 +226,14 @@ class EvaluationUnitTests(unittest.TestCase):
         professionalism = 2
         budget = 4
 
-        evaluation = Evaluation(sourceGroupID, receipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget)
+        evaluation = Evaluation(sourceGroupID, recipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget)
         assert evaluation
         assert evaluation.overallScore == 5.6
 
     @pytest.mark.run(order=32)
     def test_evaluation_get_json(self):
         sourceGroupID = 1
-        receipientGroupID = 2
+        recipientGroupID = 2
         bidID = 2
         lotID = 1
         specsMet = 5
@@ -243,11 +241,11 @@ class EvaluationUnitTests(unittest.TestCase):
         professionalism = 2
         budget = 4
 
-        evaluation = Evaluation(sourceGroupID, receipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget)
+        evaluation = Evaluation(sourceGroupID, recipientGroupID, bidID, lotID, specsMet, presentation, professionalism, budget)
         self.assertDictEqual({
             'id': None,
             'sourceGroupID': 1,
-            'receipientGroupID': 2,
+            'recipientGroupID': 2,
             'bidID': 2,
             'lotID': 1,
             'overallScore': 5.6
