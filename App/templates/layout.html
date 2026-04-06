@@ -36,41 +36,20 @@
 
   </head>
   <body class="bg-slate-100 font-body text-slate-900 antialiased">
-
-
     <header class="border-b border-slate-300 bg-white/80 backdrop-blur">
-      <div class="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between lg:px-6">
-        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-7">
-          <a href="/" class="font-heading text-xl tracking-tight text-slate-900">Procurement Simulator</a>
-          <nav>
-            <ul class="flex flex-wrap items-center gap-2 text-sm font-medium text-slate-800">
-              <li><a href="/" class="rounded-md px-3 py-1.5 transition hover:bg-slate-100 hover:text-brand-600">Home</a></li>
-              <li><a href="/users" class="rounded-md px-3 py-1.5 transition hover:bg-slate-100 hover:text-brand-600">Users Jinja</a></li>
-              {% if is_authenticated %}
-                <li><a href="/identify" class="rounded-md px-3 py-1.5 transition hover:bg-slate-100 hover:text-brand-600">Identify</a></li>
-              {% endif %}
-              <li><a href="/static/users" class="rounded-md px-3 py-1.5 transition hover:bg-slate-100 hover:text-brand-600">Users JS</a></li>
-            </ul>
-          </nav>
-        </div>
-
-        {% if is_authenticated %}
-          <a href="/logout" class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-panel transition hover:bg-brand-600">Logout</a>
-        {% else %}
-          <form class="grid gap-2 sm:grid-cols-[1fr_1fr_auto] sm:items-end" method="POST" action="/login">
-            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500" for="login-username">
-              Username
-              <input id="login-username" placeholder="username" value="bob" name="username" type="text" required class="mt-1 w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:outline-none">
-            </label>
-            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500" for="login-password">
-              Password
-              <input id="login-password" placeholder="password" value="bobpass" name="password" type="password" required class="mt-1 w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:outline-none">
-            </label>
-            <button type="submit" class="h-10 rounded-xl bg-brand-500 px-4 text-sm font-semibold text-white transition hover:bg-brand-600">Login</button>
-          </form>
-        {% endif %}
-      </div>
-    </header>
+    <div class="mx-auto flex max-w-6xl justify-center px-4 py-4 lg:px-6">
+      <nav>
+        <ul class="flex flex-wrap items-center justify-center gap-3 text-sm font-medium text-slate-800">
+          <li><a href="/" class="rounded-md px-3 py-1.5 transition hover:bg-slate-100 hover:text-brand-600">Home</a></li>
+          <li><a href="/users" class="rounded-md px-3 py-1.5 transition hover:bg-slate-100 hover:text-brand-600">Users Jinja</a></li>
+          {% if is_authenticated %}
+            <li><a href="/identify" class="rounded-md px-3 py-1.5 transition hover:bg-slate-100 hover:text-brand-600">Identify</a></li>
+          {% endif %}
+          <li><a href="/static/users" class="rounded-md px-3 py-1.5 transition hover:bg-slate-100 hover:text-brand-600">Users JS</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}

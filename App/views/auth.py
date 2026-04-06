@@ -27,13 +27,16 @@ def identify_page():
 @auth_views.route('/login', methods=['POST'])
 def login_action():
     data = request.form
-    token, role = login(data['username'], data['password']) 
+    user, token, role = login(data['username'], data['password']) 
     
     if not token:
         flash('Bad username or password given', "failed")
         return redirect(request.referrer) 
     
     flash('Login Successful', "success")
+
+    name = user.username if user.is_admin() else user.name
+    flash(f"Welcome {name}", "success")
     
     if role == "student":
         response = redirect('/student')
