@@ -642,7 +642,7 @@ def rfp_gallery_page():
 
     return render_template(
         'student/vendor_rfp_gallery.html',
-        # title='View RFPs',
+        title='RFP Gallery',
         active_page='rfp-gallery',
         rfps=available_rfps,
         sourceGroupID=sourceGroupID
@@ -711,6 +711,7 @@ def submitted_bids_page():
         'student/vendor_bids.html',
         active_page='my-bids',
         bids=submitted_bids,
+        title='My Submitted Bids',
         accepted = accepted,
         pending = pending,
         rejected = rejected
