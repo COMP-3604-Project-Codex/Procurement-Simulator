@@ -1,66 +1,108 @@
 {% extends "admin/layout.html" %}
 {% block title %}Manage Groups{% endblock %}
-
+Approve & Assign Lots
 {% block content %}
-<div class="mx-auto max-w-5xl">
-  <div class="flex border-b border-slate-300 mb-6">
-    <button id="tab-requests" class="px-6 py-2 text-lg font-semibold border-b-2 focus:outline-none transition-colors border-transparent text-slate-700 hover:bg-slate-50" onclick="showTab('requests')">Group Requests</button>
-    <button id="tab-groups" class="px-6 py-2 text-lg font-semibold border-b-2 focus:outline-none transition-colors border-transparent text-slate-700 hover:bg-slate-50" onclick="showTab('groups')">Groups</button>
-  </div>
-  <div id="section-requests" class="space-y-8 pb-10">
-    {% for request in group_requests %}
-    <div class="request-card rounded-2xl border border-slate-300 bg-white p-6 shadow-panel flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-      <div>
-        <div class="font-semibold text-xl text-slate-900 mb-2">Group Name: {{ request.name }}</div>
+<div id="manage-groups-page" class="mx-auto max-w-7xl space-y-6">
+  <div class="rounded-3xl border border-slate-800 bg-slate-950 p-6 shadow-panel">
+    <section class="space-y-3">
+      <div class="flex items-center justify-between gap-4">
         <div>
-          <p class="text-sm font-semibold text-slate-700 mb-1">Members:</p>
-          <ul class="space-y-1">
-            {% for member in request.members %}
-            <li class="text-slate-800">{{ member.name }} ({{ member.id }})</li>
-            {% endfor %}
-          </ul>
+          <h2 class="text-xl font-semibold text-slate-100">Pending Group Requests</h2>
+          <p class="text-xs text-slate-400 mt-1">Review the incoming requests and assign lots when approving.</p>
         </div>
+        <span class="text-xs font-medium text-slate-400">{{ group_requests|length }} pending</span>
       </div>
-      <div class="flex flex-col gap-3 min-w-[140px]">
-        <button type="button" data-action="approve" data-group-id="{{ request.id }}" class="approve-btn rounded-xl border border-green-600 bg-green-50 px-6 py-2 text-sm font-semibold text-green-700 transition hover:bg-green-100 w-full">Approve</button>
-        <button type="button" data-action="decline" data-group-id="{{ request.id }}" class="decline-btn rounded-xl border border-red-600 bg-red-50 px-6 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 w-full">Reject</button>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-      </div>
-  <div id="section-groups" class="grid grid-cols-1 md:grid-cols-2 gap-8 pb-10 hidden">
-        {% for group in groups %}
-        <div class="rounded-2xl border border-slate-300 bg-white p-6 shadow-panel flex flex-col gap-4">
-          <div class="font-semibold text-xl text-slate-900">Group Name: {{ group.name }}</div>
-          <div>
-            <p class="text-sm font-semibold text-slate-700 mb-1">Members:</p>
-            <ul class="space-y-1">
-              {% for member in group.members %}
-              <li class="text-slate-800">{{ member.name }} ({{ member.id }})</li>
-              {% endfor %}
-            </ul>
-          </div>
-          <div>
-            <p class="text-sm font-semibold text-slate-700 mb-1">Assigned Lots:</p>
-            <div class="flex flex-wrap gap-2">
-              {% for lot in group.lots %}
-              <span class="rounded-lg bg-brand-100 px-3 py-1 text-sm font-medium text-brand-600">Lot {{ lot }}</span>
-              {% endfor %}
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {% if group_requests %}
+          {% for request in group_requests %}
+          <div class="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow flex flex-col justify-between gap-4">
+            <div class="space-y-3">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <div class="font-semibold text-lg text-slate-100">{{ request.name }}</div>
+                  <span class="inline-flex items-center rounded-full bg-yellow-700/15 px-2 py-0.5 text-xs font-semibold text-yellow-200">Pending</span>
+                </div>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-300 mb-1">Members</p>
+                <ul class="space-y-0.5 text-xs text-slate-300">
+                  {% for member in request.members %}
+                  <li>{{ member.name }} ({{ member.id }})</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+            <div class="flex flex-col gap-2">
+              <button type="button" data-action="approve" data-group-id="{{ request.id }}" class="approve-btn rounded-lg border border-emerald-500 bg-emerald-700/10 px-4 py-2 text-xs font-semibold text-emerald-200 transition hover:bg-emerald-600/20">Approve & Assign Lots</button>
+              <button type="button" data-action="decline" data-group-id="{{ request.id }}" class="decline-btn rounded-lg border border-red-500 bg-red-700/10 px-4 py-2 text-xs font-semibold text-red-200 transition hover:bg-red-600/20">Reject Request</button>
             </div>
           </div>
-          <button type="button" data-action="remove" data-group-id="{{ group.id }}" class="remove-btn w-full rounded-xl border border-slate-900 bg-white px-4 py-3 text-base font-semibold text-slate-900 transition hover:bg-slate-100">Remove Group</button>
-        </div>
-        {% endfor %}
+          {% endfor %}
+        {% else %}
+          <div class="md:col-span-2 rounded-2xl border border-slate-800 bg-slate-900 p-6 text-slate-300">There are no pending group requests at the moment.</div>
+        {% endif %}
       </div>
+    </section>
+
+    <section class="space-y-3">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-semibold text-slate-100">Confirmed Groups</h2>
+          <p class="text-xs text-slate-400 mt-1">Manage the status of confirmed groups and remove them if needed.</p>
+        </div>
+        <span class="text-xs font-medium text-slate-400">{{ groups|length }} confirmed</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {% if groups %}
+          {% for group in groups %}
+          <div class="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow flex flex-col justify-between gap-4">
+            <div class="space-y-3">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <div class="font-semibold text-lg text-slate-100">{{ group.name }}</div>
+                  <span class="inline-flex items-center rounded-full bg-emerald-700/15 px-2 py-0.5 text-xs font-semibold text-emerald-200">Confirmed</span>
+                </div>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-300 mb-1">Members</p>
+                <ul class="space-y-0.5 text-xs text-slate-300">
+                  {% for member in group.members %}
+                  <li>{{ member.name }} ({{ member.id }})</li>
+                  {% endfor %}
+                </ul>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-300 mb-1">Assigned Lots</p>
+                <div class="flex flex-wrap gap-2">
+                  {% for lot in group.lots %}
+                  <span class="rounded-full bg-brand-600/15 px-2 py-0.5 text-xs font-medium text-brand-200">Lot {{ lot }}</span>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            <div class="flex flex-col gap-2">
+              <button type="button" data-action="reopen" data-group-id="{{ group.id }}" class="reopen-btn rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-100 transition hover:bg-slate-700">Mark Pending</button>
+              <button type="button" data-action="remove" data-group-id="{{ group.id }}" class="remove-btn rounded-lg border border-red-500 bg-red-700/10 px-4 py-2 text-xs font-semibold text-red-200 transition hover:bg-red-600/20">Remove Group</button>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="md:col-span-2 rounded-2xl border border-slate-800 bg-slate-900 p-6 text-slate-300">There are no confirmed groups yet.</div>
+        {% endif %}
+      </div>
+    </section>
+  </div>
 </div>
+
 <!-- Assign Lots Modal -->
-  <div id="assignLotsModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
-    <div class="bg-white text-black rounded-2xl p-8 w-full max-w-md relative">
-      <button onclick="hideAssignLotsModal()" class="absolute top-4 right-4 text-3xl font-bold leading-none">&times;</button>
-      <h2 class="text-2xl font-semibold mb-6 text-center text-slate-900">Assign Lots:</h2>
+  <div id="assignLotsModal" class="fixed inset-0 flex items-center justify-center bg-black/40 z-50 hidden">
+    <div class="bg-slate-950 text-black rounded-2xl p-8 w-full max-w-md shadow-panel border border-slate-800 relative">
+      <button onclick="hideAssignLotsModal()" class="absolute top-4 right-4 text-3xl font-bold leading-none text-slate-100">&times;</button>
+      <h2 class="text-2xl font-semibold mb-6 text-center text-slate-100">Assign Lots:</h2>
       <form id="assignLotsForm" method="post">
-        <label for="lot1" class="block mb-2 text-slate-800 font-semibold">1st Lot:</label>
+        <label for="lot1" class="block mb-2 text-slate-100 font-semibold">1st Lot:</label>
         <div class="relative w-full mb-4">
           <button type="button" onclick="toggleDropdown('lot1Dropdown')" 
             class="w-full rounded-lg border border-slate-300 px-3 py-2 text-left bg-white">
@@ -82,7 +124,7 @@
           <!-- hidden input to submit value -->
           <input type="hidden" name="lot1" id="lot1">
         </div>
-        <label for="lot2" class="block mb-2 text-slate-800 font-semibold">2nd Lot:</label>
+        <label for="lot2" class="block mb-2 text-slate-100 font-semibold">2nd Lot:</label>
         <div class="relative w-full mb-4">
           <button type="button" onclick="toggleDropdown('lot2Dropdown')" 
             class="w-full rounded-lg border border-slate-300 px-3 py-2 text-left bg-white">
@@ -105,19 +147,19 @@
           <!-- hidden input -->
           <input type="hidden" name="lot2" id="lot2">
         </div>
-        <button type="button" id="confirmAssignBtn" class="w-full rounded-xl border border-slate-900 bg-white px-4 py-3 text-lg font-semibold text-slate-900 transition hover:bg-slate-100">Confirm</button>
+        <button type="button" id="confirmAssignBtn" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-lg font-semibold text-slate-100 transition hover:bg-slate-900">Confirm</button>
       </form>
     </div>
   </div>
 </div>
 
 <!-- Confirm Action Modal -->
-<div id="confirmModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
-    <div class="bg-white rounded-2xl p-8 w-full max-w-md relative">
-        <h2 class="text-xl font-bold text-slate-900 mb-2" id="confirmTitle">Are you sure?</h2>
-        <p class="text-slate-600 mb-6" id="confirmMessage">This action cannot be undone.</p>
+<div id="confirmModal" class="fixed inset-0 flex items-center justify-center bg-black/40 z-50 hidden">
+    <div class="bg-slate-950 rounded-2xl p-8 w-full max-w-md shadow-panel border border-slate-800 relative">
+        <h2 class="text-xl font-bold text-slate-100 mb-2" id="confirmTitle">Are you sure?</h2>
+        <p class="text-slate-400 mb-6" id="confirmMessage">This action cannot be undone.</p>
         <div class="flex gap-4">
-            <button onclick="hideConfirmModal()" class="flex-1 rounded-xl border border-slate-300 px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50 transition">
+            <button onclick="hideConfirmModal()" class="flex-1 rounded-xl border border-slate-700 px-4 py-3 font-semibold text-slate-100 hover:bg-slate-900 transition">
                 Cancel
             </button>
             <button id="confirmActionBtn" class="flex-1 rounded-xl bg-red-600 px-4 py-3 font-semibold text-white hover:bg-red-700 transition">
@@ -145,32 +187,12 @@ document.addEventListener('click', function(e) {
     }
   });
 });
-function showTab(tab) {
-  document.getElementById('section-requests').classList.toggle('hidden', tab !== 'requests');
-  document.getElementById('section-groups').classList.toggle('hidden', tab !== 'groups');
-  document.getElementById('tab-requests').classList.toggle('border-brand-600', tab === 'requests');
-  document.getElementById('tab-requests').classList.toggle('text-brand-600', tab === 'requests');
-  document.getElementById('tab-requests').classList.toggle('bg-white', tab === 'requests');
-  document.getElementById('tab-groups').classList.toggle('border-brand-600', tab === 'groups');
-  document.getElementById('tab-groups').classList.toggle('text-brand-600', tab === 'groups');
-  document.getElementById('tab-groups').classList.toggle('bg-white', tab === 'groups');
-}
-// Default to requests tab
-showTab('requests');
 
 // Assign Lots Modal logic
 let assignLotsAction = '';
-let isApproval = false;
-function showAssignLotsModal(groupId) {
-  assignLotsAction = `/admin/groups/${groupId}/assign-lots`;
-  isApproval = false;
-  document.getElementById('assignLotsForm').action = assignLotsAction;
-  document.getElementById('assignLotsModal').classList.remove('hidden');
-}
 function showAssignLotsModalForApproval(groupId) {
   assignLotsAction = `/admin/group-requests/${groupId}/approve-and-assign`;
-  isApproval = true;
-  document.getElementById('assignLotsForm').action = assignLotsAction; // add this line
+  document.getElementById('assignLotsForm').action = assignLotsAction;
   document.getElementById('assignLotsModal').classList.remove('hidden');
 }
 function hideAssignLotsModal() {
@@ -191,28 +213,12 @@ function hideConfirmModal() {
     document.getElementById('confirmModal').classList.add('hidden');
 }
 
-// Attach event listeners to Assign Lots buttons after DOM loads
 window.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('.assign-lots-btn').forEach(function(btn) {
-    btn.addEventListener('click', function(e) {
-      e.preventDefault();
-      showAssignLotsModal(btn.dataset.groupId);
-    });
-  });
-
-  // Handle approve, decline and remove buttons
   document.querySelectorAll('.approve-btn').forEach(function(btn) {
     btn.addEventListener('click', function(e) {
       const groupId = e.target.dataset.groupId;
       showAssignLotsModalForApproval(groupId);
     });
-  });
-
-  document.getElementById('confirmActionBtn').addEventListener('click', function() {
-      if (pendingForm) {
-          document.body.appendChild(pendingForm);
-          pendingForm.submit();
-      }
   });
 
   document.querySelectorAll('.decline-btn').forEach(function(btn) {
@@ -224,6 +230,20 @@ window.addEventListener('DOMContentLoaded', function() {
           showConfirmModal(
               'Reject Group Request?',
               'This will permanently reject the group request and cannot be undone.',
+              form
+          );
+      });
+  });
+
+  document.querySelectorAll('.reopen-btn').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+          const groupId = e.target.dataset.groupId;
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = `/admin/groups/${groupId}/reopen`;
+          showConfirmModal(
+              'Reopen Group?',
+              'This will move the group back into pending status and release its assigned lots.',
               form
           );
       });
@@ -243,11 +263,17 @@ window.addEventListener('DOMContentLoaded', function() {
       });
   });
 
-  // Handle confirm assign button
-  document.getElementById('confirmAssignBtn').addEventListener('click', function(e) {
+  document.getElementById('confirmActionBtn').addEventListener('click', function() {
+      if (pendingForm) {
+          document.body.appendChild(pendingForm);
+          pendingForm.submit();
+      }
+  });
+
+  document.getElementById('confirmAssignBtn').addEventListener('click', function() {
     document.getElementById('assignLotsForm').action = assignLotsAction;
     document.getElementById('assignLotsForm').submit();
-});
+  });
 });
 </script>
 {% endblock %}

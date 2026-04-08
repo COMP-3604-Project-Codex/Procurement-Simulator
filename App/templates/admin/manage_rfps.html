@@ -1,228 +1,374 @@
-{% extends 'admin/layout.html' %}
-{% block title %}Manage RFPs{% endblock %}
-
-{% block content %}
+{% extends 'admin/layout.html' %} {% block title %}Manage RFPs{% endblock %} {%
+block content %}
 <div class="mx-auto max-w-5xl">
-  <div class="flex border-b border-slate-300 mb-6">
-    <button id="tab-requests" class="px-6 py-2 text-lg font-semibold border-b-2 focus:outline-none transition-colors border-brand-500 text-brand-600" onclick="showRfpTab('requests')">RFP Requests</button>
-    <button id="tab-gallery" class="px-6 py-2 text-lg font-semibold border-b-2 focus:outline-none transition-colors border-transparent text-slate-700 hover:bg-slate-50" onclick="showRfpTab('gallery')">RFP Gallery</button>
-  </div>
-  <div id="section-requests" class="grid grid-cols-2 gap-4 mt-6">
-    {% for rfp in rfp_requests %}
-    <div class="border p-4 rounded-lg bg-white shadow">
-      <h3 class="text-lg font-semibold">{{ rfp.name }}</h3>
-      <p class="text-sm text-gray-500">TimeStamp: {{ rfp.timestamp }}</p>
-      <div class="mt-4 flex justify-between">
-        <button class="px-4 py-2 bg-blue-500 text-white rounded" onclick="showRfpPreviewModal(this)"
-          data-lot="{{ rfp.Lot }}"
-          data-devicetype="{{ rfp.deviceType }}"
-          data-resolution="{{ rfp.resolution }}"
-          data-os="{{ rfp.os }}"
-          data-cpu="{{ rfp.cpu }}"
-          data-ram="{{ rfp.ram }}"
-          data-drive="{{ rfp.drive }}"
-          data-gpu="{{ rfp.gpu }}"
-          data-peripherals="{{ rfp.peripherals }}"
-          data-features="{{ rfp.features }}"
-          data-io="{{ rfp.io }}">
-          Preview RFP
+    <div class="flex border-b border-slate-800 mb-6">
+        <button
+            id="tab-requests"
+            class="px-6 py-2 text-lg font-semibold border-b-2 focus:outline-none transition-colors border-brand-500 text-brand-600"
+            onclick="showRfpTab('requests')"
+        >
+            RFP Requests
         </button>
-        <form method="post" action="{{ url_for('admin_views.admin_manage_rfps') }}">
-          <input type="hidden" name="groupID" value="{{ rfp.groupID }}">
-          <input type="hidden" name="lotID" value="{{ rfp.lotID }}">
-          <button type="button" class="rfp-approve-btn px-4 py-2 bg-green-500 text-white rounded"
-            data-group-id="{{ rfp.groupID }}" data-lot-id="{{ rfp.lotID }}">Approve</button>
-          <button type="button" class="rfp-reject-btn px-4 py-2 bg-red-500 text-white rounded"
-            data-group-id="{{ rfp.groupID }}" data-lot-id="{{ rfp.lotID }}">Reject</button>
-        </form>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-  <div id="section-gallery" class="grid grid-cols-3 gap-4 mt-6 hidden">
-    {% for rfp in rfp_gallery %}
-    <div class="border p-4 rounded-lg bg-white shadow">
-      <h3 class="text-lg font-semibold">{{ rfp.name }}</h3>
-      <p class="text-sm text-gray-500">TimeStamp: {{ rfp.timestamp }}</p>
-      <div class="mt-4 flex justify-between">
-        <button class="px-4 py-2 bg-blue-500 text-white rounded" onclick="showRfpPreviewModal(this)"
-          data-lot="{{ rfp.Lot }}"
-          data-devicetype="{{ rfp.deviceType }}"
-          data-resolution="{{ rfp.resolution }}"
-          data-os="{{ rfp.os }}"
-          data-cpu="{{ rfp.cpu }}"
-          data-ram="{{ rfp.ram }}"
-          data-drive="{{ rfp.drive }}"
-          data-gpu="{{ rfp.gpu }}"
-          data-peripherals="{{ rfp.peripherals }}"
-          data-features="{{ rfp.features }}"
-          data-io="{{ rfp.io }}">
-          Preview
+        <button
+            id="tab-gallery"
+            class="px-6 py-2 text-lg font-semibold border-b-2 focus:outline-none transition-colors border-transparent text-slate-100 hover:bg-slate-900"
+            onclick="showRfpTab('gallery')"
+        >
+            RFP Gallery
         </button>
-        <form method="post" action="{{ url_for('admin_views.admin_manage_rfps') }}">
-          <input type="hidden" name="groupID" value="{{ rfp.groupID }}">
-          <input type="hidden" name="lotID" value="{{ rfp.lotID }}">
-          <button type="button" class="rfp-remove-btn px-4 py-2 bg-red-500 text-white rounded"
-            data-group-id="{{ rfp.groupID }}" data-lot-id="{{ rfp.lotID }}">Remove</button>
-        </form>
-      </div>
     </div>
-    {% endfor %}
-  </div>
+    <div id="section-requests" class="grid grid-cols-2 gap-4 mt-6">
+        {% for rfp in rfp_requests %}
+        <div
+            class="rounded-2xl border border-slate-800 bg-slate-900 shadow overflow-hidden"
+        >
+            <div class="bg-slate-950 px-5 py-4 border-b border-slate-800">
+                <h3 class="text-lg font-semibold text-slate-100">
+                    {{ rfp.name }}
+                </h3>
+                <p class="text-sm text-slate-400">
+                    TimeStamp: {{ rfp.timestamp }}
+                </p>
+            </div>
+            <div class="p-5">
+                <div class="flex justify-between">
+                    <button
+                        class="px-4 py-2 bg-blue-500 text-white rounded"
+                        onclick="showRfpPreviewModal(this)"
+                        data-lot="{{ rfp.Lot }}"
+                        data-devicetype="{{ rfp.deviceType }}"
+                        data-resolution="{{ rfp.resolution }}"
+                        data-os="{{ rfp.os }}"
+                        data-cpu="{{ rfp.cpu }}"
+                        data-ram="{{ rfp.ram }}"
+                        data-drive="{{ rfp.drive }}"
+                        data-gpu="{{ rfp.gpu }}"
+                        data-peripherals="{{ rfp.peripherals }}"
+                        data-features="{{ rfp.features }}"
+                        data-io="{{ rfp.io }}"
+                    >
+                        Preview RFP
+                    </button>
+                    <form
+                        method="post"
+                        action="{{ url_for('admin_views.admin_manage_rfps') }}"
+                    >
+                        <input
+                            type="hidden"
+                            name="groupID"
+                            value="{{ rfp.groupID }}"
+                        />
+                        <input
+                            type="hidden"
+                            name="lotID"
+                            value="{{ rfp.lotID }}"
+                        />
+                        <button
+                            type="button"
+                            class="rfp-approve-btn px-4 py-2 bg-green-500 text-white rounded"
+                            data-group-id="{{ rfp.groupID }}"
+                            data-lot-id="{{ rfp.lotID }}"
+                        >
+                            Approve
+                        </button>
+                        <button
+                            type="button"
+                            class="rfp-reject-btn px-4 py-2 bg-red-500 text-white rounded"
+                            data-group-id="{{ rfp.groupID }}"
+                            data-lot-id="{{ rfp.lotID }}"
+                        >
+                            Reject
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div id="section-gallery" class="grid grid-cols-3 gap-4 mt-6 hidden">
+        {% for rfp in rfp_gallery %}
+        <div
+            class="rounded-2xl border border-slate-800 bg-slate-900 shadow overflow-hidden"
+        >
+            <div class="bg-slate-950 px-5 py-4 border-b border-slate-800">
+                <h3 class="text-lg font-semibold text-slate-100">
+                    {{ rfp.name }}
+                </h3>
+                <p class="text-sm text-slate-400">
+                    TimeStamp: {{ rfp.timestamp }}
+                </p>
+            </div>
+            <div class="p-5">
+                <div class="flex justify-between">
+                    <button
+                        class="px-4 py-2 bg-blue-500 text-white rounded"
+                        onclick="showRfpPreviewModal(this)"
+                        data-lot="{{ rfp.Lot }}"
+                        data-devicetype="{{ rfp.deviceType }}"
+                        data-resolution="{{ rfp.resolution }}"
+                        data-os="{{ rfp.os }}"
+                        data-cpu="{{ rfp.cpu }}"
+                        data-ram="{{ rfp.ram }}"
+                        data-drive="{{ rfp.drive }}"
+                        data-gpu="{{ rfp.gpu }}"
+                        data-peripherals="{{ rfp.peripherals }}"
+                        data-features="{{ rfp.features }}"
+                        data-io="{{ rfp.io }}"
+                    >
+                        Preview
+                    </button>
+                    <form
+                        method="post"
+                        action="{{ url_for('admin_views.admin_manage_rfps') }}"
+                    >
+                        <input
+                            type="hidden"
+                            name="groupID"
+                            value="{{ rfp.groupID }}"
+                        />
+                        <input
+                            type="hidden"
+                            name="lotID"
+                            value="{{ rfp.lotID }}"
+                        />
+                        <button
+                            type="button"
+                            class="rfp-remove-btn px-4 py-2 bg-red-500 text-white rounded"
+                            data-group-id="{{ rfp.groupID }}"
+                            data-lot-id="{{ rfp.lotID }}"
+                        >
+                            Remove
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 <!-- RFP Preview Modal -->
-<div id="rfpPreviewModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
-  <div class="bg-white p-6 rounded-lg shadow-lg w-1/2">
-    <div class="flex justify-between items-center border-b pb-4">
-      <h2 class="text-xl font-bold">RFP Details</h2>
-      <button class="text-gray-500 hover:text-gray-700" onclick="hideRfpPreviewModal()">&times;</button>
+<div
+    id="rfpPreviewModal"
+    class="fixed inset-0 flex items-center justify-center bg-black/40 z-50 hidden"
+>
+    <div
+        class="bg-slate-950 p-6 rounded-lg shadow-lg w-1/2 border border-slate-800"
+    >
+        <div
+            class="flex justify-between items-center border-b border-slate-400 pb-4"
+        >
+            <h2 class="text-xl font-bold text-slate-100">RFP Details</h2>
+            <button
+                class="text-slate-300 hover:text-slate-100"
+                onclick="hideRfpPreviewModal()"
+            >
+                &times;
+            </button>
+        </div>
+        <div class="mt-4 space-y-4 text-slate-100">
+            <p><strong>Lot:</strong> <span id="modal-lot"></span></p>
+            <p><strong>Type:</strong> <span id="modal-type"></span></p>
+            <p>
+                <strong>Screen Size & Resolution:</strong>
+                <span id="modal-screen"></span>
+            </p>
+            <p>
+                <strong>Operating System(s):</strong>
+                <span id="modal-os"></span>
+            </p>
+            <p><strong>CPU:</strong> <span id="modal-cpu"></span></p>
+            <p><strong>Memory (RAM):</strong> <span id="modal-ram"></span></p>
+            <p><strong>Hard Drive:</strong> <span id="modal-drive"></span></p>
+            <p><strong>Graphics:</strong> <span id="modal-gpu"></span></p>
+            <p><strong>I/O Ports:</strong> <span id="modal-io"></span></p>
+            <p>
+                <strong>Peripherals:</strong>
+                <span id="modal-peripherals"></span>
+            </p>
+            <p>
+                <strong>Special Features:</strong>
+                <span id="modal-features"></span>
+            </p>
+        </div>
+        <div class="mt-6 text-right">
+            <button
+                class="px-4 py-2 bg-gray-300 text-gray-700 rounded"
+                onclick="hideRfpPreviewModal()"
+            >
+                Close
+            </button>
+        </div>
     </div>
-    <div class="mt-4 space-y-4">
-      <p><strong>Lot:</strong> <span id="modal-lot"></span></p>
-      <p><strong>Type:</strong> <span id="modal-type"></span></p>
-      <p><strong>Screen Size & Resolution:</strong> <span id="modal-screen"></span></p>
-      <p><strong>Operating System(s):</strong> <span id="modal-os"></span></p>
-      <p><strong>CPU:</strong> <span id="modal-cpu"></span></p>
-      <p><strong>Memory (RAM):</strong> <span id="modal-ram"></span></p>
-      <p><strong>Hard Drive:</strong> <span id="modal-drive"></span></p>
-      <p><strong>Graphics:</strong> <span id="modal-gpu"></span></p>
-      <p><strong>I/O Ports:</strong> <span id="modal-io"></span></p>
-      <p><strong>Peripherals:</strong> <span id="modal-peripherals"></span></p>
-      <p><strong>Special Features:</strong> <span id="modal-features"></span></p>
-    </div>
-    <div class="mt-6 text-right">
-      <button class="px-4 py-2 bg-gray-300 text-gray-700 rounded" onclick="hideRfpPreviewModal()">Close</button>
-    </div>
-  </div>
 </div>
 <!-- Confirm RFP Action Modal -->
-<div id="confirmRfpModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
-    <div class="bg-white rounded-2xl p-8 w-full max-w-md relative">
-        <h2 class="text-xl font-bold text-slate-900 mb-2" id="confirmRfpTitle">Are you sure?</h2>
-        <p class="text-slate-600 mb-6" id="confirmRfpMessage">This action cannot be undone.</p>
+<div
+    id="confirmRfpModal"
+    class="fixed inset-0 flex items-center justify-center bg-black/40 z-50 hidden"
+>
+    <div
+        class="bg-slate-950 rounded-2xl p-8 w-full max-w-md shadow-panel border border-slate-800"
+    >
+        <h2 class="text-xl font-bold text-slate-100 mb-2" id="confirmRfpTitle">
+            Are you sure?
+        </h2>
+        <p class="text-slate-400 mb-6" id="confirmRfpMessage">
+            This action cannot be undone.
+        </p>
         <div class="flex gap-4">
-            <button onclick="hideConfirmRfpModal()" class="flex-1 rounded-xl border border-slate-300 px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50 transition">
+            <button
+                onclick="hideConfirmRfpModal()"
+                class="flex-1 rounded-xl border border-slate-700 px-4 py-3 font-semibold text-slate-100 hover:bg-slate-900 transition"
+            >
                 Cancel
             </button>
-            <button id="confirmRfpActionBtn" class="flex-1 rounded-xl px-4 py-3 font-semibold text-white transition">
+            <button
+                id="confirmRfpActionBtn"
+                class="flex-1 rounded-xl px-4 py-3 font-semibold text-white transition"
+            >
                 Confirm
             </button>
         </div>
     </div>
 </div>
 <script>
-let pendingRfpForm = null;
+    let pendingRfpForm = null;
 
-function hideConfirmRfpModal() {
-    pendingRfpForm = null;
-    document.getElementById('confirmRfpModal').classList.add('hidden');
-}
-
-function showConfirmRfpModal(title, message, form, btnColor) {
-    pendingRfpForm = form;
-    document.getElementById('confirmRfpTitle').textContent = title;
-    document.getElementById('confirmRfpMessage').textContent = message;
-    const btn = document.getElementById('confirmRfpActionBtn');
-    btn.className = `flex-1 rounded-xl px-4 py-3 font-semibold text-white transition ${btnColor}`;
-    document.getElementById('confirmRfpModal').classList.remove('hidden');
-}
-
-document.getElementById('confirmRfpActionBtn').addEventListener('click', function() {
-    if (pendingRfpForm) {
-        document.body.appendChild(pendingRfpForm);
-        pendingRfpForm.submit();
+    function hideConfirmRfpModal() {
+        pendingRfpForm = null;
+        document.getElementById("confirmRfpModal").classList.add("hidden");
     }
-});
 
-document.querySelectorAll('.rfp-approve-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = "{{ url_for('admin_views.admin_manage_rfps') }}";
-        form.innerHTML = `
+    function showConfirmRfpModal(title, message, form, btnColor) {
+        pendingRfpForm = form;
+        document.getElementById("confirmRfpTitle").textContent = title;
+        document.getElementById("confirmRfpMessage").textContent = message;
+        const btn = document.getElementById("confirmRfpActionBtn");
+        btn.className = `flex-1 rounded-xl px-4 py-3 font-semibold text-white transition ${btnColor}`;
+        document.getElementById("confirmRfpModal").classList.remove("hidden");
+    }
+
+    document
+        .getElementById("confirmRfpActionBtn")
+        .addEventListener("click", function () {
+            if (pendingRfpForm) {
+                document.body.appendChild(pendingRfpForm);
+                pendingRfpForm.submit();
+            }
+        });
+
+    document.querySelectorAll(".rfp-approve-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            const form = document.createElement("form");
+            form.method = "POST";
+            form.action = "{{ url_for('admin_views.admin_manage_rfps') }}";
+            form.innerHTML = `
             <input type="hidden" name="groupID" value="${btn.dataset.groupId}">
             <input type="hidden" name="lotID" value="${btn.dataset.lotId}">
             <input type="hidden" name="action" value="approve">
         `;
-        showConfirmRfpModal(
-            'Approve RFP?',
-            'This will approve the RFP and make it visible in the gallery.',
-            form,
-            'bg-green-600 hover:bg-green-700'
-        );
+            showConfirmRfpModal(
+                "Approve RFP?",
+                "This will approve the RFP and make it visible in the gallery.",
+                form,
+                "bg-green-600 hover:bg-green-700",
+            );
+        });
     });
-});
 
-document.querySelectorAll('.rfp-reject-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = "{{ url_for('admin_views.admin_manage_rfps') }}";
-        form.innerHTML = `
+    document.querySelectorAll(".rfp-reject-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            const form = document.createElement("form");
+            form.method = "POST";
+            form.action = "{{ url_for('admin_views.admin_manage_rfps') }}";
+            form.innerHTML = `
             <input type="hidden" name="groupID" value="${btn.dataset.groupId}">
             <input type="hidden" name="lotID" value="${btn.dataset.lotId}">
             <input type="hidden" name="action" value="reject">
         `;
-        showConfirmRfpModal(
-            'Reject RFP?',
-            'This will permanently reject and remove the RFP. This cannot be undone.',
-            form,
-            'bg-red-600 hover:bg-red-700'
-        );
+            showConfirmRfpModal(
+                "Reject RFP?",
+                "This will permanently reject and remove the RFP. This cannot be undone.",
+                form,
+                "bg-red-600 hover:bg-red-700",
+            );
+        });
     });
-});
 
-document.querySelectorAll('.rfp-remove-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = "{{ url_for('admin_views.admin_manage_rfps') }}";
-        form.innerHTML = `
+    document.querySelectorAll(".rfp-remove-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            const form = document.createElement("form");
+            form.method = "POST";
+            form.action = "{{ url_for('admin_views.admin_manage_rfps') }}";
+            form.innerHTML = `
             <input type="hidden" name="groupID" value="${btn.dataset.groupId}">
             <input type="hidden" name="lotID" value="${btn.dataset.lotId}">
             <input type="hidden" name="action" value="remove">
         `;
-        showConfirmRfpModal(
-            'Remove RFP?',
-            'This will permanently remove the RFP from the gallery. This cannot be undone.',
-            form,
-            'bg-red-600 hover:bg-red-700'
-        );
+            showConfirmRfpModal(
+                "Remove RFP?",
+                "This will permanently remove the RFP from the gallery. This cannot be undone.",
+                form,
+                "bg-red-600 hover:bg-red-700",
+            );
+        });
     });
-});
 
-function showRfpTab(tab) {
-  document.getElementById('section-requests').classList.toggle('hidden', tab !== 'requests');
-  document.getElementById('section-gallery').classList.toggle('hidden', tab !== 'gallery');
-  document.getElementById('tab-requests').classList.toggle('border-brand-500', tab === 'requests');
-  document.getElementById('tab-requests').classList.toggle('text-brand-600', tab === 'requests');
-  document.getElementById('tab-requests').classList.toggle('border-transparent', tab !== 'requests');
-  document.getElementById('tab-requests').classList.toggle('text-slate-700', tab !== 'requests');
-  document.getElementById('tab-gallery').classList.toggle('border-brand-500', tab === 'gallery');
-  document.getElementById('tab-gallery').classList.toggle('text-brand-600', tab === 'gallery');
-  document.getElementById('tab-gallery').classList.toggle('border-transparent', tab !== 'gallery');
-  document.getElementById('tab-gallery').classList.toggle('text-slate-700', tab !== 'gallery');
-}
+    function showRfpTab(tab) {
+        document
+            .getElementById("section-requests")
+            .classList.toggle("hidden", tab !== "requests");
+        document
+            .getElementById("section-gallery")
+            .classList.toggle("hidden", tab !== "gallery");
+        document
+            .getElementById("tab-requests")
+            .classList.toggle("border-brand-500", tab === "requests");
+        document
+            .getElementById("tab-requests")
+            .classList.toggle("text-brand-600", tab === "requests");
+        document
+            .getElementById("tab-requests")
+            .classList.toggle("border-transparent", tab !== "requests");
+        document
+            .getElementById("tab-requests")
+            .classList.toggle("text-slate-700", tab !== "requests");
+        document
+            .getElementById("tab-gallery")
+            .classList.toggle("border-brand-500", tab === "gallery");
+        document
+            .getElementById("tab-gallery")
+            .classList.toggle("text-brand-600", tab === "gallery");
+        document
+            .getElementById("tab-gallery")
+            .classList.toggle("border-transparent", tab !== "gallery");
+        document
+            .getElementById("tab-gallery")
+            .classList.toggle("text-slate-700", tab !== "gallery");
+    }
 
-function showRfpPreviewModal(btn) {
-  document.getElementById('modal-lot').textContent        = btn.dataset.lot;
-  document.getElementById('modal-type').textContent       = btn.dataset.devicetype;
-  document.getElementById('modal-screen').textContent     = btn.dataset.resolution;
-  document.getElementById('modal-os').textContent         = btn.dataset.os;
-  document.getElementById('modal-cpu').textContent        = btn.dataset.cpu;
-  document.getElementById('modal-ram').textContent        = btn.dataset.ram;
-  document.getElementById('modal-drive').textContent      = btn.dataset.drive;
-  document.getElementById('modal-gpu').textContent        = btn.dataset.gpu;
-  document.getElementById('modal-peripherals').textContent = btn.dataset.peripherals;
-  document.getElementById('modal-features').textContent   = btn.dataset.features;
-  document.getElementById('modal-io').textContent         = btn.dataset.io;
-  document.getElementById('rfpPreviewModal').classList.remove('hidden');
-}
+    function showRfpPreviewModal(btn) {
+        document.getElementById("modal-lot").textContent = btn.dataset.lot;
+        document.getElementById("modal-type").textContent =
+            btn.dataset.devicetype;
+        document.getElementById("modal-screen").textContent =
+            btn.dataset.resolution;
+        document.getElementById("modal-os").textContent = btn.dataset.os;
+        document.getElementById("modal-cpu").textContent = btn.dataset.cpu;
+        document.getElementById("modal-ram").textContent = btn.dataset.ram;
+        document.getElementById("modal-drive").textContent = btn.dataset.drive;
+        document.getElementById("modal-gpu").textContent = btn.dataset.gpu;
+        document.getElementById("modal-peripherals").textContent =
+            btn.dataset.peripherals;
+        document.getElementById("modal-features").textContent =
+            btn.dataset.features;
+        document.getElementById("modal-io").textContent = btn.dataset.io;
+        document.getElementById("rfpPreviewModal").classList.remove("hidden");
+    }
 
-function hideRfpPreviewModal() {
-  document.getElementById('rfpPreviewModal').classList.add('hidden');
-}
-// Default to requests tab
-showRfpTab('requests');
+    function hideRfpPreviewModal() {
+        document.getElementById("rfpPreviewModal").classList.add("hidden");
+    }
+    // Default to requests tab
+    showRfpTab("requests");
 </script>
 {% endblock %}

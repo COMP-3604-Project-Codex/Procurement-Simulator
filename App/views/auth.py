@@ -41,7 +41,7 @@ def login_action():
     if role == "student":
         response = redirect('/student')
     elif role == "admin":
-        response = redirect('/admin/manage-groups')
+        response = redirect('/admin/lab-types')
     else:
         response = redirect('/')  
 

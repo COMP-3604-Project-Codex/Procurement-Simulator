@@ -322,7 +322,7 @@ def student_view_bids_page():
         data["id"] = lot.id
         data["lab_type"] = lot.labType
         data["budget"] = lot.budget
-        data["description"] = lot.labSize
+        data["description"] = lot.labTypeObj.description if getattr(lot, 'labTypeObj', None) else lot.labSize
 
         ASSIGNED_LOTS.append(data)
 
@@ -333,8 +333,8 @@ def student_view_bids_page():
     current_lot = {}
     current_lot["id"] = current_lot_obj.id
     current_lot["lab_type"] = current_lot_obj.labType
-    current_lot["budget"] = lot.budget
-    current_lot["description"] = lot.labSize    
+    current_lot["budget"] = current_lot_obj.budget
+    current_lot["description"] = current_lot_obj.labTypeObj.description if getattr(current_lot_obj, 'labTypeObj', None) else current_lot_obj.labSize
 
     bids_for_lot = []
 
@@ -406,7 +406,7 @@ def student_bid_details_page(bid_id):
     lot["id"] = lotObj.id
     lot["lab_type"] = lotObj.labType
     lot["budget"] = lotObj.budget
-    lot["description"] = lotObj.labSize
+    lot["description"] = lotObj.labTypeObj.description if getattr(lotObj, 'labTypeObj', None) else lotObj.labSize
 
     if request.method == 'POST':
         specsMet = request.form.getlist("specs_selected")
@@ -626,7 +626,7 @@ def rfp_gallery_page():
         data["client"] = group.groupName
         data["timestamp"] = rfp.timestamp.strftime('%#m/%#d/%Y, %#I:%M%p').lower()
         data["status"] = rfp.status 
-        data["description"] = lot.labSize
+        data["description"] = lot.labTypeObj.description if getattr(lot, 'labTypeObj', None) else lot.labSize
         data["deviceType"] = rfp.deviceType
         data["resolution"] = rfp.resolution
         data["os"] = rfp.os

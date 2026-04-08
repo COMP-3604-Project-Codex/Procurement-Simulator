@@ -5,6 +5,7 @@ from .lot import *
 from .group import *
 from .lotGroup import *
 from .studentGroup import *
+from .labType import *
 from .RFP import *
 from .bid import *
 from .evaluation import *

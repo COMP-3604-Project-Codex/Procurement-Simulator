@@ -1,133 +1,348 @@
-{% extends "student/layout.html" %}
-
-{% block content %}
-    <div class="mx-auto max-w-5xl space-y-6">
-
-        <div class="flex gap-4 border-b border-slate-300 pb-1">
+{% extends "student/layout.html" %} {% block content %}
+<div class="flex flex-col h-full overflow-hidden">
+    <!-- Fixed Header Section -->
+    <div class="flex-shrink-0 space-y-3 border-b border-slate-800 pb-3">
+        <!-- Lot Tabs -->
+        <div class="flex gap-2 overflow-x-auto">
             {% for lot in lots %}
-            <button type="button" onclick="window.location.href='?selected_lot={{ lot.id }}'"
-                    class="px-6 py-3 font-heading font-bold transition-all border-b-4 {% if request.args.get('selected_lot', '1') == lot.id|string %} border-brand-500 text-brand-600 {% else %} border-transparent text-slate-500 hover:text-slate-800 {% endif %}">
+            <button
+                type="button"
+                onclick="window.location.href='?selected_lot={{ lot.id }}'"
+                class="px-4 py-2 font-heading font-bold transition-all border-b-3 text-sm whitespace-nowrap {% if request.args.get('selected_lot', '1') == lot.id|string %} border-brand-500 text-brand-400 {% else %} border-transparent text-slate-400 hover:text-slate-100 {% endif %}"
+            >
                 LOT {{ lot.id }}
             </button>
             {% endfor %}
         </div>
-        
-        <div class="rounded-2xl border border-slate-300 bg-white p-6 shadow-panel">
-            <div class="flex justify-between items-start">
+
+        <!-- Lot Info Card -->
+        <div
+            class="rounded-lg border border-slate-800 bg-slate-900 p-3 shadow-panel"
+        >
+            <div class="flex justify-between items-start gap-4">
                 <div>
-                    <h2 class="text-sm font-bold uppercase tracking-widest text-brand-500">Currently Viewing</h2>
-                    <p class="font-heading text-3xl font-bold text-slate-900">{{ current_lot.labType }}</p>
-                    <p class="mt-2 text-slate-600">{{ current_lot.labSize }}</p>
+                    <p
+                        class="text-xs font-bold uppercase tracking-widest text-brand-400"
+                    >
+                        Currently Viewing
+                    </p>
+                    <p
+                        class="font-heading text-lg font-bold text-slate-100 mt-0.5"
+                    >
+                        {{ current_lot.labType }}
+                    </p>
+                    <p class="mt-1 text-xs text-slate-400">
+                        {{ current_lot.labTypeObj.description if
+                        current_lot.labTypeObj else current_lot.labSize }}
+                    </p>
                 </div>
-                <div class="text-right">
-                    <p class="text-sm font-semibold text-slate-500">Allocated Budget</p>
-                    <p class="text-2xl font-bold text-slate-900">${{ "{:,.2f}".format(current_lot.budget) }}</p>
+                <div class="text-right flex-shrink-0">
+                    <p class="text-xs font-semibold text-slate-400">
+                        Allocated Budget
+                    </p>
+                    <p class="text-lg font-bold text-slate-100">
+                        ${{ "{:,.2f}".format(current_lot.budget) }}
+                    </p>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="rounded-2xl border border-slate-300 bg-white shadow-panel overflow-hidden">
-            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
-                <h3 class="font-bold text-slate-800 tracking-tight">Technical Specifications (RFP Details)</h3>
+    <!-- Scrollable Specifications Section -->
+    <div class="flex-1 overflow-hidden flex flex-col min-h-0 mt-3">
+        <div
+            class="rounded-lg border border-slate-800 bg-slate-900 shadow-panel flex flex-col overflow-hidden h-full"
+        >
+            <div
+                class="bg-slate-950 px-4 py-3 border-b border-slate-800 flex justify-between items-center flex-shrink-0"
+            >
+                <h3 class="font-bold text-sm text-slate-100">
+                    Technical Specifications (RFP Details)
+                </h3>
                 {% if existing_rfp %}
-                    <span class="px-3 py-1 rounded-full text-xs font-bold uppercase {% if existing_rfp.status == 'approved' %} bg-emerald-100 text-emerald-700 {% else %} bg-amber-100 text-amber-700 {% endif %}">
-                        {{ existing_rfp.status }}
-                    </span>
+                <span
+                    class="px-2 py-1 rounded-full text-xs font-bold uppercase flex-shrink-0 {% if existing_rfp.status == 'approved' %} bg-emerald-900 text-emerald-300 {% else %} bg-amber-900 text-amber-300 {% endif %}"
+                >
+                    {{ existing_rfp.status }}
+                </span>
                 {% endif %}
             </div>
-            
-            <form action="{{ url_for('student_views.student_lots_page') }}" method="POST" class="p-6 max-h-[500px] overflow-y-auto space-y-8">
-                <input type="hidden" name="lot_id" value="{{ current_lot.id }}">
-                {% set is_locked = existing_rfp and existing_rfp.status == 'approved' %}
 
-                <div class="space-y-2">
-                    <label class="text-sm font-bold text-slate-700">Device Type</label>
-                    <textarea name="deviceType" rows="2" placeholder="e.g. Workstation/Laptop/Tablet..." {% if is_locked %} readonly {% endif %}
-                        class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none {% if is_locked %} bg-slate-100 text-slate-500 {% else %} bg-slate-50 {% endif %}">{{ current_lot.deviceType if current_lot else '' }}</textarea>
+            <form
+                action="{{ url_for('student_views.student_lots_page') }}"
+                method="POST"
+                class="flex-1 overflow-y-auto flex flex-col p-4 space-y-5"
+            >
+                <input
+                    type="hidden"
+                    name="lot_id"
+                    value="{{ current_lot.id }}"
+                />
+                {% set is_locked = existing_rfp and existing_rfp.status ==
+                'approved' %}
+
+                <!-- Scrollable content -->
+                <div class="space-y-4 flex-1">
+                    <div class="space-y-1">
+                        <label
+                            class="text-xs font-bold text-slate-300 uppercase"
+                            >Device Type</label
+                        >
+                        <textarea
+                            name="deviceType"
+                            rows="2"
+                            placeholder="e.g. Workstation/Laptop/Tablet..."
+                            {%
+                            if
+                            is_locked
+                            %}
+                            readonly
+                            {%
+                            endif
+                            %}
+                            class="w-full rounded-lg border border-slate-700 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none text-slate-100 {% if is_locked %} bg-slate-800 text-slate-400 {% else %} bg-slate-900 {% endif %}"
+                        >
+{{ current_lot.deviceType if current_lot else '' }}</textarea
+                        >
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label
+                                class="text-xs font-bold text-slate-300 uppercase"
+                                >CPU (Processor)</label
+                            >
+                            <input
+                                type="text"
+                                name="cpu"
+                                placeholder="e.g. Intel Core i7"
+                                value="{{ current_lot.cpu if current_lot else '' }}"
+                                {%
+                                if
+                                is_locked
+                                %}
+                                readonly
+                                {%
+                                endif
+                                %}
+                                class="w-full rounded-lg border border-slate-700 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none text-slate-100 {% if is_locked %} bg-slate-800 text-slate-400 {% else %} bg-slate-900 {% endif %}"
+                            />
+                        </div>
+                        <div class="space-y-1">
+                            <label
+                                class="text-xs font-bold text-slate-300 uppercase"
+                                >Memory (RAM)</label
+                            >
+                            <input
+                                type="text"
+                                name="ram"
+                                placeholder="e.g. 32GB DDR5"
+                                value="{{ current_lot.ram if current_lot else '' }}"
+                                {%
+                                if
+                                is_locked
+                                %}
+                                readonly
+                                {%
+                                endif
+                                %}
+                                class="w-full rounded-lg border border-slate-700 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none text-slate-100 {% if is_locked %} bg-slate-800 text-slate-400 {% else %} bg-slate-900 {% endif %}"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label
+                                class="text-xs font-bold text-slate-300 uppercase"
+                                >Screen Size & Resolution</label
+                            >
+                            <input
+                                type="text"
+                                name="screen"
+                                placeholder="e.g. 27-inch 4K"
+                                value="{{ current_lot.resolution if current_lot else '' }}"
+                                {%
+                                if
+                                is_locked
+                                %}
+                                readonly
+                                {%
+                                endif
+                                %}
+                                class="w-full rounded-lg border border-slate-700 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none text-slate-100 {% if is_locked %} bg-slate-800 text-slate-400 {% else %} bg-slate-900 {% endif %}"
+                            />
+                        </div>
+                        <div class="space-y-1">
+                            <label
+                                class="text-xs font-bold text-slate-300 uppercase"
+                                >Operating System(s)</label
+                            >
+                            <input
+                                type="text"
+                                name="os"
+                                placeholder="e.g. Windows 11 Pro"
+                                value="{{ current_lot.os if current_lot else '' }}"
+                                {%
+                                if
+                                is_locked
+                                %}
+                                readonly
+                                {%
+                                endif
+                                %}
+                                class="w-full rounded-lg border border-slate-700 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none text-slate-100 {% if is_locked %} bg-slate-800 text-slate-400 {% else %} bg-slate-900 {% endif %}"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="space-y-1">
+                            <label
+                                class="text-xs font-bold text-slate-300 uppercase"
+                                >Hard Drive / Storage</label
+                            >
+                            <input
+                                type="text"
+                                name="storage"
+                                placeholder="e.g. 1TB NVMe SSD"
+                                value="{{ current_lot.drive if current_lot else '' }}"
+                                {%
+                                if
+                                is_locked
+                                %}
+                                readonly
+                                {%
+                                endif
+                                %}
+                                class="w-full rounded-lg border border-slate-700 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none text-slate-100 {% if is_locked %} bg-slate-800 text-slate-400 {% else %} bg-slate-900 {% endif %}"
+                            />
+                        </div>
+                        <div class="space-y-1">
+                            <label
+                                class="text-xs font-bold text-slate-300 uppercase"
+                                >Graphics Card (GPU)</label
+                            >
+                            <input
+                                type="text"
+                                name="graphics"
+                                placeholder="e.g. NVIDIA RTX 4070"
+                                value="{{ current_lot.gpu if current_lot else '' }}"
+                                {%
+                                if
+                                is_locked
+                                %}
+                                readonly
+                                {%
+                                endif
+                                %}
+                                class="w-full rounded-lg border border-slate-700 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none text-slate-100 {% if is_locked %} bg-slate-800 text-slate-400 {% else %} bg-slate-900 {% endif %}"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="space-y-1">
+                            <label
+                                class="text-xs font-bold text-slate-300 uppercase"
+                                >I/O Ports</label
+                            >
+                            <textarea
+                                name="io"
+                                rows="2"
+                                placeholder="e.g. USB-C, HDMI..."
+                                {%
+                                if
+                                is_locked
+                                %}
+                                readonly
+                                {%
+                                endif
+                                %}
+                                class="w-full rounded-lg border border-slate-700 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none text-slate-100 {% if is_locked %} bg-slate-800 text-slate-400 {% else %} bg-slate-900 {% endif %}"
+                            >
+{{ current_lot.io if current_lot else '' }}</textarea
+                            >
+                        </div>
+                        <div class="space-y-1">
+                            <label
+                                class="text-xs font-bold text-slate-300 uppercase"
+                                >External Peripherals</label
+                            >
+                            <textarea
+                                name="peripherals"
+                                rows="2"
+                                placeholder="e.g. Keyboard, Mouse..."
+                                {%
+                                if
+                                is_locked
+                                %}
+                                readonly
+                                {%
+                                endif
+                                %}
+                                class="w-full rounded-lg border border-slate-700 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none text-slate-100 {% if is_locked %} bg-slate-800 text-slate-400 {% else %} bg-slate-900 {% endif %}"
+                            >
+{{ current_lot.peripherals if current_lot else '' }}</textarea
+                            >
+                        </div>
+                        <div class="space-y-1">
+                            <label
+                                class="text-xs font-bold text-slate-300 uppercase"
+                                >Special Features</label
+                            >
+                            <textarea
+                                name="features"
+                                rows="2"
+                                placeholder="e.g. Webcam, WiFi 6E..."
+                                {%
+                                if
+                                is_locked
+                                %}
+                                readonly
+                                {%
+                                endif
+                                %}
+                                class="w-full rounded-lg border border-slate-700 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none text-slate-100 {% if is_locked %} bg-slate-800 text-slate-400 {% else %} bg-slate-900 {% endif %}"
+                            >
+{{ current_lot.features if current_lot else '' }}</textarea
+                            >
+                        </div>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="text-sm font-bold text-slate-700">CPU (Processor)</label>
-                        <input type="text" name="cpu" placeholder="e.g. Intel Core i7" value="{{ current_lot.cpu if current_lot else '' }}" 
-                            {% if is_locked %} readonly {% endif %}
-                            class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none {% if is_locked %} bg-slate-100 text-slate-500 {% else %} bg-slate-50 {% endif %}">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-sm font-bold text-slate-700">Memory (RAM)</label>
-                        <input type="text" name="ram" placeholder="e.g. 32GB DDR5" value="{{ current_lot.ram if current_lot else '' }}" 
-                            {% if is_locked %} readonly {% endif %}
-                            class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none {% if is_locked %} bg-slate-100 text-slate-500 {% else %} bg-slate-50 {% endif %}">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="text-sm font-bold text-slate-700">Screen Size & Resolution</label>
-                        <input type="text" name="screen" placeholder="e.g. 27-inch 4K" value="{{ current_lot.resolution if current_lot else '' }}" 
-                            {% if is_locked %} readonly {% endif %}
-                            class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none {% if is_locked %} bg-slate-100 text-slate-500 {% else %} bg-slate-50 {% endif %}">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-sm font-bold text-slate-700">Operating System(s)</label>
-                        <input type="text" name="os" placeholder="e.g. Windows 11 Pro" value="{{ current_lot.os if current_lot else '' }}" 
-                            {% if is_locked %} readonly {% endif %}
-                            class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none {% if is_locked %} bg-slate-100 text-slate-500 {% else %} bg-slate-50 {% endif %}">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="space-y-2">
-                        <label class="text-sm font-bold text-slate-700">Hard Drive / Storage</label>
-                        <input type="text" name="storage" placeholder="e.g. 1TB NVMe SSD" value="{{ current_lot.drive if current_lot else '' }}" 
-                            {% if is_locked %} readonly {% endif %}
-                            class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none {% if is_locked %} bg-slate-100 text-slate-500 {% else %} bg-slate-50 {% endif %}">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-sm font-bold text-slate-700">Graphics Card (GPU)</label>
-                        <input type="text" name="graphics" placeholder="e.g. NVIDIA RTX 4070" value="{{ current_lot.gpu if current_lot else '' }}" 
-                            {% if is_locked %} readonly {% endif %}
-                            class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none {% if is_locked %} bg-slate-100 text-slate-500 {% else %} bg-slate-50 {% endif %}">
-                    </div>
-                </div>
-
-                <div class="space-y-6">
-                    <div class="space-y-2">
-                        <label class="text-sm font-bold text-slate-700">I/O Ports</label>
-                        <textarea name="io" rows="2" placeholder="e.g. USB-C, HDMI..." {% if is_locked %} readonly {% endif %}
-                            class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none {% if is_locked %} bg-slate-100 text-slate-500 {% else %} bg-slate-50 {% endif %}">{{ current_lot.io if current_lot else '' }}</textarea>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-sm font-bold text-slate-700">External Peripherals</label>
-                        <textarea name="peripherals" rows="2" placeholder="e.g. Keyboard, Mouse..." {% if is_locked %} readonly {% endif %}
-                            class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none {% if is_locked %} bg-slate-100 text-slate-500 {% else %} bg-slate-50 {% endif %}">{{ current_lot.peripherals if current_lot else '' }}</textarea>
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-sm font-bold text-slate-700">Special Features</label>
-                        <textarea name="features" rows="2" placeholder="e.g. Webcam, WiFi 6E..." {% if is_locked %} readonly {% endif %}
-                            class="w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-brand-500 focus:outline-none {% if is_locked %} bg-slate-100 text-slate-500 {% else %} bg-slate-50 {% endif %}">{{ current_lot.features if current_lot else '' }}</textarea>
-                    </div>
-                </div>
-
-                <div class="pt-4 border-t border-slate-200">
+                <!-- Fixed Action Buttons -->
+                <div class="flex-shrink-0 pt-3 border-t border-slate-800">
                     {% if is_locked %}
-                        <div class="w-full rounded-xl bg-emerald-50 py-4 font-bold text-emerald-700 text-center border border-emerald-200">
-                            ✅ This RFP has been submitted and approved and is now locked.
-                        </div>
+                    <div
+                        class="w-full rounded-lg bg-emerald-900 py-2 font-bold text-xs text-emerald-300 text-center border border-emerald-800"
+                    >
+                        ✅ This RFP has been submitted and approved and is now
+                        locked.
+                    </div>
                     {% else %}
-                        <div class="flex gap-4">
-                            <button type="submit" name="action" value="save" 
-                                class="flex-1 rounded-xl border border-slate-300 py-4 font-bold text-slate-700 hover:bg-slate-50 transition">
-                                Save as Draft
-                            </button>
-                            <button type="submit" name="action" value="submit" 
-                                class="flex-1 rounded-xl bg-brand-500 py-4 font-bold text-white shadow-panel hover:bg-brand-600 transition">
-                                Submit Final RFP
-                            </button>
-                        </div>
+                    <div class="flex gap-3">
+                        <button
+                            type="submit"
+                            name="action"
+                            value="save"
+                            class="flex-1 rounded-lg border border-slate-700 py-2 font-bold text-xs text-slate-300 hover:bg-slate-800 transition bg-slate-900"
+                        >
+                            Save as Draft
+                        </button>
+                        <button
+                            type="submit"
+                            name="action"
+                            value="submit"
+                            class="flex-1 rounded-lg bg-brand-600 py-2 font-bold text-xs text-white shadow-sm hover:bg-brand-500 transition"
+                        >
+                            Submit Final RFP
+                        </button>
+                    </div>
                     {% endif %}
                 </div>
             </form>
         </div>
     </div>
+</div>
 {% endblock %}

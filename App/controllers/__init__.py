@@ -6,6 +6,7 @@ from .admin import *
 from .student import *
 from .group import *
 from .studentGroup import *
+from .labType import *
 from .lotGroup import *
 from .rfp import *
 from .bid import *

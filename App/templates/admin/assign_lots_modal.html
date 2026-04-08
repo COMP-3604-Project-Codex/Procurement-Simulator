@@ -1,22 +1,44 @@
 <!-- This is a modal for assigning lots to a group -->
-<div id="assignLotsModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
-  <div class="bg-white text-black rounded-lg p-8 w-96 relative">
-    <button onclick="document.getElementById('assignLotsModal').classList.add('hidden')" class="absolute top-2 right-2 text-2xl">&times;</button>
-    <h2 class="text-xl font-bold mb-4">Assign Lots</h2>
-    <form method="post" action="{{ url_for('admin_assign_lots', group_id=group.id) }}">
-      <label for="lot1">1st Lot:</label>
-      <select name="lot1" id="lot1" class="block w-full mb-4">
-        {% for lot in lots %}
-        <option value="{{ lot }}">Lot {{ lot }}</option>
-        {% endfor %}
-      </select>
-      <label for="lot2">2nd Lot:</label>
-      <select name="lot2" id="lot2" class="block w-full mb-4">
-        {% for lot in lots %}
-        <option value="{{ lot }}">Lot {{ lot }}</option>
-        {% endfor %}
-      </select>
-      <button type="submit" class="w-full px-4 py-2 border rounded">Confirm</button>
-    </form>
-  </div>
+<div
+    id="assignLotsModal"
+    class="fixed inset-0 flex items-center justify-center bg-black/40 z-50 hidden"
+>
+    <div
+        class="bg-slate-950 text-slate-100 rounded-lg p-8 w-96 shadow-panel border border-slate-800 relative"
+    >
+        <button
+            onclick="
+                document
+                    .getElementById('assignLotsModal')
+                    .classList.add('hidden')
+            "
+            class="absolute top-2 right-2 text-2xl"
+        >
+            &times;
+        </button>
+        <h2 class="text-xl font-bold mb-4">Assign Lots</h2>
+        <form
+            method="post"
+            action="{{ url_for('admin_assign_lots', group_id=group.id) }}"
+        >
+            <label for="lot1">1st Lot:</label>
+            <select name="lot1" id="lot1" class="block w-full mb-4">
+                {% for lot in lots %}
+                <option value="{{ lot }}">Lot {{ lot }}</option>
+                {% endfor %}
+            </select>
+            <label for="lot2">2nd Lot:</label>
+            <select name="lot2" id="lot2" class="block w-full mb-4">
+                {% for lot in lots %}
+                <option value="{{ lot }}">Lot {{ lot }}</option>
+                {% endfor %}
+            </select>
+            <button
+                type="submit"
+                class="w-full px-4 py-2 border border-slate-700 rounded text-slate-100 hover:bg-slate-900 transition"
+            >
+                Confirm
+            </button>
+        </form>
+    </div>
 </div>

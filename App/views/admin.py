@@ -6,7 +6,7 @@ from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, se
 from flask_admin import Admin as FlaskAdmin
 from flask import flash, redirect, url_for, request, Blueprint, render_template, send_file
 from App.database import db
-from App.models import User, Admin, Student, Group, StudentGroup, Lot, LotGroup, Bid, Evaluation, RFP
+from App.models import User, Admin, Student, Group, StudentGroup, Lot, LotGroup, LabType, Bid, Evaluation, RFP
 from App.controllers import *
 
 class AdminView(ModelView):
@@ -43,27 +43,41 @@ def admin_manage_lots():
         db.select(Lot)
     ).all()
 
-    return render_template('admin/manage_lots.html', title='Manage Lots', lots=lots, active_page="lots")
+    lab_types = get_all_lab_types()
+
+    return render_template('admin/manage_lots.html', title='Manage Lots', lots=lots, lab_types=lab_types, active_page="lots")
 
 @admin_views.route('/admin/lots/add', methods=['POST'])
 @admin_required
 def admin_add_lot():
-    lab_type = request.form.get('lab_type')
-    lab_size = request.form.get('lab_size')
+    lab_type_id = request.form.get('lab_type_id')
+    lab_type_name = None
+    if lab_type_id:
+        lab_type = get_lab_type(int(lab_type_id))
+        lab_type_name = lab_type.name if lab_type else None
+        lab_type_description = lab_type.description if lab_type else None
+
+    lab_size = lab_type_description
     budget = request.form.get('budget')
     
-    create_lot(lab_type, lab_size, budget)
+    create_lot(lab_type_name or request.form.get('lab_type'), lab_size, budget, labTypeId=int(lab_type_id) if lab_type_id else None)
 
     return redirect(url_for('admin_views.admin_manage_lots'))
 
 @admin_views.route('/admin/lots/<int:lot_id>/edit', methods=['POST'])
 @admin_required
 def admin_edit_lot(lot_id):
-    labType = request.form.get('lab_type')
-    labSize = request.form.get('lab_size')
+    lab_type_id = request.form.get('lab_type_id')
+    lab_type_name = None
+    if lab_type_id:
+        lab_type = get_lab_type(int(lab_type_id))
+        lab_type_name = lab_type.name if lab_type else None
+        lab_type_description = lab_type.description if lab_type else None
+
+    labSize = lab_type_description
     budget = request.form.get('budget')
     
-    edit_lot(lot_id, labType, labSize, budget)
+    edit_lot(lot_id, lab_type_name or request.form.get('lab_type'), int(lab_type_id) if lab_type_id else None, labSize, budget)
 
     return redirect(url_for('admin_views.admin_manage_lots'))
 
@@ -75,6 +89,47 @@ def admin_remove_lot(lot_id):
 
     flash(f"Lot {lot_id} removed successfully", "success")
     return redirect(url_for('admin_views.admin_manage_lots'))
+
+@admin_views.route('/admin/lab-types', methods=['GET'])
+@admin_required
+def admin_manage_lab_types():
+    lab_types = get_all_lab_types()
+    return render_template('admin/manage_lab_types.html', title='Manage Lab Types', lab_types=lab_types, active_page='types')
+
+@admin_views.route('/admin/lab-types/add', methods=['POST'])
+@admin_required
+def admin_add_lab_type():
+    name = request.form.get('name')
+    description = request.form.get('description')
+    create_lab_type(name, description)
+    flash('Lab type added successfully', 'success')
+    return redirect(url_for('admin_views.admin_manage_lab_types'))
+
+@admin_views.route('/admin/lab-types/<int:type_id>/edit', methods=['POST'])
+@admin_required
+def admin_edit_lab_type(type_id):
+    name = request.form.get('name')
+    description = request.form.get('description')
+    edit_lab_type(type_id, name, description)
+    flash('Lab type updated successfully', 'success')
+    return redirect(url_for('admin_views.admin_manage_lab_types'))
+
+@admin_views.route('/admin/lab-types/<int:type_id>/remove', methods=['POST'])
+@admin_required
+def admin_remove_lab_type(type_id):
+    lab_type = get_lab_type(type_id)
+    if lab_type:
+        in_use = db.session.scalars(
+            db.select(Lot).filter_by(labTypeId=type_id)
+        ).first()
+        if in_use:
+            flash('Cannot remove a lab type that is assigned to lots', 'failed')
+            return redirect(url_for('admin_views.admin_manage_lab_types'))
+
+        remove_lab_type(type_id)
+        flash('Lab type removed successfully', 'success')
+
+    return redirect(url_for('admin_views.admin_manage_lab_types'))
 
 # ─── Bid Routes ───────────────────────────────────────────────────────────────
 
@@ -310,6 +365,24 @@ def admin_remove_group(group_id):
     if group:
         removed = remove_group(group_id)
         flash("Group Removed", "success")
+
+    return redirect(url_for('admin_views.admin_manage_groups'))
+
+@admin_views.route('/admin/groups/<int:group_id>/reopen', methods=['POST'])
+@admin_required
+def admin_reopen_group(group_id):
+    group = get_group(group_id)
+    if group:
+        lot_entries = db.session.scalars(
+            db.select(LotGroup)
+            .filter_by(groupID=group_id)
+        ).all()
+        for entry in lot_entries:
+            remove_lotGroup(entry.lotID, entry.groupID)
+
+        group.status = "requested"
+        db.session.commit()
+        flash("Group moved back to pending status", "success")
 
     return redirect(url_for('admin_views.admin_manage_groups'))
 
