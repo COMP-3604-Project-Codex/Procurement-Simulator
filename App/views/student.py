@@ -709,7 +709,7 @@ def submitted_bids_page():
 
     return render_template(
         'student/vendor_bids.html',
-        active_page='my-bids',
+        active_page='vendor-bids',
         bids=submitted_bids,
         title='My Submitted Bids',
         accepted = accepted,
