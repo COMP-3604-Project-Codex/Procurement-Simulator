@@ -7,9 +7,15 @@
   <div class="w-full max-w-md rounded-2xl bg-white p-8 shadow-panel border border-slate-200">
 
     <!-- App Name -->
-    <h1 class="text-center font-heading text-3xl text-slate-900">
-      Procurement Simulator
-    </h1>
+    {% if is_authenticated %}
+      <a href="{% if current_user.is_admin() %}/admin/lab-types{% else %}/student{% endif %}" class="block text-center font-heading text-3xl text-slate-900 hover:text-brand-500 transition cursor-pointer">
+        Procurement Simulator
+      </a>
+    {% else %}
+      <h1 class="text-center font-heading text-3xl text-slate-900">
+        Procurement Simulator
+      </h1>
+    {% endif %}
 
     {% if is_authenticated %}
       <p class="mt-4 text-center text-sm text-emerald-600">

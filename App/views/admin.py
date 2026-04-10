@@ -259,7 +259,7 @@ def admin_view_group_bids(group_id):
         toLot = get_lot(bidObj.lotID)
 
         bidJson["to_group_name"] = toGroup.groupName
-        bidJson["timestamp"] = bidObj.timestamp
+        bidJson["timestamp"] = bidObj.timestamp.strftime('%#m/%#d/%Y, %#I:%M%p').lower()
         bidJson["to_lot_id"] = toLot.id
         bidJson["to_lot_name"] = toLot.labType
         bidJson["id"] = bidObj.id
