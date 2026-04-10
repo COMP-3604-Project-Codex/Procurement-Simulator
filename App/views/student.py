@@ -141,8 +141,11 @@ def student_create_group_page():
     
     students = db.session.scalars(
         db.select(Student)
-        .join(StudentGroup, Student.id == StudentGroup.studentID)
-        .where(StudentGroup.studentID != Student.id)
+        .where(
+            ~Student.id.in_(
+                db.select(StudentGroup.studentID)
+            )
+        )
     ).all()
 
     candidates = []
