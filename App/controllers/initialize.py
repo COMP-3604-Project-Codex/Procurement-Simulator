@@ -45,14 +45,15 @@ def initialize():
     create_student("Aiden Joseph", "20240001", "aidenpass")
     create_student("Kareem Ali", "20240002", "kareempass")
     create_student("Joshua Peters", "20240003", "joshuapass")
-    create_student("Daniel Roberts", "20240004", "danielpass")
 
+    create_student("Daniel Roberts", "20240004", "danielpass")
     create_student("Samantha Clarke", "20240005", "samanthapass")
     create_student("Aaliyah Mohammed", "20240006", "aaliyahpass")
+
     create_student("Leah Charles", "20240007", "leahpass")
     create_student("Naomi Thomas", "20240008", "naomipass")
-
     create_student("Ryan Williams", "20240009", "ryanpass")
+
     create_student("Darius Edwards", "20240010", "dariuspass")
     create_student("Marcus Browne", "20240011", "marcuspass")
     create_student("Andre Lewis", "20240012", "andrepass")
@@ -60,12 +61,24 @@ def initialize():
     create_student("Keisha Grant", "20240013", "keishapass")
     create_student("Tricia Ramnarine", "20240014", "triciapass")
     create_student("Anil Singh", "20240015", "anilpass")
-    create_student("Ravi Persad", "20240016", "ravipass")
 
+    create_student("Ravi Persad", "20240016", "ravipass")
     create_student("Janelle Baptiste", "20240017", "janellepass")
     create_student("Shawn Mitchell", "20240018", "shawnpass")
+
     create_student("Kevin Hernandez", "20240019", "kevinpass")
     create_student("Ashley Gomez", "20240020", "ashleypass")
+    create_student("Joey Patterson", "20240021", "joeypass")
+    create_student("Michelle James", "20240022", "michellepass")
+    create_student("Tyrell George", "20240023", "tyrellpass")
+    create_student("Nadia Richards", "20240024", "nadiapass")
+    create_student("Jerome Phillips", "20240025", "jeromepass")
+    create_student("Vanessa Edwards", "20240026", "vanessapass")
+    create_student("Christopher Lewis", "20240027", "christopherpass")
+    create_student("Melissa Clarke", "20240028", "melissapass")
+    create_student("Devon Peters", "20240029", "devonpass")
+    create_student("Sherisse Joseph", "20240030", "sherissepass")
+    create_student("Darren Mitchell", "20240031", "darrenpass")
 
     # Group 1
     group1 = create_group("NexoraTech")
@@ -77,7 +90,6 @@ def initialize():
     for member in members1:
         add_studentGroup(member, group1.id)
 
-
     # Group 2
     group2 = create_group("QuantumSoft")
     s4 = db.session.scalars(db.select(Student).where(Student.username == "20240004")).first()
@@ -88,7 +100,6 @@ def initialize():
     for member in members2:
         add_studentGroup(member, group2.id)
 
-
     # Group 3
     group3 = create_group("ByteForge")
     s7 = db.session.scalars(db.select(Student).where(Student.username == "20240007")).first()
@@ -98,7 +109,6 @@ def initialize():
     members3 = [s7.id, s8.id, s9.id]
     for member in members3:
         add_studentGroup(member, group3.id)
-
 
     # Group 4
     group4 = create_group("CyberNova")
@@ -129,15 +139,6 @@ def initialize():
     members6 = [s16.id, s17.id, s18.id]
     for member in members6:
         add_studentGroup(member, group6.id)
-
-    # Group 7
-    group7 = create_group("DataViz")
-    s19 = db.session.scalars(db.select(Student).where(Student.username == "20240019")).first()
-    s20 = db.session.scalars(db.select(Student).where(Student.username == "20240020")).first()
-
-    members7 = [s19.id, s20.id]
-    for member in members7:
-        add_studentGroup(member, group7.id)
 
     # Approve groups and assign lots
     approve_group(group1.id)
