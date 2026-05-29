@@ -3,47 +3,71 @@ username = bob, password = bobpass
 
 # Student Accounts Unassigned to a Group
 username = "20240019", password = "kevinpass"
+
 username = "20240020", password = "ashleypass"
+
 username = "20240021", password = "joeypass"
+
 username = "20240022", password = "michellepass"
+
 username = "20240023", password = "tyrellpass"
+
 username = "20240024", password = "nadiapass"
+
 username = "20240025", password = "jeromepass"
+
 username = "20240026", password = "vanessapass"
+
 username = "20240027", password = "christopherpass"
+
 username = "20240028", password = "melissapass"
+
 username = "20240029", password = "devonpass"
+
 username = "20240030", password = "sherissepass"
+
 username = "20240031", password = "darrenpass"
 
 # Group 1 (NexoraTech) Student Accounts
 username = "20240001", password = "aidenpass"
+
 username = "20240002", password = "kareempass"
+
 username = "20240003", password = "joshuapass"
 
 # Group 2 (QuantumSoft) Student Accounts
 username = "20240004", password = "danielpass"
+
 username = "20240005", password = "samanthapass"
+
 username = "20240006", password = "aaliyahpass"
 
 # Group 3 (ByteForge) Student Accounts
 username = "20240007", password = "leahpass"
+
 username = "20240008", password = "naomipass"
+
 username = "20240009", password = "ryanpass"
 
 # Group 4 (CyberNova) Student Accounts
 username = "20240010", password = "dariuspass"
+
 username = "20240011", password = "marcuspass"
+
 username = "20240012", password = "andrepass"
 
 # Group 5 (InnovateTech) Student Accounts
 username = "20240013", password = "keishapass"
+
 username = "20240014", password = "triciapass"
+
 username = "20240015", password = "anilpass"
 
 # Group 6 (CloudSystems) Student Accounts
 username = "20240016", password = "ravipass"
+
 username = "20240017", password = "janellepass"
+
 username = "20240018", password = "shawnpass"
 
 ![Tests](https://github.com/uwidcit/flaskmvc/actions/workflows/dev.yml/badge.svg)
