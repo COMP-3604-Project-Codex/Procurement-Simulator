@@ -1,74 +1,129 @@
 <!doctype html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              heading: ["Sora", "sans-serif"],
-              body: ["Manrope", "sans-serif"]
-            },
-            colors: {
-              brand: {
-                50: "#f5f8ff",
-                100: "#e9efff",
-                500: "#2f5dff",
-                600: "#2348d2"
-              }
-            },
-            boxShadow: {
-              panel: "0 14px 40px -26px rgba(15, 23, 42, 0.35)"
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            heading: ["Sora", "sans-serif"],
+                            body: ["Manrope", "sans-serif"],
+                        },
+                        colors: {
+                            slate: {
+                                25: "#fcfcfd",
+                                50: "#f9fafb",
+                                100: "#f3f4f6",
+                                200: "#e5e7eb",
+                                300: "#d1d5db",
+                                400: "#9ca3af",
+                                500: "#6b7280",
+                                600: "#4b5563",
+                                700: "#374151",
+                                800: "#1f2937",
+                                900: "#111827",
+                                950: "#030712",
+                            },
+                            brand: {
+                                50: "#ecf0ff",
+                                100: "#d9e2ff",
+                                200: "#b3c4ff",
+                                300: "#8da7ff",
+                                400: "#6689ff",
+                                500: "#406bff",
+                                600: "#3454d4",
+                                700: "#2643ab",
+                                800: "#1a3182",
+                                900: "#0f1d59",
+                            },
+                        },
+                        boxShadow: {
+                            xs: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+                            sm: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+                            md: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                            lg: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+                            panel: "0 1px 3px rgba(0,0,0,0.08)",
+                        },
+                    },
+                },
+            };
+        </script>
+        <style>
+            html {
+                padding: 0;
+                margin: 0;
             }
-          }
-        }
-      }
-    </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <title>{% block title %}{% endblock %}</title>
-
-  </head>
-  <body class="bg-slate-100 font-body text-slate-900 antialiased">
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="mx-auto mt-4 flex w-full max-w-6xl flex-col gap-3 px-4 lg:px-6" id="flash-stack">
-          {% for category, message in messages %}
-              <div class="mb-6 p-4 rounded-xl border shadow-sm flex justify-between items-center
-                  {% if category == 'success' %} bg-emerald-50 border-emerald-200 text-emerald-800
-                  {% elif category == 'failed' %} bg-red-50 border-red-200 text-red-800
-                  {% elif category == 'info' %} bg-yellow-50 border-yellow-200 text-yellow-800
-                  {% endif %}">
-                  <span>{{ message }}</span>
-                  <button onclick="this.parentElement.remove()" class="
-                      {% if category == 'success' %} text-emerald-500 hover:text-emerald-700
-                      {% elif category == 'failed' %} text-red-500 hover:text-red-700
-                      {% elif category == 'info' %} text-yellow-500 hover:text-yellow-700
-                      {% endif %}">✕</button>
-              </div>
+            h1 {
+                font-size: 1.75rem;
+                line-height: 2.25rem;
+                letter-spacing: -0.02em;
+            }
+            h2 {
+                font-size: 1.375rem;
+                line-height: 1.75rem;
+                font-weight: 600;
+                letter-spacing: -0.01em;
+            }
+            h3 {
+                font-size: 1.125rem;
+                line-height: 1.5rem;
+                font-weight: 600;
+            }
+        </style>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', filename='style.css') }}"
+        />
+        <title>{% block title %}{% endblock %}</title>
+    </head>
+    <body class="bg-slate-950 font-body text-slate-100 antialiased">
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %}
+        <div
+            class="mx-auto mt-3 flex w-full max-w-6xl flex-col gap-2 px-4 lg:px-6"
+            id="flash-stack"
+        >
+            {% for category, message in messages %}
+            <div
+                class="p-3 rounded-lg border shadow-xs flex justify-between items-center {% if category == 'success' %} bg-emerald-50 border-emerald-200 text-emerald-800 {% elif category == 'failed' %} bg-red-50 border-red-200 text-red-800 {% elif category == 'info' %} bg-amber-50 border-amber-200 text-amber-800 {% endif %}"
+            >
+                <span class="text-sm">{{ message }}</span>
+                <button
+                    onclick="this.parentElement.remove()"
+                    class="text-lg leading-none {% if category == 'success' %} text-emerald-400 hover:text-emerald-600 {% elif category == 'failed' %} text-red-400 hover:text-red-600 {% elif category == 'info' %} text-amber-400 hover:text-amber-600 {% endif %}"
+                >
+                    ×
+                </button>
+            </div>
             {% endfor %}
         </div>
-      {% endif %}
-    {% endwith %}
+        {% endif %} {% endwith %}
 
-    <main class="mx-auto w-full max-w-6xl px-4 py-8 lg:px-6" id="content">{% block content %}{% endblock %}</main>
+        <main class="mx-auto w-full max-w-6xl px-4 py-4 lg:px-6" id="content">
+            {% block content %}{% endblock %}
+        </main>
 
-    <script>
-      document.querySelectorAll('.dismiss-flash').forEach(function(button) {
-        button.addEventListener('click', function() {
-          const card = button.closest('.flash-item');
-          if (card) {
-            card.remove();
-          }
-        });
-      });
-    </script>
-  </body>
+        <script>
+            document
+                .querySelectorAll(".dismiss-flash")
+                .forEach(function (button) {
+                    button.addEventListener("click", function () {
+                        const card = button.closest(".flash-item");
+                        if (card) {
+                            card.remove();
+                        }
+                    });
+                });
+        </script>
+    </body>
 </html>

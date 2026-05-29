@@ -3,8 +3,10 @@ from App.database import db
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy import or_, and_
 
-def create_lot(labType, labSize, budget):
+def create_lot(labType, labSize, budget, labTypeId=None):
     newlot = Lot(labType, labSize, budget)
+    if labTypeId is not None:
+        newlot.labTypeId = labTypeId
     db.session.add(newlot)
     db.session.flush()
     newlot.set_generated_name()
@@ -25,11 +27,13 @@ def get_all_lots_json():
     lots = [lot.get_json() for lot in lots]
     return lots
 
-def edit_lot(id, labType=None, labSize=None, budget=None):
+def edit_lot(id, labType=None, labTypeId=None, labSize=None, budget=None):
     lot = get_lot(id)
     if lot:
         if labType:
             lot.labType = labType
+        if labTypeId is not None:
+            lot.labTypeId = labTypeId
 
         if labSize:
             lot.labSize = labSize

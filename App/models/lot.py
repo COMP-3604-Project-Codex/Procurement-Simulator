@@ -4,6 +4,8 @@ class Lot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(10))
     labType = db.Column(db.String(30), nullable=False)
+    labTypeId = db.Column(db.Integer, db.ForeignKey('lab_type.id'), nullable=True)
+    labTypeObj = db.relationship('LabType', foreign_keys=[labTypeId], lazy='joined')
     labSize = db.Column(db.String(1000), nullable=False)
     budget = db.Column(db.Float, nullable=False)
     deviceType = db.Column(db.String(1000), default="")

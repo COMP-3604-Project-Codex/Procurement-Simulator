@@ -1,83 +1,126 @@
-{% extends "student/layout.html" %}
-{% block content %}
+{% extends "student/layout.html" %} {% block content %}
 <div class="mx-auto max-w-6xl space-y-6">
-    
-    <div class="flex gap-4 border-b border-slate-300 pb-1">
+    <div class="flex gap-4 border-b border-slate-800 pb-1">
         {% for lot in lots %}
-        <button type="button" onclick="window.location.href='?selected_lot={{ lot.id }}'"
-                class="px-6 py-3 font-heading font-bold transition-all border-b-4 {% if request.args.get('selected_lot', '1') == lot.id|string %} border-brand-500 text-brand-600 {% else %} border-transparent text-slate-500 hover:text-slate-800 {% endif %}">
-            LOT {{ lot.id }}
-            {% set rfp = (STUDENT_RFPS | selectattr('lot_id', 'equalto', lot.id|string) | list | first) %}
-            {% if rfp and rfp.status == 'Submitted' %}
-                <span class="ml-2 text-xs text-emerald-500">✓</span>
+        <button
+            type="button"
+            onclick="window.location.href='?selected_lot={{ lot.id }}'"
+            class="px-6 py-3 font-heading font-bold transition-all border-b-4 {% if request.args.get('selected_lot', '1') == lot.id|string %} border-brand-500 text-brand-400 {% else %} border-transparent text-slate-400 hover:text-slate-100 {% endif %}"
+        >
+            LOT {{ lot.id }} {% set rfp = (STUDENT_RFPS | selectattr('lot_id',
+            'equalto', lot.id|string) | list | first) %} {% if rfp and
+            rfp.status == 'Submitted' %}
+            <span class="ml-2 text-xs text-emerald-400">✓</span>
             {% endif %}
         </button>
         {% endfor %}
     </div>
 
     <div class="px-2">
-        <h2 class="text-xl font-bold text-slate-800">Evaluation Summary</h2>
-        <p class="text-sm text-slate-500 italic">Compare and select the best bid for this lot.</p>
+        <h2 class="text-xl font-bold text-slate-100">Evaluation Summary</h2>
+        <p class="text-sm text-slate-400 italic">
+            Compare and select the best bid for this lot.
+        </p>
     </div>
 
-    <div class="rounded-2xl border border-slate-300 bg-white shadow-panel overflow-hidden">
+    <div
+        class="rounded-2xl border border-slate-800 bg-slate-900 shadow-panel overflow-hidden"
+    >
         <table class="w-full text-left">
-            <thead class="bg-slate-50 border-b border-slate-200 text-[10px] uppercase font-bold text-slate-500">
+            <thead
+                class="bg-slate-950 border-b border-slate-800 text-[10px] uppercase font-bold text-slate-300"
+            >
                 <tr>
                     <th class="px-6 py-4">Group / Vendor</th>
-                    <th class="px-6 py-4 text-center border-x border-slate-200" colspan="3">RFP & Evaluation Metrics</th>
+                    <th
+                        class="px-6 py-4 text-center border-x border-slate-800"
+                        colspan="3"
+                    >
+                        RFP & Evaluation Metrics
+                    </th>
                     <th class="px-6 py-4">Preview</th>
                     <th class="px-6 py-4">Selected</th>
                 </tr>
-                <tr class="bg-slate-100/50 border-b border-slate-200">
+                <tr class="bg-slate-900/50 border-b border-slate-800">
                     <th class="px-6 py-2"></th>
-                    <th class="px-4 py-2 text-center text-slate-400">Total Cost</th>
-                    <th class="px-4 py-2 text-center text-slate-400">Specs Met</th>
-                    <th class="px-4 py-2 text-center text-slate-400">Overall Rating</th>
+                    <th class="px-4 py-2 text-center text-slate-400">
+                        Total Cost
+                    </th>
+                    <th class="px-4 py-2 text-center text-slate-400">
+                        Specs Met
+                    </th>
+                    <th class="px-4 py-2 text-center text-slate-400">
+                        Overall Rating
+                    </th>
                     <th colspan="2"></th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
+            <tbody class="divide-y divide-slate-800">
                 {% for eval in evaluations %}
-                <tr class="hover:bg-slate-50/80 transition group">
-                    <td class="px-6 py-4 font-bold text-slate-900">
+                <tr class="hover:bg-slate-800/80 transition group">
+                    <td class="px-6 py-4 font-bold text-slate-100">
                         {{ eval.group_name }}
                     </td>
-                    
-                    <td class="px-4 py-4 text-center font-mono text-sm text-slate-600">
+
+                    <td
+                        class="px-4 py-4 text-center font-mono text-sm text-slate-300"
+                    >
                         ${{ "{:,.2f}".format(eval.cost) }}
                     </td>
                     <td class="px-4 py-4 text-center">
-                        <span class="px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-100">
+                        <span
+                            class="px-2 py-1 rounded-full bg-emerald-900 text-emerald-300 text-[10px] font-bold border border-emerald-800"
+                        >
                             {{ eval.specs_met }}
                         </span>
                     </td>
                     <td class="px-4 py-4 text-center">
                         <div class="flex items-center justify-center gap-1">
                             <span class="text-yellow-400">★</span>
-                            <span class="font-bold text-slate-700">{{ eval.rating }}</span>
+                            <span class="font-bold text-slate-300"
+                                >{{ eval.rating }}</span
+                            >
                         </div>
                     </td>
 
-                    <td class="px-6 py-4 text-brand-600 hover:underline text-sm font-semibold">
-                        <a href="{{ url_for('student_views.student_bid_details_page', bid_id=eval.bid_id) }}">
+                    <td
+                        class="px-6 py-4 text-brand-400 hover:underline text-sm font-semibold"
+                    >
+                        <a
+                            href="{{ url_for('student_views.student_bid_details_page', bid_id=eval.bid_id) }}"
+                        >
                             View Eval
                         </a>
                     </td>
 
                     <td class="px-6 py-4">
                         {% if eval.is_selected %}
-                            <div class="flex items-center gap-2 text-emerald-600 font-bold text-[10px] uppercase">
-                                <div class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                                Selected
-                            </div>
+                        <div
+                            class="flex items-center gap-2 text-emerald-400 font-bold text-[10px] uppercase"
+                        >
+                            <div
+                                class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"
+                            ></div>
+                            Selected
+                        </div>
                         {% else %}
-                            <form method="POST" class="select-eval-form" data-eval-id="{{ eval.id }}">
-                                <input type="hidden" name="evaluationID" value="{{ eval.id }}">
-                                <button type="button" class="px-4 py-1.5 rounded-lg border border-slate-300 text-slate-500 text-[10px] font-bold uppercase hover:bg-slate-900 hover:text-white transition-all select-bid-btn">
-                                    Select Bid
-                                </button>
-                            </form>
+                        <form
+                            method="POST"
+                            class="select-eval-form"
+                            data-eval-id="{{ eval.id }}"
+                        >
+                            <input
+                                type="hidden"
+                                name="evaluationID"
+                                value="{{ eval.id }}"
+                            />
+                            <button
+                                type="button"
+                                class="px-4 py-1.5 rounded-lg border border-slate-700 text-slate-400 text-[10px] font-bold uppercase hover:bg-slate-800 hover:text-slate-100 transition-all select-bid-btn bg-slate-900"
+                            >
+                                Select Bid
+                            </button>
+                        </form>
                         {% endif %}
                     </td>
                 </tr>
@@ -87,18 +130,34 @@
     </div>
 </div>
 <!-- Confirm Select Evaluation Modal -->
-<div id="confirmSelectModal" class="fixed inset-0 flex items-center justify-center bg-black/30 z-50 hidden">
-    <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-lg relative">
-        <button class="absolute top-4 right-4 text-3xl font-bold text-slate-700 close-modal">&times;</button>
-        <h2 class="text-xl font-bold text-slate-900 mb-4">Confirm Selection</h2>
-        <p class="text-slate-600 mb-6">
-            Are you sure you want to select this bid as the winning evaluation? This action cannot be undone.
+<div
+    id="confirmSelectModal"
+    class="fixed inset-0 flex items-center justify-center bg-black/40 z-50 hidden"
+>
+    <div
+        class="bg-slate-950 rounded-2xl p-8 w-full max-w-md shadow-panel border border-slate-800"
+    >
+        <button
+            class="absolute top-4 right-4 text-3xl font-bold text-slate-100 close-modal"
+        >
+            &times;
+        </button>
+        <h2 class="text-xl font-bold text-slate-100 mb-4">Confirm Selection</h2>
+        <p class="text-slate-400 mb-6">
+            Are you sure you want to select this bid as the winning evaluation?
+            This action cannot be undone.
         </p>
         <div class="flex gap-4">
-            <button id="cancelSelectBtn" class="flex-1 rounded-xl border border-slate-300 px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50 transition">
+            <button
+                id="cancelSelectBtn"
+                class="flex-1 rounded-xl border border-slate-700 px-4 py-3 font-semibold text-slate-300 hover:bg-slate-800 transition bg-slate-900"
+            >
                 Cancel
             </button>
-            <button id="confirmSelectBtn" class="flex-1 rounded-xl bg-slate-900 px-4 py-3 font-semibold text-white hover:bg-brand-600 transition">
+            <button
+                id="confirmSelectBtn"
+                class="flex-1 rounded-xl bg-slate-800 px-4 py-3 font-semibold text-slate-100 hover:bg-brand-600 transition border border-slate-700"
+            >
                 Confirm
             </button>
         </div>
@@ -108,26 +167,34 @@
     let selectedForm = null;
 
     // Open modal on select bid click
-    document.querySelectorAll('.select-bid-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            selectedForm = btn.closest('.select-eval-form');
-            document.getElementById('confirmSelectModal').classList.remove('hidden');
+    document.querySelectorAll(".select-bid-btn").forEach((btn) => {
+        btn.addEventListener("click", function () {
+            selectedForm = btn.closest(".select-eval-form");
+            document
+                .getElementById("confirmSelectModal")
+                .classList.remove("hidden");
         });
     });
 
     // Close modal
-    document.querySelectorAll('#confirmSelectModal .close-modal, #cancelSelectBtn').forEach(el => {
-        el.addEventListener('click', function() {
-            selectedForm = null;
-            document.getElementById('confirmSelectModal').classList.add('hidden');
+    document
+        .querySelectorAll("#confirmSelectModal .close-modal, #cancelSelectBtn")
+        .forEach((el) => {
+            el.addEventListener("click", function () {
+                selectedForm = null;
+                document
+                    .getElementById("confirmSelectModal")
+                    .classList.add("hidden");
+            });
         });
-    });
 
     // Confirm selection
-    document.getElementById('confirmSelectBtn').addEventListener('click', function() {
-        if (selectedForm) {
-            selectedForm.submit();
-        }
-    });
+    document
+        .getElementById("confirmSelectBtn")
+        .addEventListener("click", function () {
+            if (selectedForm) {
+                selectedForm.submit();
+            }
+        });
 </script>
 {% endblock %}

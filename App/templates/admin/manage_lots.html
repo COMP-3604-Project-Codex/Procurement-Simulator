@@ -1,192 +1,255 @@
 {% extends "admin/layout.html" %} {% block title %}Manage Lots{% endblock %} {%
 block content %}
-<div class="mx-auto max-w-3xl">
-    <div class="space-y-8 pb-10">
-        {% for lot in lots %}
+<div class="mx-auto max-w-4xl space-y-8">
+    <div
+        class="rounded-3xl border border-slate-800 bg-slate-950 p-6 shadow-panel"
+    >
         <div
-            class="rounded-2xl border border-slate-300 bg-white p-6 shadow-panel flex flex-col gap-4"
+            class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
         >
-            <div class="font-semibold text-2xl text-slate-900">
-                Lot {{ lot.id }}
+            <div>
+                <p class="text-2xl font-semibold text-slate-100">Lot Catalog</p>
+                <p class="text-sm text-slate-400">
+                    Create and manage lots for procurement workflows.
+                </p>
             </div>
-            <div class="text-lg">
-                <div>Lab Type : {{ lot.labType }}</div>
-                <div>Lab Size : {{ lot.labSize }}</div>
-                <div>Budget : ${{ "{:,.0f}".format(lot.budget|float) }}</div>
-            </div>
-            <div class="flex gap-6 mt-4">
-                <button
-                    class="edit-lot-btn rounded-xl border border-slate-600 bg-slate-50 px-8 py-2 text-base font-semibold text-slate-700 transition hover:bg-slate-100"
-                    data-lot-id="{{ lot.id }}"
-                >
-                    Edit
-                </button>
-                <button type="button"
-                    class="remove-lot-btn rounded-xl border border-red-600 bg-red-50 px-8 py-2 text-base font-semibold text-red-700 transition hover:bg-red-100"
-                    data-lot-id="{{ lot.id }}">
-                    Remove
-                </button>
-            </div>
+            <button
+                id="add-lot-btn"
+                class="rounded-2xl border border-slate-700 bg-slate-900 px-5 py-3 text-sm font-semibold text-slate-100 hover:bg-slate-800 transition"
+            >
+                Add Lot
+            </button>
         </div>
-        {% endfor %}
-    </div>
-    <div class="fixed bottom-8 left-[calc(140px+50%)] -translate-x-1/2 w-full max-w-3xl px-4 z-40">
-        <button
-            id="add-lot-btn"
-            class="w-full rounded-xl border border-slate-900 bg-white px-8 py-4 text-2xl font-semibold text-slate-900 transition hover:bg-slate-100 shadow-lg"
-        >
-            Add Lot +
-        </button>
+
+        <div class="mt-8 grid gap-4">
+            {% if lots %} {% for lot in lots %}
+            <div class="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+                <div
+                    class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between"
+                >
+                    <div>
+                        <p class="text-lg font-semibold text-slate-100">
+                            Lot {{ lot.id }}
+                        </p>
+                        <p class="mt-2 text-slate-300">
+                            Lab Type: {{ lot.labType }} • Budget: ${{
+                            "{:,.0f}".format(lot.budget|float) }}
+                        </p>
+                        <p class="mt-2 text-slate-300">
+                            Description: {{ lot.labSize }}
+                        </p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button
+                            type="button"
+                            class="edit-lot-btn rounded-2xl border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-semibold text-slate-100 hover:bg-slate-700 transition"
+                            data-lot-id="{{ lot.id }}"
+                            data-lab-type-id="{{ lot.labTypeId if lot.labTypeId is not none else '' }}"
+                            data-lab-type-name="{{ lot.labType }}"
+                            data-lab-size="{{ lot.labSize }}"
+                            data-budget="{{ lot.budget }}"
+                        >
+                            Edit
+                        </button>
+                        <button
+                            type="button"
+                            class="remove-lot-btn rounded-2xl border border-red-500 bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 transition"
+                            data-lot-id="{{ lot.id }}"
+                        >
+                            Remove
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %} {% else %}
+            <div
+                class="rounded-2xl border border-slate-800 bg-slate-900 p-6 text-slate-300"
+            >
+                No lots exist yet. Add one to begin running procurement
+                simulations.
+            </div>
+            {% endif %}
+        </div>
     </div>
 </div>
 
-<!-- Add Lot Modal -->
 <div
-    id="add-lot-modal"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 hidden"
+    id="lotModal"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 hidden"
 >
     <div
-        class="bg-white rounded-2xl p-10 shadow-panel w-full max-w-lg relative"
+        class="bg-slate-950 rounded-2xl p-8 w-full max-w-md shadow-panel relative border border-slate-800"
     >
         <button
-            class="absolute top-4 right-4 text-4xl font-bold text-slate-700 close-modal"
+            class="absolute top-4 right-4 text-3xl font-bold text-slate-300 close-lot-modal"
         >
             &times;
         </button>
-        <form
-            method="POST"
-            action="{{ url_for('admin_views.admin_add_lot') }}"
-            class="space-y-6"
+        <h2
+            id="lotModalTitle"
+            class="text-2xl font-semibold text-slate-100 mb-4"
         >
-            <input
-                name="lab_type"
-                placeholder="Lab Type"
-                class="w-full rounded bg-slate-200 px-4 py-3 text-lg"
-                required
-            />
-            <input
-                name="lab_size"
-                placeholder="Lab Size"
-                class="w-full rounded bg-slate-200 px-4 py-3 text-lg"
-                required
-            />
-            <input
-                name="budget"
-                placeholder="Budget"
-                class="w-full rounded bg-slate-200 px-4 py-3 text-lg"
-                required
-            />
+            Add Lot
+        </h2>
+        <form id="lotForm" method="POST" class="space-y-5">
+            <input type="hidden" name="lot_id" id="lotId" />
+            {% if lab_types %}
+            <div class="space-y-2">
+                <label
+                    class="text-sm font-semibold text-slate-300"
+                    for="lotLabTypeId"
+                    >Lab Type</label
+                >
+                <select
+                    id="lotLabTypeId"
+                    name="lab_type_id"
+                    class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-lg text-slate-100 focus:border-slate-500 focus:outline-none"
+                    required
+                >
+                    <option value="">Select Lab Type</option>
+                    {% for type in lab_types %}
+                    <option value="{{ type.id }}">{{ type.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% else %}
+            <div class="space-y-2">
+                <label
+                    class="text-sm font-semibold text-slate-300"
+                    for="lotTypeName"
+                    >Lab Type</label
+                >
+                <input
+                    name="lab_type"
+                    id="lotTypeName"
+                    class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-lg text-slate-100 focus:border-slate-500 focus:outline-none"
+                    required
+                />
+            </div>
+            {% endif %}
+            <div class="space-y-2">
+                <label
+                    class="text-sm font-semibold text-slate-300"
+                    for="lotBudget"
+                    >Budget</label
+                >
+                <input
+                    name="budget"
+                    id="lotBudget"
+                    type="number"
+                    min="0"
+                    step="1"
+                    class="w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-lg text-slate-100 focus:border-slate-500 focus:outline-none"
+                    placeholder="Budget"
+                    required
+                />
+            </div>
             <button
                 type="submit"
-                class="w-full rounded-xl border border-slate-900 bg-white px-8 py-3 text-xl font-semibold text-slate-900 transition hover:bg-slate-100"
+                class="w-full rounded-2xl bg-slate-700 py-3 text-sm font-semibold text-white hover:bg-slate-600 transition"
+                id="lotSubmitButton"
             >
-                Add
+                Save Lot
             </button>
         </form>
     </div>
 </div>
 
-<!-- Edit Lot Modal -->
 <div
-    id="edit-lot-modal"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 hidden"
+    id="confirmLotRemoveModal"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 hidden"
 >
     <div
-        class="bg-white rounded-2xl p-10 shadow-panel w-full max-w-lg relative"
+        class="bg-slate-950 rounded-2xl p-8 w-full max-w-md shadow-panel border border-slate-800"
     >
-        <button
-            class="absolute top-4 right-4 text-4xl font-bold text-slate-700 close-modal"
-        >
-            &times;
-        </button>
-        <form id="edit-lot-form" method="POST" class="space-y-6">
-            <input
-                name="lab_type"
-                id="edit-lab-type"
-                placeholder="Lab Type"
-                class="w-full rounded bg-slate-200 px-4 py-3 text-lg"
-                required
-            />
-            <input
-                name="lab_size"
-                id="edit-lab-size"
-                placeholder="Lab Size"
-                class="w-full rounded bg-slate-200 px-4 py-3 text-lg"
-                required
-            />
-            <input
-                name="budget"
-                id="edit-budget"
-                placeholder="Budget"
-                class="w-full rounded bg-slate-200 px-4 py-3 text-lg"
-                required
-            />
-            <button
-                type="submit"
-                class="w-full rounded-xl border border-slate-900 bg-white px-8 py-3 text-xl font-semibold text-slate-900 transition hover:bg-slate-100"
-            >
-                Save
-            </button>
-        </form>
-    </div>
-</div>
-<!-- Confirm Remove Modal -->
-<div id="confirmLotModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 hidden">
-    <div class="bg-white rounded-2xl p-8 w-full max-w-md relative">
-        <h2 class="text-xl font-bold text-slate-900 mb-2">Remove Lot?</h2>
-        <p class="text-slate-600 mb-6">This will permanently remove the lot and all associated data. This cannot be undone.</p>
+        <h2 class="text-xl font-bold text-slate-100 mb-2">Remove Lot?</h2>
+        <p class="text-slate-400 mb-6">
+            This will permanently remove the lot and all associated data. This
+            cannot be undone.
+        </p>
         <div class="flex gap-4">
-            <button onclick="hideConfirmLotModal()" class="flex-1 rounded-xl border border-slate-300 px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50 transition">
+            <button
+                id="cancelLotRemove"
+                class="flex-1 rounded-xl border border-slate-700 px-4 py-3 font-semibold text-slate-100 hover:bg-slate-900 transition"
+            >
                 Cancel
             </button>
-            <button id="confirmLotRemoveBtn" class="flex-1 rounded-xl bg-red-600 px-4 py-3 font-semibold text-white hover:bg-red-700 transition">
-                Confirm
+            <button
+                id="confirmLotRemoveBtn"
+                class="flex-1 rounded-xl bg-red-600 px-4 py-3 font-semibold text-white hover:bg-red-700 transition"
+            >
+                Remove
             </button>
         </div>
     </div>
 </div>
+
 <script>
     let pendingLotForm = null;
 
-    function hideConfirmLotModal() {
-        pendingLotForm = null;
-        document.getElementById('confirmLotModal').classList.add('hidden');
-    }
+    document.getElementById('add-lot-btn').addEventListener('click', function() {
+      document.getElementById('lotModalTitle').textContent = 'Add Lot';
+      document.getElementById('lotForm').action = '{{ url_for('admin_views.admin_add_lot') }}';
+      document.getElementById('lotId').value = '';
+      const addTypeSelect = document.getElementById('lotLabTypeId');
+      if (addTypeSelect) addTypeSelect.value = '';
+      const lotTypeName = document.getElementById('lotTypeName');
+      if (lotTypeName) lotTypeName.value = '';
+      document.getElementById('lotBudget').value = '';
+      document.getElementById('lotSubmitButton').textContent = 'Save Lot';
+      document.getElementById('lotModal').classList.remove('hidden');
+    });
+
+    document.querySelectorAll('.edit-lot-btn').forEach(function(button) {
+      button.addEventListener('click', function() {
+        const lotId = button.dataset.lotId;
+        const labTypeId = button.dataset.labTypeId;
+        const labTypeName = button.dataset.labTypeName;
+        const budget = button.dataset.budget;
+        document.getElementById('lotModalTitle').textContent = 'Edit Lot';
+        document.getElementById('lotForm').action = `/admin/lots/${lotId}/edit`;
+        document.getElementById('lotId').value = lotId;
+        const selectField = document.getElementById('lotLabTypeId');
+        if (selectField) {
+          selectField.value = labTypeId || '';
+        }
+        const lotTypeNameInput = document.getElementById('lotTypeName');
+        if (lotTypeNameInput) {
+          lotTypeNameInput.value = labTypeName || '';
+        }
+        document.getElementById('lotBudget').value = budget || '';
+        document.getElementById('lotSubmitButton').textContent = 'Save Lot';
+        document.getElementById('lotModal').classList.remove('hidden');
+      });
+    });
+
+    document.querySelectorAll('.remove-lot-btn').forEach(function(button) {
+      button.addEventListener('click', function() {
+        const lotId = button.dataset.lotId;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/lots/${lotId}/remove`;
+        pendingLotForm = form;
+        document.getElementById('confirmLotRemoveModal').classList.remove('hidden');
+      });
+    });
 
     document.getElementById('confirmLotRemoveBtn').addEventListener('click', function() {
-        if (pendingLotForm) {
-            document.body.appendChild(pendingLotForm);
-            pendingLotForm.submit();
-        }
+      if (pendingLotForm) {
+        document.body.appendChild(pendingLotForm);
+        pendingLotForm.submit();
+      }
     });
 
-    document.querySelectorAll('.remove-lot-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            const lotId = btn.dataset.lotId;
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `/admin/lots/${lotId}/remove`;
-            pendingLotForm = form;
-            document.getElementById('confirmLotModal').classList.remove('hidden');
-        });
+    document.getElementById('cancelLotRemove').addEventListener('click', function() {
+      pendingLotForm = null;
+      document.getElementById('confirmLotRemoveModal').classList.add('hidden');
     });
 
-    // existing modal JS
-    document.getElementById('add-lot-btn').addEventListener('click', function() {
-        document.getElementById('add-lot-modal').classList.remove('hidden');
-    });
-    document.querySelectorAll('.close-modal').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            document.getElementById('add-lot-modal').classList.add('hidden');
-            document.getElementById('edit-lot-modal').classList.add('hidden');
-        });
-    });
-    document.querySelectorAll('.edit-lot-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            const lotId = btn.dataset.lotId;
-            document.getElementById('edit-lot-form').action = `/admin/lots/${lotId}/edit`;
-            document.getElementById('edit-lot-modal').classList.remove('hidden');
-        });
+    document.querySelectorAll('.close-lot-modal').forEach(function(button) {
+      button.addEventListener('click', function() {
+        document.getElementById('lotModal').classList.add('hidden');
+      });
     });
 </script>
 {% endblock %}
