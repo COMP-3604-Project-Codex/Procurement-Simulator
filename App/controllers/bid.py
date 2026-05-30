@@ -24,16 +24,19 @@ def get_all_bids_json():
 
 def remove_bid(id):
     bid = get_bid(id)
-    if bid:
-        evaluations = db.session.scalars(
-            db.select(Evaluation)
-            .filter_by(bidID=bid.id)
-        )
+    if not bid:
+        return False
 
-        for evaluation in evaluations:
-            db.session.delete(evaluation)
-        
-        db.session.delete(bid)
-        db.session.commit()
-        return True
-    return False
+    evaluations = db.session.scalars(
+        db.select(Evaluation).filter_by(bidID=bid.id)
+    ).all()
+
+    for evaluation in evaluations:
+        db.session.delete(evaluation)
+
+    db.session.flush()
+
+    db.session.delete(bid)
+    db.session.commit()
+
+    return True
