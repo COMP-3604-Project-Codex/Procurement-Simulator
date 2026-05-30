@@ -153,12 +153,6 @@ def initialize():
     add_lotGroup(5, group3.id)
     add_lotGroup(6, group3.id)
 
-    approve_group(group4.id)
-    add_lotGroup(1, group4.id)
-
-    approve_group(group5.id)
-    add_lotGroup(2, group5.id)
-
     # Create sample RFPs
     rfp1_1 = create_rfp(group1.id, 1)
     rfp1_2 = create_rfp(group1.id, 2)
@@ -169,6 +163,8 @@ def initialize():
     approve_rfp(group1.id, 1)
     approve_rfp(group1.id, 2)
     approve_rfp(group2.id, 3)
+
+    group6
 
     # Generate sample PDF content
     def generate_sample_pdf(vendor_name, lot_name, price):
@@ -187,7 +183,7 @@ def initialize():
     bid2 = create_bid(1, group3.id, group1.id, generate_sample_pdf("ByteForge", "GIS Lab", 155000), "byteforge_gis_bid.pdf", 155000.00)
     bid3 = create_bid(2, group2.id, group1.id, generate_sample_pdf("QuantumSoft", "Gov Office Lab", 105000), "quantumsoft_gov_bid.pdf", 105000.00)
     bid4 = create_bid(3, group1.id, group2.id, generate_sample_pdf("NexoraTech", "University Lab", 240000), "nexoratech_uni_bid.pdf", 240000.00)
-    bid5 = create_bid(3, group4.id, group2.id, generate_sample_pdf("CyberNova", "University Lab", 260000), "cybernova_uni_bid.pdf", 260000.00)
+    bid5 = create_bid(3, group3.id, group2.id, generate_sample_pdf("CyberNova", "University Lab", 260000), "cybernova_uni_bid.pdf", 260000.00)
     bid6 = create_bid(4, group1.id, group2.id, generate_sample_pdf("NexoraTech", "Data Center", 24950000), "nexoratech_dc_bid.pdf", 24950000.00)
 
     # Create sample evaluations for draft status
@@ -195,7 +191,7 @@ def initialize():
     eval2 = create_evaluation(group1.id, group3.id, bid2.id, 1, 5, 4, 5, 4)
     eval3 = create_evaluation(group1.id, group2.id, bid3.id, 2, 4, 3, 3, 4)
     eval4 = create_evaluation(group2.id, group1.id, bid4.id, 3, 5, 4, 4, 5)
-    eval5 = create_evaluation(group2.id, group4.id, bid5.id, 3, 3, 3, 3, 2)
+    eval5 = create_evaluation(group2.id, group3.id, bid5.id, 3, 3, 3, 3, 2)
     eval6 = create_evaluation(group2.id, group1.id, bid6.id, 4, 5, 5, 5, 5)
 
     # Select some evaluations
