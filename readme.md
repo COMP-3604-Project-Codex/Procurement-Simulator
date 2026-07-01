@@ -70,6 +70,10 @@ username = "20240017", password = "janellepass"
 
 username = "20240018", password = "shawnpass"
 
+UML CLASS DIAGRAM
+<img width="3666" height="3036" alt="Procurement Simulator Class Diagram" src="https://github.com/user-attachments/assets/8272071a-363a-43ed-b5a4-d95526ef5db9" />
+
+
 ![Tests](https://github.com/uwidcit/flaskmvc/actions/workflows/dev.yml/badge.svg)
 
 # Flask MVC Template
